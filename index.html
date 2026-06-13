@@ -3,20 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ma-Baba's Restaurant | Premium Dining</title>
-    <!-- Font Awesome for Icons -->
+    <title>Vee's Restaurant | Premium Dining</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Promo Bar -->
     <div class="promo-discount-bar">
         Enjoy 20% off on all authentic Bangladeshi dishes this weekend! Use code: DHAKA20
     </div>
     
-    <!-- Header -->
     <header>
-        <div class="logo">Ma-Bba'sRestaurant</div>
+        <div class="logo">Vee's Restaurant</div>
         <nav>
             <a href="#home">Home</a>
             <a href="#about">About</a>
@@ -24,29 +21,26 @@
             <a href="#gallery">Gallery</a>
             <a href="#contact">Contact</a>
         </nav>
-        <button class="btn-reserve" onclick="openBooking()">Reserve Table</button>
+        <button class="btn-reserve" onclick="window.location.href='#reservation-section'">Reserve Table</button>
     </header>
 
-    <!-- Hero Section -->
     <section id="home" class="hero-viewport" style="padding: 0;">
         <div class="hero-overlay-content">
             <h1>Vee's Restaurant</h1>
             <p>Exquisite flavors, warm hospitality in the heart of Dhaka's culinary scene. Authentic Bangladeshi warmth and global flair.</p>
             <div class="hero-action-btns">
                 <button class="btn-primary" onclick="window.location.href='#menu'">Explore Menu</button>
-                <button class="btn-secondary" onclick="openBooking()">Reserve Table</button>
+                <button class="btn-secondary" onclick="window.location.href='#reservation-section'">Reserve Table</button>
             </div>
         </div>
     </section>
 
-    <!-- About Section -->
     <section id="about" class="about-story-section">
         <div class="section-title-block">
             <h2>Our Story & Leadership</h2>
             <p>Where premium culinary vision meets authentic warmth and global flair.</p>
         </div>
         <div class="chefs-flex-row">
-            <!-- Owner Info Card -->
             <div class="chef-profile-card owner-highlight">
                 <div class="profile-image-wrapper">
                     <img id="owner-profile-img" src="Md. EmTIAZ hOSSAIN sAMI LOGO.png" alt="Md. Emtiaz Hossain Sami">
@@ -60,7 +54,6 @@
                 <p class="chef-role-tag">Owner & Founder</p>
                 <p class="chef-biography">Visionary entrepreneur dedicated to bringing premium global dining experiences, rich heritage blends, and authentic traditional cuisines under one elite platform.</p>
             </div>
-            <!-- Executive Chef Card -->
             <div class="chef-profile-card">
                 <div class="profile-image-wrapper normal-chef-border">
                     <img src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&q=80&w=300" alt="Chef Vera">
@@ -72,13 +65,11 @@
         </div>
     </section>
 
-    <!-- Menu Section -->
     <section id="menu">
         <div class="section-title-block">
             <h4 class="sub-heading-accent">Our Signature Menu</h4>
             <h2>From timeless classics to modern twists</h2>
         </div>
-        <!-- Category Filters -->
         <div class="menu-filter-bar">
             <button class="filter-tab-btn active" onclick="filterMenu('all')">All Items</button>
             <button class="filter-tab-btn" onclick="filterMenu('breakfast')">Breakfast</button>
@@ -89,8 +80,6 @@
         </div>
         
         <div class="menu-products-container">
-            <!-- ================= BREAKFAST / ORIGINAL ITEMS ================= -->
-            
             <div class="product-item-card breakfast">
                 <img src="images (12).jpg" alt="Soft Ruti / Paratha">
                 <div class="product-card-body">
@@ -276,8 +265,6 @@
                 </div>
             </div>
 
-            <!-- ================= DESSERTS ================= -->
-
             <div class="product-item-card desserts">
                 <span class="badge-popular badge-bestseller">Must Try</span>
                 <img src="0ddd6c12-16ec-45c4-b487-b80951e661d3.png" alt="Golap Jam">
@@ -461,11 +448,9 @@
                 </div>
             </div>
 
-            <!-- ================= THAI, SOUP & NAAN ================= -->
-
             <div class="product-item-card lunch dinner">
                 <span class="badge-popular">Appetizer</span>
-                <img src="https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=400" alt="Premium Hot Soup">
+                <img src="https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&q=80&w=400" alt="Premium Hot Soup">
                 <div class="product-card-body">
                     <h3>Premium Hot Soup</h3>
                     <p>Rich Thai Clear Soup or Thick Chicken Corn Soup with herbs.</p>
@@ -518,7 +503,7 @@
 
             <div class="product-item-card lunch dinner">
                 <span class="badge-popular"><i class="fa-solid fa-pepper-hot"></i> Hot & Spicy</span>
-                <img src="https://images.unsplash.com/photo-1548943487-a2e4b43b4854?auto=format&fit=crop&q=80&w=400" alt="Tom Yum Goong">
+                <img src="https://images.unsplash.com/photo-1548946526-f69e2424cf45?auto=format&fit=crop&q=80&w=400" alt="Tom Yum Goong">
                 <div class="product-card-body">
                     <h3>Authentic Tom Yum Goong</h3>
                     <p>World-famous spicy and sour Thai soup with fresh prawns and lemongrass.</p>
@@ -571,7 +556,7 @@
             </div>
 
             <div class="product-item-card lunch dinner">
-                <img src="https://images.unsplash.com/photo-1626804475297-41609ea004eb?auto=format&fit=crop&q=80&w=400" alt="Thai Basil Chicken">
+                <img src="https://images.unsplash.com/photo-1564834724105-918b73d1b9e0?auto=format&fit=crop&q=80&w=400" alt="Thai Basil Chicken">
                 <div class="product-card-body">
                     <h3>Thai Basil Chicken (Kra Pao)</h3>
                     <p>Minced chicken stir-fried with holy basil, garlic, and chilies.</p>
@@ -621,8 +606,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- ================= DRINKS ================= -->
 
             <div class="product-item-card drinks lunch dinner">
                 <span class="badge-popular">Digestive</span>
@@ -711,9 +694,9 @@
             </div>
 
             <div class="product-item-card drinks lunch dinner">
-                <img src="https://images.unsplash.com/photo-1581006852262-e4307cf6283a?auto=format&fit=crop&q=80&w=400" alt="Mojo Cola">
+                <img src="https://images.unsplash.com/photo-1622543925917-763c34d1a86e?auto=format&fit=crop&q=80&w=400" alt="Mojo">
                 <div class="product-card-body">
-                    <h3>Mojo Cola</h3>
+                    <h3>Mojo</h3>
                     <p>Popular local carbonated cola drink with a bold and refreshing taste.</p>
                     <div class="product-dropdown-control">
                         <label>Size:</label>
@@ -733,7 +716,7 @@
                                 <input type="text" class="qty-input" value="1" readonly>
                                 <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
                             </div>
-                            <button class="btn-cart" onclick="addToCart(this, 'Mojo Cola')">Add</button>
+                            <button class="btn-cart" onclick="addToCart(this, 'Mojo')">Add</button>
                         </div>
                     </div>
                 </div>
@@ -742,31 +725,60 @@
         </div>
     </section>
 
-    <!-- Contact & Footer Section -->
-    <section id="contact" style="padding: 0 8% 40px;">
+    <section id="reservation-section" style="padding: 60px 8%; background-color: #fdfdfd; border-top: 1px solid #eee;">
+        <div class="reservation-box-wrapper">
+            <h2 style="color: var(--brand-orange-accent); margin-bottom: 10px; font-size: 28px;">Reserve Your Table</h2>
+            <p style="color: var(--slate-muted); font-size: 14px; margin-bottom: 25px;">Book a table in advance to enjoy a premium dining experience without the wait.</p>
+            
+            <form onsubmit="event.preventDefault(); alert('Your table reservation request has been received successfully! We will contact you soon.'); this.reset();">
+                <div class="reservation-form-grid">
+                    <div>
+                        <label>Full Name</label>
+                        <input type="text" required placeholder="Your Name">
+                    </div>
+                    <div>
+                        <label>Phone Number</label>
+                        <input type="tel" required placeholder="017XXXXXXXX">
+                    </div>
+                    <div>
+                        <label>Date & Time</label>
+                        <input type="datetime-local" required>
+                    </div>
+                    <div>
+                        <label>Number of Guests</label>
+                        <input type="number" min="1" required placeholder="E.g., 4">
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary" style="margin-top: 25px; width: 100%; padding: 14px; font-size: 16px;">Confirm Reservation</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="contact" style="padding: 50px 8%; text-align: center; background-color: #fff;">
         <div class="section-title-block" style="margin-bottom: 30px;">
             <h2 style="color: var(--brand-orange-accent); font-size: 28px;">Contact & Support</h2>
             <p style="color: var(--slate-muted); font-size: 14px; margin-top: 8px;">Have questions or special event requests? Reach out to us directly.</p>
         </div>
-        <div class="contact-cards-container">
-            <div class="contact-card">
-                <i class="fa-solid fa-phone"></i>
+        
+        <div class="centered-contact-flex">
+            <div class="contact-card" style="width: 250px;">
+                <i class="fa-solid fa-phone" style="font-size: 24px; color: var(--brand-orange-accent); margin-bottom: 10px;"></i>
                 <h4>Call / WhatsApp</h4>
                 <p class="contact-highlight">+880 1998-453990</p>
             </div>
-            <div class="contact-card">
-                <i class="fa-solid fa-envelope"></i>
+            <div class="contact-card" style="width: 250px;">
+                <i class="fa-solid fa-envelope" style="font-size: 24px; color: var(--brand-orange-accent); margin-bottom: 10px;"></i>
                 <h4>Email Us</h4>
                 <p>info@veesrestaurant.com</p>
             </div>
         </div>
-        <div class="footer-bottom-bar">
-            <p>&copy; 2026 Vee's Restaurant. All Rights Reserved.</p>
-            <p>Proprietor: <strong>Md. Emtiaz Hossain Sami</strong></p>
+        
+        <div style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 20px;">
+            <p style="color: #666; font-size: 14px;">&copy; 2026 Vee's Restaurant. All Rights Reserved.</p>
+            <p style="color: #666; font-size: 14px; margin-top: 5px;">Proprietor: <strong style="color: #333;">Md. Emtiaz Hossain Sami</strong></p>
         </div>
     </section>
 
-    <!-- Foodpanda Style Floating Cart Basket Bar -->
     <div id="floating-cart" class="floating-cart hidden" onclick="toggleCheckoutModal(true)">
         <div class="cart-left">
             <div class="cart-icon-wrapper">
@@ -780,7 +792,6 @@
         </div>
     </div>
 
-    <!-- Active Checkout Flow Modal Drawer -->
     <div id="checkoutModal" class="system-modal-backdrop">
         <div class="modal-card-container">
             <span class="modal-dismiss-trigger" onclick="toggleCheckoutModal(false)">&times;</span>
@@ -789,8 +800,7 @@
             
             <div class="checkout-summary-box">
                 <div id="checkout-items-list">
-                    <!-- JS Appends Rows Here dynamically -->
-                </div>
+                    </div>
                 <div class="summary-total-row">
                     <span>Grand Total:</span>
                     <span id="summary-total-val" style="color: #d70f64; font-weight: 800;">৳0</span>
@@ -822,7 +832,6 @@
         </div>
     </div>
 
-    <!-- Booking Modal Backdrop -->
     <div id="bookingModal" class="system-modal-backdrop">
         <div class="modal-card-container">
             <span class="modal-dismiss-trigger" onclick="closeBooking()">&times;</span>
@@ -834,7 +843,6 @@
         </div>
     </div>
 
-    <!-- Toast Notification Overlay -->
     <div id="toast-notification"></div>
     <script src="script.js"></script>
 </body>

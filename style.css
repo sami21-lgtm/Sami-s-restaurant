@@ -114,120 +114,49 @@ h2 { font-size: 32px; font-weight: 600; }
 .fp-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(3px); z-index: 3000; visibility: hidden; opacity: 0; transition: all 0.3s ease; }
 .fp-overlay.active { visibility: visible; opacity: 1; }
 
-.fp-sidebar { position: fixed; top: 0; right: -100%; width: 420px; height: 100%; background-color: #ffffff; z-index: 3001; display: flex; flex-direction: column; box-shadow: -5px 0 30px rgba(0,0,0,0.15); transition: right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); }
-.fp-sidebar.active { right: 0; }
-@media (max-width: 450px) { .fp-sidebar { width: 100%; } }
+./* Foodpanda Premium Custom Layout CSS System */
+.fp-sidebar-panel { position: fixed; top: 0; right: -420px; width: 400px; height: 100%; background: #fff; box-shadow: -5px 0 25px rgba(0,0,0,0.15); z-index: 9999; display: flex; flex-direction: column; transition: right 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+.fp-sidebar-panel.active { right: 0; }
+.fp-sidebar-header { padding: 20px; background: #fff; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+.fp-sidebar-header h3 { margin: 0; font-size: 18px; color: #333; font-weight: 700; }
+.fp-close-btn { background: none; border: none; font-size: 28px; cursor: pointer; color: #888; }
+.fp-sidebar-body { flex: 1; overflow-y: auto; padding: 20px; background: #fcfcfc; }
+.fp-sidebar-footer { padding: 20px; background: #fff; border-top: 1px solid #f0f0f0; }
+.fp-subtotal-row { display: flex; justify-content: space-between; font-size: 16px; font-weight: 700; margin-bottom: 15px; color: #333; }
+.fp-btn-checkout { width: 100%; background: #d70f64; color: #fff; border: none; padding: 14px; font-size: 15px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+.fp-btn-checkout:hover { background: #b50b52; }
 
-.fp-sidebar-scroll-area { flex-grow: 1; overflow-y: auto; padding: 20px; }
+/* Checkout Grid Screens */
+.fp-checkout-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f7f7f7; z-index: 10000; overflow-y: auto; padding: 30px 10px; }
+.fp-checkout-container { max-width: 1100px; margin: 0 auto; }
+.fp-checkout-main-grid { display: grid; grid-template-columns: 7fr 5fr; gap: 25px; margin-top: 20px; }
+@media (max-width: 850px) { .fp-checkout-main-grid { grid-template-columns: 1fr; } }
 
-/* Delivery/Pick-up Toggle Pill inside Sidebar */
-.fp-delivery-toggle-container { margin-bottom: 20px; }
-.fp-delivery-toggle { display: flex; background: #f3f4f6; padding: 4px; border-radius: 30px; }
-.toggle-option { flex: 1; text-align: center; padding: 8px 12px; border-radius: 25px; cursor: pointer; color: #707070; transition: 0.2s; }
-.toggle-option.active { background: #ffffff; color: #000000; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-.toggle-option strong { display: block; font-size: 13px; font-weight: 700; }
-.toggle-option span { font-size: 11px; color: var(--fp-pink); }
+.fp-back-to-cart { background: none; border: none; font-size: 15px; font-weight: 600; color: #d70f64; cursor: pointer; margin-bottom: 15px; }
+.fp-form-card, .fp-summary-card { background: #fff; padding: 25px; border-radius: 12px; border: 1px solid #ebebeb; margin-bottom: 20px; }
+.fp-form-card h2 { font-size: 18px; margin-top: 0; margin-bottom: 20px; color: #333; border-bottom: 1px solid #f5f5f5; padding-bottom: 10px; }
 
-.fp-header { background: #ffffff; display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid #eee; }
-.fp-header h2 { font-size: 22px; font-weight: 700; color: #333; margin: 0; }
-.fp-close-btn { background: none; border: none; font-size: 20px; color: #111; cursor: pointer; }
+.fp-input-group { margin-bottom: 15px; }
+.fp-input-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #555; }
+.fp-input-group input, .fp-input-group textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; font-family: inherit; }
+.fp-payment-options { display: flex; gap: 15px; }
+.fp-pay-card { flex: 1; border: 2px solid #eaeaea; padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.2s; }
+.fp-pay-card.active { border-color: #d70f64; color: #d70f64; background: #fff0f5; }
 
-.fp-body { padding: 15px 0; }
-
-/* Dynamic Items in Basket */
-.fp-cart-item { display: flex; padding: 15px 0; border-bottom: 1px solid #eee; }
-.fp-item-img { width: 55px; height: 55px; border-radius: 8px; object-fit: cover; margin-right: 15px; }
-.fp-item-info { flex-grow: 1; }
-.fp-item-title { font-size: 14px; color: #333; margin-bottom: 8px; font-weight: 600; }
+/* Quantity pill box inside cart list */
+.fp-cart-item { display: flex; gap: 12px; background: #fff; padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #ededed; }
+.fp-item-img { width: 65px; height: 65px; object-fit: cover; border-radius: 6px; }
+.fp-item-info { flex: 1; }
 .fp-item-row-bottom { display: flex; justify-content: space-between; align-items: center; }
-.fp-item-price { font-size: 14px; font-weight: 700; color: #222; }
+.fp-qty-pill { display: flex; align-items: center; background: #f7f7f7; border: 1px solid #ddd; border-radius: 20px; overflow: hidden; }
+.fp-qty-pill button { background: none; border: none; width: 28px; height: 28px; font-size: 12px; cursor: pointer; }
+.fp-qty-pill span { padding: 0 8px; font-weight: 600; font-size: 13px; }
 
-/* Quantity pill styling */
-.fp-qty-pill { display: flex; align-items: center; justify-content: space-between; border: 1px solid #dcdcdc; border-radius: 20px; padding: 4px 12px; width: 90px; background: #fff; }
-.fp-qty-pill button { background: none; border: none; font-size: 13px; color: var(--fp-pink); cursor: pointer; }
-.fp-qty-pill span { font-size: 13px; font-weight: 700; color: #333; }
+/* Voucher element input styling */
+.fp-voucher-box { display: flex; gap: 10px; margin: 15px 0; }
+.fp-voucher-box input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+.fp-voucher-box button { background: #333; color: #fff; border: none; padding: 0 15px; border-radius: 6px; cursor: pointer; font-weight: 600; }
 
-/* Sidebar Footer Section */
-.fp-sidebar-footer { background: #ffffff; padding: 20px; border-top: 1px solid #eee; box-shadow: 0 -4px 10px rgba(0,0,0,0.02); }
-.fp-total-summary { margin-bottom: 15px; }
-.summary-row { display: flex; justify-content: space-between; align-items: center; }
-.summary-left strong { font-size: 18px; color: #222; }
-.summary-left span { font-size: 12px; color: #777; }
-.summary-left a { display: block; font-size: 12px; color: var(--fp-pink); font-weight: 600; text-decoration: none; margin-top: 2px; }
-.summary-right { font-size: 20px; font-weight: 800; color: #222; }
-
-/* Main CTA button to open checkout screen */
-.fp-review-btn { width: 100%; background: var(--fp-pink); color: #ffffff; border: none; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: 700; text-align: center; cursor: pointer; transition: 0.2s; }
-.fp-review-btn:hover { background: #c20d55; }
-
-/* Popular addons block inside Sidebar */
-.popular-addons-section { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #eee; }
-.popular-addons-section h3 { font-size: 14px; font-weight: 700; color: #333; margin-bottom: 12px; }
-.addon-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
-.addon-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
-.addon-info strong { display: block; font-size: 13px; color: #333; }
-.addon-info span { font-size: 12px; color: #666; }
-.btn-addon-add { background: #fff; border: 1px solid #ccc; border-radius: 50%; width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; color: var(--fp-pink); cursor: pointer; font-size: 12px; }
-
-/* ==========================================================================
-   FULLSCREEN CHECKOUT SCREEN (Foodpanda Desktop App Mockup)
-   ========================================================================== */
-.checkout-fullscreen-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f8f9fa; z-index: 4000; display: none; overflow-y: auto; }
-.checkout-fullscreen-wrapper.active { display: block; }
-
-.checkout-header { background: #fff; border-bottom: 1px solid #e9ecef; position: sticky; top: 0; z-index: 10; }
-.checkout-header-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; }
-.checkout-header .back-btn { background: none; border: none; font-size: 18px; cursor: pointer; color: #333; }
-.checkout-header .logo { font-size: 20px; font-weight: 800; color: var(--fp-pink); }
-
-.checkout-content { max-width: 1100px; margin: 0 auto; padding: 30px 20px 60px 20px; }
-.checkout-main-title { font-size: 26px; font-weight: 700; color: #333; margin-bottom: 25px; }
-
-.checkout-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 30px; }
-@media (max-width: 850px) { .checkout-grid { grid-template-columns: 1fr; } }
-
-.checkout-box { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #edf2f7; }
-.checkout-box h2 { font-size: 18px; font-weight: 700; margin-bottom: 15px; color: #222; }
-.box-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-.box-header h2 { margin-bottom: 0; }
-.box-header a { color: var(--fp-pink); font-weight: 600; text-decoration: none; font-size: 14px; }
-
-/* Custom Forms & Maps inside Checkout */
-.checkout-map { width: 100%; height: 140px; object-fit: cover; border-radius: 8px; margin-bottom: 15px; }
-.address-display { display: flex; align-items: flex-start; gap: 12px; background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 15px; position: relative; }
-.address-display .edit-link { position: absolute; right: 12px; top: 12px; color: var(--fp-pink); text-decoration: none; font-size: 13px; font-weight: 600; }
-.chk-input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 10px; font-size: 14px; outline: none; }
-.chk-input:focus { border-color: var(--fp-pink); }
-
-/* Delivery cards */
-.delivery-option-card { cursor: pointer; transition: 0.2s; }
-.delivery-option-card span { float: right; color: #666; font-size: 13px; }
-
-/* Rider Tip Section */
-.tip-options { display: flex; gap: 8px; margin-top: 12px; overflow-x: auto; padding-bottom: 5px; }
-.tip-btn { border: 1px solid #cbd5e1; background: #fff; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 600; color: #4a5568; white-space: nowrap; transition: 0.15s; }
-.tip-btn:hover { border-color: #a0aec0; }
-.tip-btn.active { border-color: #000; background: #000; color: #fff; }
-
-/* Voucher Container styling */
-.vouchers-section { border-top: 1px dashed #cbd5e1; border-bottom: 1px dashed #cbd5e1; padding: 15px 0; margin: 20px 0; }
-.voucher-card { display: flex; justify-content: space-between; align-items: center; border: 1px solid #fed7e2; background: #fff5f7; padding: 12px; border-radius: 6px; }
-.voucher-card i { margin-right: 8px; }
-.voucher-card strong { font-size: 12px; color: #b83280; font-family: monospace; }
-.btn-apply-voucher { color: var(--fp-pink); background: none; border: none; font-weight: 700; cursor: pointer; font-size: 13px; }
-
-/* Order Summary Details */
-.summary-line { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color: #4a5568; }
-.total-line { font-size: 16px; color: #1a202c; }
-.btn-place-order { width: 100%; background: var(--fp-pink); color: #fff; border: none; padding: 16px; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 20px; box-shadow: 0 4px 12px rgba(226, 27, 112, 0.2); }
-.btn-place-order:hover { background: #c20d55; }
-
-/* Order list items in summary */
-.chk-item-list { margin-bottom: 15px; max-height: 200px; overflow-y: auto; }
-.chk-single-item { display: flex; justify-content: space-between; font-size: 14px; color: #333; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #f1f1f1; }
-
-/* Toast Notifications */
-#toast-notification { visibility: hidden; min-width: 280px; background-color: #2c3e50; color: #fff; text-align: center; border-radius: 8px; padding: 14px; position: fixed; z-index: 6000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 14px; font-weight: 600; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-#toast-notification.show-alert { visibility: visible; animation: fadeInTray 0.4s, fadeOutTray 0.4s 2.5s; }
-@keyframes fadeInTray { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
-@keyframes fadeOutTray { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
+.fp-price-line { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; color: #666; }
+.total-grand { font-size: 18px; color: #222; margin-top: 10px; }
+.fp-btn-place-order { width: 100%; background: #d70f64; color: #fff; border: none; padding: 15px; font-size: 16px; font-weight: 700; border-radius: 8px; cursor: pointer; margin-top: 15px; }

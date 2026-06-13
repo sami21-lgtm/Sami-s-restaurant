@@ -199,6 +199,7 @@ function adjustQtyByMeta(name, variant, delta) {
 }
 
 // ==================== Reactively Render Floating Basket & Sidebar Data ====================
+// ==================== Foodpanda Native Render Engine Engine Pipeline ====================
 function renderCartData() {
     const floatingBtn = document.getElementById('floating-cart');
     const countBadge = document.getElementById('cart-item-count');
@@ -206,9 +207,18 @@ function renderCartData() {
     const itemsContainer = document.getElementById('fp-cart-items-container');
     const summaryTotalVal = document.getElementById('fp-sticky-total');
     
-    let totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
-    let totalAmt = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    // Checkout DOM References
+    const chkList = document.getElementById('checkout-items-list');
+    const chkSubtotal = document.getElementById('chk-subtotal');
+    const chkFinalTotal = document.getElementById('chk-final-total');
     
+    let totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+    let subtotalAmt = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    
+    // Foodpanda structural calculations: Subtotal + Delivery Fee (32) + Service Fee (19)
+    let grandTotalAmt = subtotalAmt > 0 ? (subtotalAmt + 32 + 19) : 0;
+    
+    // 1. Floating Basket Bar Visibility Wrapper
     if (floatingBtn) {
         if (totalQty > 0) {
             floatingBtn.style.display = 'flex';
@@ -217,53 +227,71 @@ function renderCartData() {
             floatingBtn.style.display = 'none';
             floatingBtn.classList.add('hidden');
             closeFpSidebar();
+            closeFullCheckout();
         }
     }
-    if (countBadge) countBadge.textContent = totalQty;
-    if (totalAmountBadge) totalAmountBadge.textContent = '৳ ' + totalAmt;
-    if (summaryTotalVal) summaryTotalVal.textContent = '৳ ' + totalAmt;
     
+    if (countBadge) countBadge.textContent = totalQty;
+    if (totalAmountBadge) totalAmountBadge.textContent = 'Tk ' + subtotalAmt;
+    if (summaryTotalVal) summaryTotalVal.textContent = 'Tk ' + grandTotalAmt;
+    
+    // 2. Sidebar Basket Data Injector (Matches image_c57c36.png)
     if (itemsContainer) {
         if (cart.length === 0) {
             itemsContainer.innerHTML = `
                 <div style="text-align:center; padding:40px 20px; color:#aaa;">
                     <i class="fa-solid fa-basket-shopping" style="font-size:40px; margin-bottom:10px; color:#e0e0e0;"></i>
-                    <p style="font-size:14px;">Apnar basket khali ache</p>
+                    <p style="font-size:14px; font-weight:600;">Your basket is empty</p>
                 </div>`;
-            return;
+        } else {
+            let itemsHtml = '';
+            cart.forEach(item => {
+                let fullName = item.variant ? `${item.name} - ${item.variant}` : item.name;
+                
+                // Switch icon smoothly based on final quantity count
+                let leftIcon = item.qty === 1 
+                    ? `<i class="fa-regular fa-trash-can"></i>` 
+                    : `<i class="fa-solid fa-minus"></i>`;
+
+                itemsHtml += `
+                    <div class="fp-cart-item">
+                        <img src="${item.image}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=120'" class="fp-item-img">
+                        <div class="fp-item-info">
+                            <div class="fp-item-title">${fullName}</div>
+                            <div class="fp-item-row-bottom">
+                                <span class="fp-item-price">Tk ${item.price * item.qty}</span>
+                                <div class="fp-qty-pill">
+                                    <button type="button" onclick="adjustCartQty(${item.id}, -1)">${leftIcon}</button>
+                                    <span>${item.qty}</span>
+                                    <button type="button" onclick="adjustCartQty(${item.id}, 1)"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+            itemsContainer.innerHTML = itemsHtml;
         }
-        let itemsHtml = '';
+    }
+
+    // 3. Full Screen Checkout Item Sheet Injector (Matches image_c57c33.png)
+    if (chkList) {
+        let chkHtml = '';
         cart.forEach(item => {
-            itemsHtml += `
-                <div class="fp-cart-item" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; border-bottom:1px solid #f5f5f5; gap:10px;">
-                    <div class="fp-item-details" style="display:flex; align-items:center; gap:12px; flex:1;">
-                        <img src="${item.image}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=120'" style="width:45px; height:45px; object-fit:cover; border-radius:6px;">
-                        <div class="fp-item-meta">
-                            <h4 style="margin:0; font-size:14px; color:#333; font-weight:600;">${item.name}</h4>
-                            <p class="fp-variant-label" style="margin:2px 0 0; font-size:11px; color:#777;">${item.variant}</p>
-                            <span class="fp-unit-price" style="font-size:12px; color:#d70f64; font-weight:600;">৳${item.price}</span>
-                        </div>
-                    </div>
-                    <div class="fp-item-controls" style="display:flex; align-items:center; gap:15px;">
-                        <div class="fp-sidebar-qty-ctrl" style="display:flex; align-items:center; background:#f7f7f7; border-radius:20px; padding:2px 6px; border:1px solid #e0e0e0;">
-                            <button type="button" onclick="adjustCartQty(${item.id}, -1)" style="background:none; border:none; color:#d70f64; font-weight:bold; font-size:16px; cursor:pointer; width:24px; height:24px;">-</button>
-                            <span style="font-size:13px; font-weight:bold; color:#333; min-width:18px; text-align:center;">${item.qty}</span>
-                            <button type="button" onclick="adjustCartQty(${item.id}, 1)" style="background:none; border:none; color:#d70f64; font-weight:bold; font-size:16px; cursor:pointer; width:24px; height:24px;">+</button>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:12px; min-width:75px; justify-content:flex-end;">
-                            <span style="font-weight:bold; color:#222; font-size:13px;">৳${item.price * item.qty}</span>
-                            <button type="button" onclick="removeDirectItem(${item.id})" style="background:none; border:none; color:#d70f64; cursor:pointer; font-size:14px;">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
-                        </div>
-                    </div>
+            let fullName = item.variant ? `${item.name} - ${item.variant}` : item.name;
+            chkHtml += `
+                <div class="chk-single-item">
+                    <span><strong>${item.qty}x</strong> ${fullName}</span>
+                    <span style="font-weight:600; color:#333;">Tk ${item.price * item.qty}</span>
                 </div>`;
         });
-        itemsContainer.innerHTML = itemsHtml;
+        chkList.innerHTML = chkHtml;
+        
+        if (chkSubtotal) chkSubtotal.textContent = 'Tk ' + subtotalAmt;
+        if (chkFinalTotal) chkFinalTotal.textContent = 'Tk ' + grandTotalAmt;
     }
 }
 
-// Adjust inside sidebar checkout options drawer
+// Global Quantity Controllers
 function adjustCartQty(itemId, delta) {
     const item = cart.find(i => i.id === itemId);
     if (!item) return;
@@ -273,20 +301,29 @@ function adjustCartQty(itemId, delta) {
         showToast(`🗑️ ${item.name} basket theke bad deya hoyeche`);
     }
     renderCartData();
-    syncCardButtons();
+    if (typeof syncCardButtons === "function") syncCardButtons();
 }
 
-function removeDirectItem(itemId) {
-    const item = cart.find(i => i.id === itemId);
-    if (item) {
-        cart = cart.filter(i => i.id !== itemId);
-        showToast(`🗑️ ${item.name} basket theke bad deya hoyeche`);
+function addDirectAddon(name, price) {
+    const existing = cart.find(item => item.name === name);
+    if (existing) {
+        existing.qty += 1;
+    } else {
+        cart.push({
+            id: Date.now(),
+            name: name,
+            variant: '',
+            price: price,
+            qty: 1,
+            image: 'https://images.unsplash.com/photo-1626082895617-2c6ad3ed327a?w=100'
+        });
+        showToast(`➕ Added ${name} to your order!`);
     }
     renderCartData();
-    syncCardButtons();
+    if (typeof syncCardButtons === "function") syncCardButtons();
 }
 
-// ==================== Checkout Panel Drawer Toggles ====================
+// ==================== Checkout Screen Controls ====================
 function openFpSidebar() {
     const sidebar = document.getElementById('fp-sidebar');
     const overlay = document.getElementById('fp-sidebar-overlay');
@@ -303,108 +340,50 @@ function closeFpSidebar() {
     document.body.style.overflow = '';
 }
 
-// ==================== Dynamic Form Control Interaction Router Pipeline ====================
-function selectFpPayment(method, element) {
-    const cards = document.querySelectorAll('.fp-pay-card');
-    cards.forEach(c => c.classList.remove('active'));
-    if (element) element.classList.add('active');
-    fpOtpVerified = false;
-    const otpSection = document.getElementById('fp-otp-section');
-    const sendBtn = document.getElementById('fp-sendBtn');
-    const boxesArea = document.getElementById('fp-otp-boxes-area');
-    if (boxesArea) boxesArea.style.display = 'none';
-    if (sendBtn) {
-        sendBtn.innerHTML = 'Send OTP';
-        sendBtn.disabled = false;
-        sendBtn.classList.remove('success');
-    }
-    if (otpSection) {
-        if (method === 'digital' || method === 'bkash' || method === 'nagad') {
-            otpSection.style.display = 'block';
-        } else {
-            otpSection.style.display = 'none';
-        }
-    }
-}
-
-function triggerFpOtp() {
-    const phoneInput = document.getElementById('fp-walletNumber');
-    if (!phoneInput || phoneInput.value.trim().length < 11) {
-        showToast("⚠️ Error: Valid 11-digit number output korun!");
-        return;
-    }
-    const sendBtn = document.getElementById('fp-sendBtn');
-    if (sendBtn) {
-        sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending OTP...';
-        sendBtn.disabled = true;
-    }
-    setTimeout(() => {
-        if (sendBtn) {
-            sendBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> OTP Verified';
-            sendBtn.classList.add('success');
-        }
-        fpOtpVerified = true;
-        const boxesArea = document.getElementById('fp-otp-boxes-area');
-        if (boxesArea) {
-            boxesArea.style.display = 'block';
-            const digitInputs = document.querySelectorAll('.fp-otp-box');
-            digitInputs.forEach(box => {
-                box.value = Math.floor(Math.random() * 10);
-                box.disabled = true;
-                box.style.borderColor = '#27ae60';
-            });
-        }
-        showToast("✅ Auto-verification completed successfully!");
-    }, 1200);
-}
-
-// ==================== Intercepting Submissions & Order State Validators ====================
-function submitFpOrder() {
+function openFullCheckout() {
     if (cart.length === 0) {
-        showToast("⚠️ Error: Basket khali, item add korun!");
+        showToast("⚠️ Basket khali! Order placement process processing possible na.");
         return;
     }
-    const name = document.getElementById('fp-custName')?.value.trim();
-    const phone = document.getElementById('fp-custPhone')?.value.trim();
-    const address = document.getElementById('fp-custAddress')?.value.trim();
-    if (!name || !phone || !address) {
-        showToast("⚠️ Shobgulo mandatory form information input korun!");
-        return;
-    }
-    const otpSection = document.getElementById('fp-otp-section');
-    if (otpSection && otpSection.style.display === 'block' && !fpOtpVerified) {
-        showToast("⚠️ Prothome wallet OTP complete korun!");
-        return;
-    }
-    
     closeFpSidebar();
+    const chkPage = document.getElementById('full-checkout-page');
+    if (chkPage) chkPage.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeFullCheckout() {
+    const chkPage = document.getElementById('full-checkout-page');
+    if (chkPage) chkPage.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// Intercepting Final Submission Pipeline
+function submitFinalOrder() {
+    const streetInput = document.getElementById('chk-street');
+    if (streetInput && !streetInput.value.trim()) {
+        showToast("⚠️ We're missing your street / house number!");
+        streetInput.focus();
+        return;
+    }
+
+    closeFullCheckout();
+    
+    // Dynamic Modal Compatibility 
     const successModal = document.getElementById('orderSuccessOverlay');
     if (successModal) {
         successModal.style.display = 'flex';
         successModal.classList.add('active');
     } else {
-        alert("🎉 Order Placed Successfully!");
+        alert("🎉 Sultan's Dine - Order Placed Successfully via Cash on Delivery!");
     }
+    
     cart = [];
     renderCartData();
-    syncCardButtons();
-    document.getElementById('fp-custName').value = '';
-    document.getElementById('fp-custPhone').value = '';
-    document.getElementById('fp-custAddress').value = '';
-    const walletNumInput = document.getElementById('fp-walletNumber');
-    if (walletNumInput) walletNumInput.value = '';
-    selectFpPayment('cod', document.querySelector('.fp-pay-card'));
+    if (typeof syncCardButtons === "function") syncCardButtons();
+    if (streetInput) streetInput.value = '';
 }
 
-function closeOrderSuccess() {
-    const successModal = document.getElementById('orderSuccessOverlay');
-    if (successModal) {
-        successModal.style.display = 'none';
-        successModal.classList.remove('active');
-    }
-}
-
-// ==================== Global Centered Live Alert Notification Engine ====================
+// ==================== Native Event Listener Mapping Utilities ====================
 function showToast(message) {
     const toast = document.getElementById('toast-notification');
     if (!toast) return;
@@ -415,16 +394,25 @@ function showToast(message) {
     }, 2500);
 }
 
-// Keyboard interactions listener mappings
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeFpSidebar();
-        closeOrderSuccess();
+        closeFullCheckout();
+        if (typeof closeOrderSuccess === "function") closeOrderSuccess();
     }
 });
 
-// Auto initialize and run core sync on DOM contents completion
 document.addEventListener('DOMContentLoaded', function() {
     renderCartData();
-    syncCardButtons();
+    if (typeof syncCardButtons === "function") syncCardButtons();
+    
+    // Multi-option UI Tip Toggler Hook Inside Checkout Page
+    const tipButtons = document.querySelectorAll('.tip-btn');
+    tipButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            tipButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            showToast(`🏍️ Rider tip updated!`);
+        });
+    });
 });

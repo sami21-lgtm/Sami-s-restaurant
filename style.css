@@ -22,7 +22,7 @@ body {
     background-color: var(--canvas-cream-bg);
     color: var(--dark-charcoal);
     scroll-behavior: smooth;
-    padding-bottom: 80px; /* Space for floating cart */
+    padding-bottom: 80px;
 }
 
 /* ================= Header & Promo ================= */
@@ -40,7 +40,6 @@ header nav a:hover { color: var(--brand-orange-accent); }
 .hero-overlay-content p { max-width: 650px; margin: 0 auto 30px; font-size: 16px; color: #FFF; }
 .btn-secondary { background: transparent; color: var(--brand-yellow); border: 2px solid var(--brand-yellow); padding: 10px 24px; border-radius: 25px; cursor: pointer; font-weight: 600; margin-left: 10px; transition: 0.3s; }
 .btn-secondary:hover { background: var(--brand-yellow); color: #000; }
-
 section { padding: 60px 8% 30px; }
 .section-title-block { text-align: center; margin-bottom: 40px; }
 .sub-heading-accent { color: var(--brand-orange-accent); text-transform: uppercase; font-weight: 600; font-size: 12px; letter-spacing: 2px; margin-bottom: 5px; }
@@ -51,17 +50,16 @@ h2 { font-size: 32px; font-weight: 600; }
 .chefs-flex-row { display: flex; justify-content: center; gap: 25px; flex-wrap: wrap; }
 .chef-profile-card { background: var(--canvas-cream-bg); padding: 25px; border-radius: 12px; width: 330px; text-align: center; border: 1px solid var(--grid-border-color); }
 .owner-highlight { border: 2px solid var(--brand-orange-accent); box-shadow: 0 8px 20px rgba(211, 102, 19, 0.08); }
-.profile-image-wrapper { position: relative; width: 140px; height: 140px; margin: 0 auto 15px; border-radius: 50%; }
+.profile-image-wrapper { position: relative; width: 140px; height: 140px; margin: 0 auto 15px; border-radius: 50%; overflow: hidden; }
 .profile-image-wrapper img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--brand-orange-accent); }
 .image-upload-overlay { position: absolute; bottom: 0; left: 0; width: 100%; height: 40px; background: rgba(0,0,0,0.6); color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; opacity: 0; transition: 0.3s; font-size: 12px; }
 .profile-image-wrapper:hover .image-upload-overlay { opacity: 1; }
-#owner-upload-input { display: none; }
+#owner-upload-input, #chef-upload-input { display: none; }
 
 /* ================= Menu Section & Product Cards ================= */
 .menu-filter-bar { display: flex; justify-content: center; gap: 12px; margin-bottom: 35px; flex-wrap: wrap; }
 .filter-tab-btn { background: var(--surface-white); border: 1px solid var(--grid-border-color); padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 13px; transition: all 0.3s; }
 .filter-tab-btn.active, .filter-tab-btn:hover { background: var(--brand-orange-accent); color: white; border-color: var(--brand-orange-accent); }
-
 .menu-products-container { display: flex; flex-wrap: wrap; gap: 25px; justify-content: center; }
 .product-item-card { background: var(--surface-white); border-radius: 12px; width: 290px; overflow: hidden; border: 1px solid var(--grid-border-color); position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
 .product-item-card img { width: 100%; height: 180px; object-fit: cover; }
@@ -70,20 +68,17 @@ h2 { font-size: 32px; font-weight: 600; }
 .product-card-body p { font-size: 13px; color: var(--slate-muted); margin-bottom: 15px; height: 38px; overflow: hidden; }
 .product-dropdown-control { display: flex; align-items: center; gap: 8px; margin-bottom: 15px; font-size: 13px; font-weight: 600; }
 .product-dropdown-control select { padding: 5px 10px; border-radius: 6px; border: 1px solid var(--grid-border-color); background: #fafafa; outline: none; }
-
 .badge-popular { position: absolute; top: 12px; left: 12px; background-color: var(--fp-pink); color: white; padding: 4px 10px; font-size: 11px; font-weight: bold; border-radius: 4px; z-index: 2; }
 .badge-bestseller { background-color: #ff9800; }
 
-/* ======== NEW Modern QTY & Add to Cart Button (Image Match) ======== */
+/* ======== NEW Modern QTY & Add to Cart Button ======== */
 .product-price-action { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; border-top: 1px dashed var(--grid-border-color); padding-top: 15px; }
 .product-base-price { font-weight: 800; color: var(--fp-pink); font-size: 18px; }
-
 .cart-action-group { display: flex; align-items: center; gap: 10px; }
 .qty-selector { display: flex; align-items: center; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; }
 .qty-btn { background: #f5f5f5; border: none; width: 32px; height: 32px; cursor: pointer; font-weight: bold; font-size: 16px; color: #333; transition: 0.2s; }
 .qty-btn:hover { background: #e0e0e0; }
 .qty-input { width: 32px; text-align: center; border: none; background: #fff; font-size: 14px; font-weight: bold; outline: none; pointer-events: none; }
-
 .btn-cart { background-color: var(--fp-pink); color: white; border: none; padding: 8px 18px; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
 .btn-cart:hover { background-color: var(--fp-pink-hover); }
 
@@ -133,12 +128,6 @@ h2 { font-size: 32px; font-weight: 600; }
 .fp-item-info h4 { font-size: 15px; color: #222; margin-bottom: 4px; }
 .fp-item-info p { font-size: 12px; color: #888; margin-bottom: 8px; }
 .fp-item-price { font-size: 15px; font-weight: 700; color: var(--fp-pink); }
-.fp-item-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
-.fp-delete-btn { background: none; border: none; color: #ff4757; cursor: pointer; font-size: 16px; padding: 5px; transition: 0.2s; }
-.fp-delete-btn:hover { color: #ff0000; transform: scale(1.1); }
-.fp-qty-controls { display: flex; align-items: center; background: #f5f5f5; border-radius: 8px; overflow: hidden; }
-.fp-qty-controls button { background: none; border: none; width: 30px; height: 30px; font-weight: bold; font-size: 16px; cursor: pointer; color: var(--fp-pink); }
-.fp-qty-controls span { font-size: 14px; font-weight: 600; width: 20px; text-align: center; }
 
 /* Delivery details and Payment */
 .fp-delivery-card { background: #ffffff; padding: 15px; border-radius: 12px; border: 1px solid #eee; }
@@ -146,7 +135,6 @@ h2 { font-size: 32px; font-weight: 600; }
 .fp-input-group input, .fp-input-group textarea { width: 100%; padding: 12px 15px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; background: #fafafa; outline: none; transition: 0.3s; }
 .fp-input-group input:focus, .fp-input-group textarea:focus { border-color: var(--fp-pink); background: #fff; box-shadow: 0 0 0 3px rgba(215, 15, 100, 0.1); }
 .flex-row { display: flex; gap: 10px; }
-
 .fp-payment-options { display: flex; gap: 12px; }
 .fp-pay-card { flex: 1; background: #ffffff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 12px; cursor: pointer; text-align: center; transition: 0.2s; position: relative; }
 .fp-pay-card input { display: none; }
@@ -172,7 +160,6 @@ h2 { font-size: 32px; font-weight: 600; }
 /* Modals & Notifications */
 .system-modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 5000; display: none; }
 .system-modal-backdrop.active { display: block; justify-content: center; align-items: center; }
-
 #toast-notification { visibility: hidden; min-width: 280px; background-color: #2c3e50; color: #fff; text-align: center; border-radius: 8px; padding: 14px; position: fixed; z-index: 6000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 14px; font-weight: 600; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
 #toast-notification.show-alert { visibility: visible; animation: fadeInTray 0.4s, fadeOutTray 0.4s 2.5s; }
 @keyframes fadeInTray { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }

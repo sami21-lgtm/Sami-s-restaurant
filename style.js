@@ -1,580 +1,309 @@
-let cart = [];
-let otpVerified = { bkash: false, nagad: false };
-let otpTimers = { bkash: null, nagad: null };
-let otpCountdown = { bkash: 0, nagad: 0 };
-let generatedOtp = { bkash: '', nagad: '' };
-
-// ==================== Menu Filter ====================
 function filterMenu(category) {
-    const allCards = document.querySelectorAll('.product-item-card');
-    const allBtns = document.querySelectorAll('.filter-tab-btn');
-
-    allBtns.forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-
-    allCards.forEach(card => {
-        if (category === 'all' || card.classList.contains(category)) {
-            card.style.display = '';
-        } else {
-            card.style.display = 'none';
-        }
-    });
+const allCards = document.querySelectorAll('.product-item-card');
+const allBtns = document.querySelectorAll('.filter-tab-btn');
+allBtns.forEach(btn => btn.classList.remove('active'));
+event.target.classList.add('active');
+allCards.forEach(card => {
+if (category === 'all' || card.classList.contains(category)) {
+card.style.display = '';
+} else {
+card.style.display = 'none';
+}
+});
 }
 
-// ==================== Quantity Controls ====================
 function updateQty(btn, delta) {
-    const container = btn.closest('.qty-selector');
-    const input = container.querySelector('.qty-input');
-    let val = parseInt(input.value) || 1;
-    val += delta;
-    if (val < 1) val = 1;
-    if (val > 99) val = 99;
-    input.value = val;
+const container = btn.closest('.qty-selector');
+const input = container.querySelector('.qty-input');
+let val = parseInt(input.value) || 1;
+val += delta;
+if (val < 1) val = 1;
+if (val > 99) val = 99;
+input.value = val;
 }
 
-// ==================== Dynamic Pricing ====================
 function updateDynamicPricing(selectEl) {
-    const card = selectEl.closest('.product-item-card') || selectEl.closest('.product-card-body').parentElement;
-    const priceEl = card.querySelector('.dynamic-render-price');
-    const newPrice = selectEl.value;
-    priceEl.textContent = '৳' + newPrice;
-    priceEl.setAttribute('data-base-price', newPrice);
+const card = selectEl.closest('.product-item-card') || selectEl.closest('.product-card-body').parentElement;
+const priceEl = card.querySelector('.dynamic-render-price');
+const newPrice = selectEl.value;
+priceEl.textContent = ' ৳ ' + newPrice;
+priceEl.setAttribute('data-base-price', newPrice);
 }
 
-// ==================== Add to Cart ====================
+function closeBooking() {
+    document.getElementById('bookingModal').style.display = 'none';
+}
+
+function showToast(message) {
+const toast = document.getElementById('toast-notification');
+if (toast) {
+toast.textContent = message;
+toast.classList.add('show-alert');
+setTimeout(function() {
+toast.classList.remove('show-alert');
+}, 3000);
+}
+}
+
+
+// ==================== NEW FOODPANDA STYLE CART LOGIC ====================
+let foodpandaCart = [];
+let isPhoneVerified = false;
+let isPromoApplied = false;
+
+// Toggle Cart Sidebar
+function toggleCartSidebar() {
+    const sidebar = document.getElementById('foodpanda-cart-sidebar');
+    const overlay = document.getElementById('fp-sidebar-overlay');
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+}
+
+// Add Item to Foodpanda Style Cart
 function addToCart(btnEl, itemName) {
     const card = btnEl.closest('.product-item-card');
     const priceEl = card.querySelector('.dynamic-render-price');
     const qtyInput = card.querySelector('.qty-input');
     const variantSelect = card.querySelector('.variant-select');
-    const imgEl = card.querySelector('img');
-
+    
     const price = parseInt(priceEl.getAttribute('data-base-price'));
     const qty = parseInt(qtyInput.value) || 1;
     const variant = variantSelect ? variantSelect.options[variantSelect.selectedIndex].text : 'Regular';
-    const imgSrc = imgEl ? imgEl.src : '';
 
-    const existingIndex = cart.findIndex(item => item.name === itemName && item.variant === variant);
-
+    const existingIndex = foodpandaCart.findIndex(item => item.name === itemName && item.variant === variant);
+    
     if (existingIndex > -1) {
-        cart[existingIndex].qty += qty;
+        foodpandaCart[existingIndex].qty += qty;
     } else {
-        cart.push({
-            id: Date.now() + Math.random(),
+        foodpandaCart.push({
             name: itemName,
             variant: variant,
             price: price,
-            qty: qty,
-            img: imgSrc
+            qty: qty
         });
     }
 
-    qtyInput.value = 1;
-    showToast(itemName + ' added to basket!');
-    updateCartUI();
+    qtyInput.value = 1; // reset qty input
+    
+    // Update Sidebar HTML Live
+    renderFoodpandaCart();
+
+    // Auto open sidebar gracefully just like Foodpanda
+    const sidebar = document.getElementById('foodpanda-cart-sidebar');
+    const overlay = document.getElementById('fp-sidebar-overlay');
+    if (!sidebar.classList.contains('active')) {
+        sidebar.classList.add('active');
+        overlay.classList.add('active');
+    }
+
+    showToast(`${itemName} basket e added!`);
 }
 
-// ==================== Update Cart UI ====================
-function updateCartUI() {
-    const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
-    const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+// Apply Promo Code Logic
+function applyPromoCode() {
+    const code = document.getElementById('fpPromoCode').value.trim().toLowerCase();
+    const successMsg = document.getElementById('promoSuccessMsg');
+    const errorMsg = document.getElementById('promoErrorMsg');
 
-    // Floating bar
-    const floatingBar = document.getElementById('floating-cart');
-    const itemCountEl = document.getElementById('cart-item-count');
-    const totalPriceEl = document.getElementById('cart-total-price');
-
-    if (totalItems > 0) {
-        floatingBar.classList.remove('hidden');
+    if (code === 'sami 100') {
+        isPromoApplied = true;
+        successMsg.style.display = 'block';
+        errorMsg.style.display = 'none';
+        renderFoodpandaCart();
     } else {
-        floatingBar.classList.add('hidden');
+        isPromoApplied = false;
+        successMsg.style.display = 'none';
+        errorMsg.style.display = 'block';
+        renderFoodpandaCart();
     }
+}
 
-    itemCountEl.textContent = totalItems;
-    totalPriceEl.textContent = '৳' + totalPrice;
-
-    // Cart panel
-    const panelBody = document.getElementById('cartPanelBody');
-    const emptyState = document.getElementById('cartEmptyState');
-    const panelFooter = document.getElementById('cartPanelFooter');
-
-    if (cart.length === 0) {
-        panelBody.innerHTML = '<div class="cart-empty-state" id="cartEmptyState"><i class="fa-solid fa-basket-shopping"></i><p>Your basket is empty</p></div>';
-        panelFooter.style.display = 'none';
+// Render dynamic elements inside cart
+function renderFoodpandaCart() {
+    const container = document.getElementById('cart-items-list');
+    const badgeCount = document.getElementById('basket-badge-count');
+    const subtotalEl = document.getElementById('fp-subtotal');
+    const deliveryEl = document.getElementById('fp-delivery');
+    const totalEl = document.getElementById('fp-total');
+    const btnTotalEl = document.getElementById('fp-btn-total');
+    
+    container.innerHTML = '';
+    
+    if (foodpandaCart.length === 0) {
+        container.innerHTML = `<div class="empty-cart-msg">Apnar basket ekhon khali ache! Item add korun.</div>`;
+        badgeCount.textContent = '0';
+        subtotalEl.textContent = '৳ 0';
+        deliveryEl.textContent = '৳ 40';
+        totalEl.textContent = '৳ 0';
+        btnTotalEl.textContent = '৳ 0';
+        validateCheckoutForm();
         return;
     }
 
-    panelFooter.style.display = '';
+    let subtotal = 0;
+    let totalItems = 0;
 
-    let html = '';
-    cart.forEach(item => {
-        html += '<div class="cart-item-row" data-cart-id="' + item.id + '">'
-            + '<img class="cart-item-img" src="' + item.img + '" alt="' + item.name + '">'
-            + '<div class="cart-item-details">'
-            + '<div class="cart-item-name">' + item.name + '</div>'
-            + '<div class="cart-item-variant">' + item.variant + '</div>'
-            + '<div class="cart-item-bottom">'
-            + '<span class="cart-item-price">৳' + (item.price * item.qty) + '</span>'
-            + '<div class="cart-item-qty-controls">'
-            + '<button class="cart-qty-adjust" onclick="adjustCartQty(' + item.id + ', -1)">-</button>'
-            + '<span class="cart-qty-display">' + item.qty + '</span>'
-            + '<button class="cart-qty-adjust" onclick="adjustCartQty(' + item.id + ', 1)">+</button>'
-            + '</div>'
-            + '</div>'
-            + '</div>'
-            + '<button class="cart-item-delete" onclick="deleteCartItem(' + item.id + ')" title="Remove item">'
-            + '<i class="fa-solid fa-trash-can"></i>'
-            + '</button>'
-            + '</div>';
+    foodpandaCart.forEach((item, index) => {
+        const itemCost = item.price * item.qty;
+        subtotal += itemCost;
+        totalItems += item.qty;
+
+        const itemHtml = `
+            <div class="fp-cart-item">
+                <div class="item-info-meta">
+                    <div class="item-title">${item.name}</div>
+                    <div class="item-variant">${item.variant}</div>
+                </div>
+                <div class="item-qty-price-block">
+                    <span class="item-qty-tag">${item.qty}x</span>
+                    <span class="item-price-tag">৳ ${itemCost}</span>
+                    <button class="fp-item-delete-btn" onclick="removeBasketItem(${index})" title="Remove item">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', itemHtml);
     });
 
-    panelBody.innerHTML = html;
+    // Dynamic delivery fee calculation based on Promo Code
+    const deliveryFee = isPromoApplied ? 30 : 40;
+    const grandTotal = subtotal + deliveryFee;
 
-    document.getElementById('cartSubtotal').textContent = '৳' + totalPrice;
-    document.getElementById('cartGrandTotal').textContent = '৳' + totalPrice;
+    badgeCount.textContent = totalItems;
+    subtotalEl.textContent = `৳ ${subtotal}`;
+    deliveryEl.textContent = `৳ ${deliveryFee}`;
+    totalEl.textContent = `৳ ${grandTotal}`;
+    btnTotalEl.textContent = `৳ ${grandTotal}`;
+
+    validateCheckoutForm();
 }
 
-// ==================== Adjust Cart Qty ====================
-function adjustCartQty(itemId, delta) {
-    const item = cart.find(i => i.id === itemId);
-    if (!item) return;
-
-    item.qty += delta;
-    if (item.qty < 1) {
-        cart = cart.filter(i => i.id !== itemId);
-        showToast(item.name + ' removed from basket');
-    }
-    updateCartUI();
+// Delete Item Function
+function removeBasketItem(index) {
+    foodpandaCart.splice(index, 1);
+    renderFoodpandaCart();
+    showToast('Item deleted from basket');
 }
 
-// ==================== Delete Cart Item ====================
-function deleteCartItem(itemId) {
-    const item = cart.find(i => i.id === itemId);
-    if (item) {
-        showToast(item.name + ' removed from basket');
-    }
-    cart = cart.filter(i => i.id !== itemId);
-    updateCartUI();
+// Change Payment State
+function handlePaymentChange(radioInput) {
+    document.querySelectorAll('.fp-pay-option').forEach(el => el.classList.remove('active'));
+    radioInput.closest('.fp-pay-option').classList.add('active');
 }
 
-// ==================== Cart Panel Open/Close ====================
-function openCartPanel() {
-    document.getElementById('cartOverlay').classList.add('active');
-    document.getElementById('cartSlidePanel').classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeCartPanel() {
-    document.getElementById('cartOverlay').classList.remove('active');
-    document.getElementById('cartSlidePanel').classList.remove('active');
-    document.body.style.overflow = '';
-}
-
-// ==================== Checkout Modal ====================
-function openCheckout() {
-    closeCartPanel();
-    renderCheckoutSummary();
-    document.getElementById('checkoutOverlay').classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeCheckout() {
-    document.getElementById('checkoutOverlay').classList.remove('active');
-    document.body.style.overflow = '';
-}
-
-function renderCheckoutSummary() {
-    const listEl = document.getElementById('checkoutItemsList');
-    const totalEl = document.getElementById('checkoutTotalVal');
-    let total = 0;
-    let html = '';
-
-    cart.forEach(item => {
-        const lineTotal = item.price * item.qty;
-        total += lineTotal;
-        html += '<div class="checkout-item-line">'
-            + '<span><span class="qty-badge">' + item.qty + 'x</span> ' + item.name + ' (' + item.variant + ')</span>'
-            + '<span>৳' + lineTotal + '</span>'
-            + '</div>';
-    });
-
-    listEl.innerHTML = html;
-    totalEl.textContent = '৳' + total;
-}
-
-// ==================== Payment Method Selection ====================
-function selectPayment(method, el) {
-    document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
-    el.classList.add('selected');
-    el.querySelector('input[type="radio"]').checked = true;
-
-    document.getElementById('bkashFields').classList.remove('active');
-    document.getElementById('nagadFields').classList.remove('active');
-
-    if (method === 'bkash') {
-        document.getElementById('bkashFields').classList.add('active');
-    } else if (method === 'nagad') {
-        document.getElementById('nagadFields').classList.add('active');
-    }
-}
-
-// ==================== OTP System ====================
-
-// Generate a random 6-digit OTP
-function generateOtpCode() {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-}
-
-// Send OTP
-function sendOtp(method) {
-    const numberInput = document.getElementById(method + 'Number');
-    const number = numberInput.value.trim();
-
-    // Validate number
-    if (!number || number.length < 10) {
-        showToast('Please enter a valid ' + (method === 'bkash' ? 'bKash' : 'Nagad') + ' number');
-        numberInput.focus();
+// Security OTP System Engine
+function triggerSendOTP() {
+    const phoneInput = document.getElementById('fpCustPhone').value.trim();
+    if (!phoneInput) {
+        alert('Daya kore prothome apnar mobile number ti input korun.');
+        document.getElementById('fpCustPhone').focus();
         return;
     }
 
-    // Generate OTP
-    generatedOtp[method] = generateOtpCode();
+    const sendBtn = document.getElementById('fpSendOtpBtn');
+    const timerEl = document.getElementById('fpOtpTimer');
+    const inputWrapper = document.getElementById('fpOtpInputWrapper');
 
-    // Show OTP section
-    const otpSection = document.getElementById(method + 'OtpSection');
-    otpSection.style.display = '';
-
-    // Display masked number
-    const maskedNumber = '+880 ' + number.substring(0, 2) + '****' + number.substring(number.length - 3);
-    document.getElementById(method + 'OtpNumber').textContent = maskedNumber;
-
-    // Disable the send button and change text
-    const sendBtn = document.getElementById(method + 'SendOtpBtn');
     sendBtn.disabled = true;
-    sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+    inputWrapper.style.display = 'flex';
+    timerEl.style.display = 'inline';
 
-    // Simulate OTP send delay
-    setTimeout(function() {
-        sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> OTP Sent';
-        showToast('OTP sent to ' + maskedNumber + ' (Code: ' + generatedOtp[method] + ')');
+    let countdown = 60;
+    timerEl.innerHTML = `Resend in <strong>${countdown}s</strong>`;
 
-        // Start countdown
-        startOtpTimer(method);
-
-        // Focus first OTP input
-        const firstOtpInput = otpSection.querySelector('.otp-digit');
-        if (firstOtpInput) firstOtpInput.focus();
-    }, 1500);
-}
-
-// Start OTP countdown timer
-function startOtpTimer(method) {
-    // Clear any existing timer
-    if (otpTimers[method]) clearInterval(otpTimers[method]);
-
-    otpCountdown[method] = 60;
-    const timerEl = document.getElementById(method + 'OtpTimer');
-    const resendBtn = document.getElementById(method + 'ResendBtn');
-
-    timerEl.style.display = '';
-    resendBtn.style.display = 'none';
-
-    otpTimers[method] = setInterval(function() {
-        otpCountdown[method]--;
-        timerEl.innerHTML = 'Resend code in <strong>' + otpCountdown[method] + 's</strong>';
-
-        if (otpCountdown[method] <= 0) {
-            clearInterval(otpTimers[method]);
+    const countdownInterval = setInterval(() => {
+        countdown--;
+        if (countdown <= 0) {
+            clearInterval(countdownInterval);
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = `<i class="fa-solid fa-arrow-rotate-right"></i> Resend OTP`;
             timerEl.style.display = 'none';
-            resendBtn.style.display = '';
+        } else {
+            timerEl.innerHTML = `Resend in <strong>${countdown}s</strong>`;
         }
     }, 1000);
+
+    showToast('OTP verification active! Enter any 4-digit numeric code.');
 }
 
-// Resend OTP
-function resendOtp(method) {
-    generatedOtp[method] = generateOtpCode();
-    showToast('New OTP sent! (Code: ' + generatedOtp[method] + ')');
-
-    // Clear OTP inputs
-    const otpInputs = document.querySelectorAll('.otp-digit[data-otp-group="' + method + '"]');
-    otpInputs.forEach(input => {
-        input.value = '';
-        input.classList.remove('filled');
-    });
-
-    // Reset verified state
-    otpVerified[method] = false;
-    const sendBtn = document.getElementById(method + 'SendOtpBtn');
-    sendBtn.classList.remove('verified');
-    sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> OTP Sent';
-
-    // Focus first OTP input
-    if (otpInputs.length > 0) otpInputs[0].focus();
-
-    // Restart timer
-    startOtpTimer(method);
-}
-
-// Handle OTP input - auto move to next field
-function handleOtpInput(input) {
-    const value = input.value;
-
-    // Only allow digits
-    if (!/^\d$/.test(value)) {
-        input.value = '';
+function verifyOTPCode() {
+    const otpCode = document.getElementById('fpOtpCode').value.trim();
+    if (otpCode.length < 4) {
+        alert('Daya kore sothik 4-digit code processing korun.');
         return;
     }
 
-    input.classList.add('filled');
+    isPhoneVerified = true;
+    document.getElementById('fpOtpInputWrapper').style.display = 'none';
+    document.getElementById('fpSendOtpBtn').style.display = 'none';
+    document.getElementById('fpOtpTimer').style.display = 'none';
+    document.getElementById('otpSuccessStatus').style.display = 'block';
 
-    // Move to next input
-    const nextInput = input.nextElementSibling;
-    if (nextInput && nextInput.classList.contains('otp-digit')) {
-        nextInput.focus();
-    }
-
-    // Check if all 6 digits filled
-    checkOtpComplete(input.getAttribute('data-otp-group'));
+    validateCheckoutForm();
 }
 
-// Handle keydown for OTP - backspace navigation
-function handleOtpKeydown(e, input) {
-    if (e.key === 'Backspace') {
-        if (input.value === '') {
-            // Move to previous input
-            const prevInput = input.previousElementSibling;
-            if (prevInput && prevInput.classList.contains('otp-digit')) {
-                prevInput.focus();
-                prevInput.value = '';
-                prevInput.classList.remove('filled');
-            }
-        } else {
-            input.value = '';
-            input.classList.remove('filled');
-        }
-        e.preventDefault();
-    }
+// Unlock Confirm Order Process
+function validateCheckoutForm() {
+    const name = document.getElementById('fpCustName').value.trim();
+    const phone = document.getElementById('fpCustPhone').value.trim();
+    const address = document.getElementById('fpCustAddress').value.trim();
+    const submitBtn = document.getElementById('fpPlaceOrderBtn');
 
-    if (e.key === 'ArrowLeft') {
-        const prevInput = input.previousElementSibling;
-        if (prevInput && prevInput.classList.contains('otp-digit')) {
-            prevInput.focus();
-        }
-    }
-
-    if (e.key === 'ArrowRight') {
-        const nextInput = input.nextElementSibling;
-        if (nextInput && nextInput.classList.contains('otp-digit')) {
-            nextInput.focus();
-        }
-    }
-}
-
-// Check if OTP is fully entered and verify
-function checkOtpComplete(method) {
-    const otpInputs = document.querySelectorAll('.otp-digit[data-otp-group="' + method + '"]');
-    let enteredOtp = '';
-
-    otpInputs.forEach(input => {
-        enteredOtp += input.value;
-    });
-
-    if (enteredOtp.length === 6) {
-        verifyOtp(method, enteredOtp);
-    }
-}
-
-// Verify OTP
-function verifyOtp(method, enteredOtp) {
-    const sendBtn = document.getElementById(method + 'SendOtpBtn');
-
-    if (enteredOtp === generatedOtp[method]) {
-        // OTP verified successfully
-        otpVerified[method] = true;
-
-        sendBtn.classList.add('verified');
-        sendBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Verified Successfully';
-        sendBtn.disabled = true;
-
-        // Clear timer
-        if (otpTimers[method]) clearInterval(otpTimers[method]);
-
-        // Hide timer/resend
-        document.getElementById(method + 'OtpTimer').style.display = 'none';
-        document.getElementById(method + 'ResendBtn').style.display = 'none';
-
-        // Disable OTP inputs
-        const otpInputs = document.querySelectorAll('.otp-digit[data-otp-group="' + method + '"]');
-        otpInputs.forEach(input => {
-            input.disabled = true;
-            input.style.borderColor = 'var(--success-green)';
-            input.style.background = '#f0fff4';
-        });
-
-        showToast('Payment verified successfully!');
+    if (foodpandaCart.length > 0 && name && phone && address && isPhoneVerified) {
+        submitBtn.disabled = false;
     } else {
-        // OTP incorrect
-        showToast('Incorrect OTP. Please try again.');
-
-        // Shake animation - clear and refocus
-        const otpInputs = document.querySelectorAll('.otp-digit[data-otp-group="' + method + '"]');
-        otpInputs.forEach(input => {
-            input.value = '';
-            input.classList.remove('filled');
-            input.style.borderColor = 'var(--danger-red)';
-            setTimeout(() => {
-                input.style.borderColor = '';
-            }, 1500);
-        });
-
-        if (otpInputs.length > 0) otpInputs[0].focus();
+        submitBtn.disabled = true;
     }
 }
 
-// ==================== Handle Order Submission ====================
-function handleOrderSubmission(e) {
-    e.preventDefault();
-
-    const name = document.getElementById('custName').value.trim();
-    const phone = document.getElementById('custPhone').value.trim();
-    const address = document.getElementById('custAddress').value.trim();
-    const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
-
-    // Validate name
-    if (!name) {
-        showToast('Please enter your name');
-        document.getElementById('custName').focus();
+// Submit Order Data Configuration Pipeline
+function submitFoodpandaOrder() {
+    if (!isPhoneVerified) {
+        alert('Daya kore prothome profile mobile OTP authentication complete korun.');
         return;
     }
 
-    // Validate phone
-    if (!phone || phone.length < 11) {
-        showToast('Please enter a valid phone number');
-        document.getElementById('custPhone').focus();
-        return;
-    }
+    const name = document.getElementById('fpCustName').value.trim();
+    const phone = document.getElementById('fpCustPhone').value.trim();
+    const address = document.getElementById('fpCustAddress').value.trim();
+    const payment = document.querySelector('input[name="fpPayment"]:checked').value;
 
-    // Validate address
-    if (!address) {
-        showToast('Please enter your delivery address');
-        document.getElementById('custAddress').focus();
-        return;
-    }
-
-    // Validate mobile banking + OTP
-    if (paymentMethod === 'bkash') {
-        const bkashNum = document.getElementById('bkashNumber').value.trim();
-        if (!bkashNum || bkashNum.length < 10) {
-            showToast('Please enter a valid bKash number');
-            document.getElementById('bkashNumber').focus();
-            return;
-        }
-        if (!otpVerified.bkash) {
-            showToast('Please verify your bKash number with OTP first');
-            return;
-        }
-    }
-
-    if (paymentMethod === 'nagad') {
-        const nagadNum = document.getElementById('nagadNumber').value.trim();
-        if (!nagadNum || nagadNum.length < 10) {
-            showToast('Please enter a valid Nagad number');
-            document.getElementById('nagadNumber').focus();
-            return;
-        }
-        if (!otpVerified.nagad) {
-            showToast('Please verify your Nagad number with OTP first');
-            return;
-        }
-    }
-
-    // All validations passed - place order
-    closeCheckout();
-
-    document.getElementById('orderSuccessOverlay').classList.add('active');
-
-    // Clear cart
-    cart = [];
-    updateCartUI();
-
-    // Reset form
-    document.getElementById('orderCheckoutForm').reset();
-    document.getElementById('bkashNumber').value = '';
-    document.getElementById('nagadNumber').value = '';
-
-    // Reset OTP states
-    resetOtpState('bkash');
-    resetOtpState('nagad');
-
-    // Reset payment selection to bKash
-    selectPayment('bkash', document.querySelector('.payment-option.bkash'));
+    alert(`Order Placed Successfully!\n\nName: ${name}\nPhone: ${phone}\nAddress: ${address}\nPayment: ${payment.toUpperCase()}\n\nThank you for choosing Sami's Restaurant!`);
+    
+    // Clear and reset cart state
+    foodpandaCart = [];
+    isPhoneVerified = false;
+    isPromoApplied = false;
+    
+    // Form Inputs Clear
+    document.getElementById('fpCustName').value = '';
+    document.getElementById('fpCustPhone').value = '';
+    document.getElementById('fpCustAddress').value = '';
+    
+    // Reset Promo view
+    document.getElementById('fpPromoCode').value = '';
+    document.getElementById('promoSuccessMsg').style.display = 'none';
+    document.getElementById('promoErrorMsg').style.display = 'none';
+    
+    // Reset OTP view
+    document.getElementById('otpSuccessStatus').style.display = 'none';
+    document.getElementById('fpOtpCode').value = '';
+    document.getElementById('fpSendOtpBtn').style.display = 'inline-block';
+    document.getElementById('fpSendOtpBtn').disabled = false;
+    document.getElementById('fpSendOtpBtn').innerHTML = `<i class="fa-solid fa-paper-plane"></i> Send OTP to Verify`;
+    
+    renderFoodpandaCart();
+    toggleCartSidebar();
 }
 
-// Reset OTP state for a payment method
-function resetOtpState(method) {
-    otpVerified[method] = false;
-    generatedOtp[method] = '';
-    if (otpTimers[method]) clearInterval(otpTimers[method]);
-    otpCountdown[method] = 0;
-
-    // Hide OTP section
-    const otpSection = document.getElementById(method + 'OtpSection');
-    if (otpSection) otpSection.style.display = 'none';
-
-    // Reset OTP inputs
-    const otpInputs = document.querySelectorAll('.otp-digit[data-otp-group="' + method + '"]');
-    otpInputs.forEach(input => {
-        input.value = '';
-        input.disabled = false;
-        input.classList.remove('filled');
-        input.style.borderColor = '';
-        input.style.background = '';
+// Attach Live validation Listeners
+document.addEventListener('DOMContentLoaded', () => {
+    const targetInputIds = ['fpCustName', 'fpCustPhone', 'fpCustAddress'];
+    targetInputIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', validateCheckoutForm);
+        }
     });
-
-    // Reset send button
-    const sendBtn = document.getElementById(method + 'SendOtpBtn');
-    if (sendBtn) {
-        sendBtn.disabled = false;
-        sendBtn.classList.remove('verified');
-        sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send OTP to Verify';
-    }
-
-    // Reset timer/resend
-    const timerEl = document.getElementById(method + 'OtpTimer');
-    const resendBtn = document.getElementById(method + 'ResendBtn');
-    if (timerEl) {
-        timerEl.style.display = '';
-        timerEl.innerHTML = 'Resend code in <strong>60s</strong>';
-    }
-    if (resendBtn) resendBtn.style.display = 'none';
-}
-
-function closeOrderSuccess() {
-    document.getElementById('orderSuccessOverlay').classList.remove('active');
-    document.body.style.overflow = '';
-}
-
-// ==================== Toast Notification ====================
-function showToast(message) {
-    const toast = document.getElementById('toast-notification');
-    toast.textContent = message;
-    toast.classList.add('show-alert');
-    setTimeout(function() {
-        toast.classList.remove('show-alert');
-    }, 3000);
-}
-
-// ==================== Keyboard Shortcuts ====================
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeCartPanel();
-        closeCheckout();
-        closeOrderSuccess();
-    }
-});
-
-// ==================== Initialize ====================
-document.addEventListener('DOMContentLoaded', function() {
-    updateCartUI();
 });

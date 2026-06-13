@@ -1,8 +1,9 @@
+// ==================== Global Application State ====================
 let cart = [];
 let fpOtpVerified = false;
 let generatedOtp = '1234';
 
-// Dynamic CSS Injection for Foodpanda Buttons (Zate HTML/CSS e haat na deya lage)
+// Dynamic CSS Injection for Foodpanda Buttons & Sidebar Layout Alignment
 const fpStyle = document.createElement('style');
 fpStyle.innerHTML = `
     .fp-inline-stepper {
@@ -30,9 +31,7 @@ fpStyle.innerHTML = `
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: transform 0.1s ease;
     }
-    .fp-stepper-btn:active { transform: scale(0.85); }
     .fp-stepper-val {
         font-weight: bold;
         font-size: 14px;
@@ -86,12 +85,11 @@ function updateDynamicPricing(selectEl) {
     priceEl.textContent = ' ৳ ' + newPrice;
     priceEl.setAttribute('data-base-price', newPrice);
     
-    // Auto-sync buttons if variant changes
     syncCardButtons();
 }
 
-// ==================== Foodpanda Structural Cart Framework Core Operations ====================
-// ==================== Foodpanda Structural Cart Framework Core Operations ====================
+// ==================== Pure Foodpanda Style Core Operations ====================
+// 1. Initial "Add" Button click handler (Normal +1/Stepper implementation)
 function addToCart(btnEl, itemName) {
     const card = btnEl.closest('.product-item-card');
     const priceEl = card.querySelector('.dynamic-render-price');
@@ -121,17 +119,11 @@ function addToCart(btnEl, itemName) {
 
     showToast(`🛒 ${itemName} basket-e add hoyeche!`);
     renderCartData();
-    syncCardButtons();
-
-    // 🔥 জাস্ট এই নিচের কোডটুকু ২য় পিকচার-এর চেকআউট ইন্টারফেসটি অটোমেটিক ওপেন করে দেবে:
-    const sidebar = document.getElementById('fp-cart-sidebar') || document.getElementById('cart-sidebar');
-    if (sidebar) {
-        sidebar.classList.add('active');
-        document.body.style.overflow = 'hidden'; // ব্যাকগ্রাউন্ড স্ক্রল বন্ধ করার জন্য
-    }
+    syncCardButtons(); 
+    // সাইডবার ওপেন করার কোড এখান থেকে সরায়ে দেওয়া হইছে। সো এখন জাস্ট +1 হবে, স্ক্রিন নরমাল থাকবে।
 }
 
-// ==================== Card Buttons UI State Sync Matrix ====================
+// 2. Card Button Swapper and Synchronizer Matrix (+1, +2 logic display handler)
 function syncCardButtons() {
     document.querySelectorAll('.product-item-card').forEach(card => {
         const h3 = card.querySelector('h3');
@@ -143,12 +135,10 @@ function syncCardButtons() {
         
         const cartItem = cart.find(item => item.name === itemName && item.variant === variant);
         
-        // Find original native button (Add to Cart / Add)
         let originalBtn = card.querySelector('.btn-cart') || card.querySelector('button[onclick^="addToCart"]');
         let inlineStepper = card.querySelector('.fp-inline-stepper');
         
         if (cartItem) {
-            // If item is inside cart array: Hide button, inject/show Foodpanda stepper [ - | 1 | + ]
             if (originalBtn) originalBtn.style.display = 'none';
             
             if (!inlineStepper) {
@@ -160,7 +150,6 @@ function syncCardButtons() {
                     <button type="button" class="fp-stepper-btn plus-btn">+</button>
                 `;
                 
-                // Click events inside food card
                 inlineStepper.querySelector('.minus-btn').onclick = (e) => {
                     e.stopPropagation();
                     adjustQtyByMeta(itemName, variant, -1);
@@ -170,7 +159,6 @@ function syncCardButtons() {
                     adjustQtyByMeta(itemName, variant, 1);
                 };
                 
-                // Append directly to action row wrapper
                 if (originalBtn) {
                     originalBtn.parentNode.insertBefore(inlineStepper, originalBtn.nextSibling);
                 }
@@ -179,14 +167,13 @@ function syncCardButtons() {
                 inlineStepper.querySelector('.fp-stepper-val').innerText = cartItem.qty;
             }
         } else {
-            // If completely removed or 0: Restore standard Add button state
             if (originalBtn) originalBtn.style.display = 'block';
             if (inlineStepper) inlineStepper.style.display = 'none';
         }
     });
 }
 
-// Helper to routing updates from card interfaces
+// 3. Helper to router data logic from UI steps 
 function adjustQtyByMeta(name, variant, delta) {
     const item = cart.find(i => i.name === name && i.variant === variant);
     if (!item) return;
@@ -194,13 +181,13 @@ function adjustQtyByMeta(name, variant, delta) {
     item.qty += delta;
     if (item.qty < 1) {
         cart = cart.filter(i => i.id !== item.id);
-        showToast(`🗑️ ${name} bad deya hoyeche`);
+        showToast(`🗑️ ${name} remove করা হয়েছে`);
     }
     renderCartData();
     syncCardButtons();
 }
 
-// ==================== Reactively Re-render Core Floating Basket UI Data Blocks ====================
+// ==================== Reactively Render Floating Basket & Sidebar Data ====================
 function renderCartData() {
     const floatingBtn = document.getElementById('floating-cart') || document.querySelector('.fp-floating-basket-btn');
     const countBadge = document.getElementById('cart-item-count') || document.getElementById('fp-basket-count');
@@ -211,6 +198,7 @@ function renderCartData() {
     let totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
     let totalAmt = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
 
+    // Floating Button Control (নিচের বার যেটা ফুডপান্ডাতে থাকে)
     if (floatingBtn) {
         if (totalQty > 0) {
             floatingBtn.style.display = 'flex';
@@ -226,6 +214,7 @@ function renderCartData() {
     if (totalAmountBadge) totalAmountBadge.textContent = '৳ ' + totalAmt;
     if (summaryTotalVal) summaryTotalVal.textContent = '৳ ' + totalAmt;
 
+    // Sidebar Inside Checkout Items Body Rendering
     if (itemsContainer) {
         if (cart.length === 0) {
             itemsContainer.innerHTML = `
@@ -267,7 +256,7 @@ function renderCartData() {
     }
 }
 
-// Modify Quantity Intersections Directly Inside the Sidebar/Checkout Drawer
+// Adjust inside sidebar checkout options drawer
 function adjustCartQty(itemId, delta) {
     const item = cart.find(i => i.id === itemId);
     if (!item) return;
@@ -281,7 +270,7 @@ function adjustCartQty(itemId, delta) {
     syncCardButtons();
 }
 
-// Trash bin delete trigger pipeline
+// Direct Trash bin execution
 function removeDirectItem(itemId) {
     const item = cart.find(i => i.id === itemId);
     if (item) {
@@ -292,9 +281,9 @@ function removeDirectItem(itemId) {
     syncCardButtons();
 }
 
-// ==================== Visual Sidebar Modal Opening/Closing Controllers ====================
+// ==================== Checkout Panel Drawer Toggles (Triggered ONLY via Floating Bar Click) ====================
 function toggleFpCart() {
-    const sidebar = document.getElementById('fp-cart-sidebar');
+    const sidebar = document.getElementById('fp-cart-sidebar') || document.getElementById('cart-sidebar');
     if (sidebar) {
         sidebar.classList.toggle('active');
         document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
@@ -302,7 +291,7 @@ function toggleFpCart() {
 }
 
 function closeCartPanel() {
-    const sidebar = document.getElementById('fp-cart-sidebar');
+    const sidebar = document.getElementById('fp-cart-sidebar') || document.getElementById('cart-sidebar');
     if (sidebar) {
         sidebar.classList.remove('active');
         document.body.style.overflow = '';

@@ -18,13 +18,13 @@
             <a href="#home">Home</a>
             <a href="#about">About</a>
             <a href="#menu">Menu</a>
-            <a href="#reservation-section">Reservation</a>
+            <a href="#gallery">Gallery</a>
             <a href="#contact">Contact</a>
         </nav>
         <button class="btn-reserve" onclick="window.location.href='#reservation-section'">Reserve Table</button>
     </header>
 
-    <section id="home" class="hero-viewport">
+    <section id="home" class="hero-viewport" style="padding: 0;">
         <div class="hero-overlay-content">
             <h1>Sami's Restaurant</h1>
             <p>Exquisite flavors, warm hospitality in the heart of Dhaka's culinary scene. Authentic Bangladeshi warmth and global flair.</p>
@@ -35,7 +35,6 @@
         </div>
     </section>
 
-    <!-- About Section -->
     <section id="about" class="about-story-section">
         <div class="section-title-block">
             <h2>Our Story & Leadership</h2>
@@ -55,6 +54,7 @@
                 <p class="chef-role-tag">Owner & Founder</p>
                 <p class="chef-biography">Visionary entrepreneur dedicated to bringing premium global dining experiences, rich heritage blends, and authentic traditional cuisines under one elite platform.</p>
             </div>
+            
             <div class="chef-profile-card">
                 <div class="profile-image-wrapper normal-chef-border">
                     <img src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&q=80&w=300" alt="Chef Vera">
@@ -66,41 +66,147 @@
         </div>
     </section>
 
-    <!-- Menu Section -->
     <section id="menu">
         <div class="section-title-block">
             <h4 class="sub-heading-accent">Our Signature Menu</h4>
             <h2>From timeless classics to modern twists</h2>
         </div>
         <div class="menu-filter-bar">
-            <button class="filter-tab-btn active" onclick="filterMenu('all', this)">All Items</button>
-            <button class="filter-tab-btn" onclick="filterMenu('lunch', this)">Lunch</button>
-            <button class="filter-tab-btn" onclick="filterMenu('dinner', this)">Dinner</button>
-            <button class="filter-tab-btn" onclick="filterMenu('drinks', this)">Drinks</button>
+            <button class="filter-tab-btn active" onclick="filterMenu('all')">All Items</button>
+            <button class="filter-tab-btn" onclick="filterMenu('breakfast')">Breakfast</button>
+            <button class="filter-tab-btn" onclick="filterMenu('lunch')">Lunch</button>
+            <button class="filter-tab-btn" onclick="filterMenu('dinner')">Dinner</button>
+            <button class="filter-tab-btn" onclick="filterMenu('drinks')">Drinks</button>
+            <button class="filter-tab-btn" onclick="filterMenu('desserts')">Desserts & Cakes</button>
         </div>
-        
-        <div class="menu-products-container" id="menu-container">
-            <!-- Product Item 1 -->
-            <div class="product-item-card lunch dinner" data-category="lunch dinner">
+
+        <div class="menu-products-container">
+            
+            <div class="product-item-card breakfast">
+                <img src="images (12).jpg" alt="Soft Ruti / Paratha" onerror="this.src='https://images.unsplash.com/photo-1505253758473-96b7015fcd40?w=400'">
+                <div class="product-card-body">
+                    <h3>Soft Ruti / Paratha</h3>
+                    <p>Freshly baked hot wheat flatbread or crispy paratha.</p>
+                    <div class="product-dropdown-control">
+                        <label>Portion:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="20">1 Piece ( ৳ 20)</option>
+                            <option value="40">2 Pieces ( ৳ 40)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="20"> ৳ 20</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Soft Ruti / Paratha')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card breakfast">
+                <span class="badge-popular">Morning Special</span>
+                <img src="images (13).jpg" alt="Special Bhuna Daal" onerror="this.src='https://images.unsplash.com/photo-1548943487-a2e4f43bb288?w=400'">
+                <div class="product-card-body">
+                    <h3>Special Bhuna Daal</h3>
+                    <p>Thick, spicy lentil soup cooked with garlic and aromatic herbs.</p>
+                    <div class="product-dropdown-control">
+                        <label>Portion:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="40">1 Bowl ( ৳ 40)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="40"> ৳ 40</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Special Bhuna Daal')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card breakfast">
+                <img src="https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&q=80&w=400" alt="Egg">
+                <div class="product-card-body">
+                    <h3>Farm Fresh Egg (Dim)</h3>
+                    <p>Omelette or sunny-side-up fried with fresh green chillies.</p>
+                    <div class="product-dropdown-control">
+                        <label>Style:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="30">Omelette ( ৳ 30)</option>
+                            <option value="30">Fried / Poached ( ৳ 30)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="30"> ৳ 30</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Farm Fresh Egg (Dim)')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card breakfast lunch">
+                <span class="badge-popular badge-bestseller">Heavy Breakfast</span>
+                <img src="e338491b-063e-4228-ac0e-3ca9c73536a8.png" alt="Khichuri" onerror="this.src='https://images.unsplash.com/photo-1544025162-8111142154ea?w=400'">
+                <div class="product-card-body">
+                    <h3>Beef Bhuna Khichuri</h3>
+                    <p>Roasted lentil rice mixed with tender, deeply spiced beef chunks.</p>
+                    <div class="product-dropdown-control">
+                        <label>Portion:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="280">Full Plate ( ৳ 280)</option>
+                            <option value="160">Half Plate ( ৳ 160)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="280"> ৳ 280</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Beef Bhuna Khichuri')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card lunch dinner">
                 <span class="badge-popular badge-bestseller"><i class="fa-solid fa-star"></i> Bestseller</span>
-                <img src="https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400" alt="Mutton Kacchi">
+                <img src="images (14).jpg" alt="Mutton Kacchi" onerror="this.src='https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400'">
                 <div class="product-card-body">
                     <h3>Premium Mutton Kacchi</h3>
                     <p>Layered basmati rice cooked with juicy mutton pieces and alu.</p>
                     <div class="product-dropdown-control">
                         <label>Portion:</label>
                         <select class="variant-select" onchange="updateDynamicPricing(this)">
-                            <option value="450">Full Plate (৳450)</option>
-                            <option value="250">Half Plate (৳250)</option>
+                            <option value="450">Full Plate ( ৳ 450)</option>
+                            <option value="250">Half Plate ( ৳ 250)</option>
                         </select>
                     </div>
                     <div class="product-price-action">
-                        <span class="product-base-price dynamic-render-price" data-base-price="450">৳450</span>
+                        <span class="product-base-price dynamic-render-price" data-base-price="450"> ৳ 450</span>
                         <div class="cart-action-group">
                             <div class="qty-selector">
-                                <button class="qty-btn" onclick="updateLocalQty(this, -1)">-</button>
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
                                 <input type="text" class="qty-input" value="1" readonly>
-                                <button class="qty-btn" onclick="updateLocalQty(this, 1)">+</button>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
                             </div>
                             <button class="btn-cart" onclick="addToCart(this, 'Premium Mutton Kacchi')">Add</button>
                         </div>
@@ -108,27 +214,26 @@
                 </div>
             </div>
 
-            <!-- Product Item 2 -->
-            <div class="product-item-card lunch dinner" data-category="lunch dinner">
+            <div class="product-item-card lunch dinner">
                 <span class="badge-popular">Popular</span>
-                <img src="https://images.unsplash.com/photo-1544025162-8111142154ea?w=400" alt="Kala Bhuna">
+                <img src="4a1cb3da-4300-4954-b526-8ac5f40146f1.png" alt="Kala Bhuna" onerror="this.src='https://images.unsplash.com/photo-1544025162-8111142154ea?w=400'">
                 <div class="product-card-body">
                     <h3>Chittagong Kala Bhuna</h3>
                     <p>Authentic dark roasted beef curry with secret traditional spices.</p>
                     <div class="product-dropdown-control">
                         <label>Portion:</label>
                         <select class="variant-select" onchange="updateDynamicPricing(this)">
-                            <option value="350">Full Plate (৳350)</option>
-                            <option value="190">Half Plate (৳190)</option>
+                            <option value="350">Full Plate ( ৳ 350)</option>
+                            <option value="190">Half Plate ( ৳ 190)</option>
                         </select>
                     </div>
                     <div class="product-price-action">
-                        <span class="product-base-price dynamic-render-price" data-base-price="350">৳350</span>
+                        <span class="product-base-price dynamic-render-price" data-base-price="350"> ৳ 350</span>
                         <div class="cart-action-group">
                             <div class="qty-selector">
-                                <button class="qty-btn" onclick="updateLocalQty(this, -1)">-</button>
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
                                 <input type="text" class="qty-input" value="1" readonly>
-                                <button class="qty-btn" onclick="updateLocalQty(this, 1)">+</button>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
                             </div>
                             <button class="btn-cart" onclick="addToCart(this, 'Chittagong Kala Bhuna')">Add</button>
                         </div>
@@ -136,36 +241,492 @@
                 </div>
             </div>
 
-            <!-- Product Item 3 -->
-            <div class="product-item-card drinks" data-category="drinks">
-                <img src="https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400" alt="Fresh Juice">
+            <div class="product-item-card lunch dinner">
+                <img src="https://images.unsplash.com/photo-1633945274405-b6c8069047b0?auto=format&fit=crop&q=80&w=400" alt="Beef Tehari">
                 <div class="product-card-body">
-                    <h3>Fresh Mint Lemonade</h3>
-                    <p>Refreshing summer drink with fresh mint and lemon.</p>
+                    <h3>Old Dhaka Beef Tehari</h3>
+                    <p>Mustard oil cooked chinigura rice with small tender beef pieces.</p>
                     <div class="product-dropdown-control">
-                        <label>Size:</label>
+                        <label>Portion:</label>
                         <select class="variant-select" onchange="updateDynamicPricing(this)">
-                            <option value="120">Regular (৳120)</option>
-                            <option value="180">Large (৳180)</option>
+                            <option value="220">Full Plate ( ৳ 220)</option>
+                            <option value="120">Half Plate ( ৳ 120)</option>
                         </select>
                     </div>
                     <div class="product-price-action">
-                        <span class="product-base-price dynamic-render-price" data-base-price="120">৳120</span>
+                        <span class="product-base-price dynamic-render-price" data-base-price="220"> ৳ 220</span>
                         <div class="cart-action-group">
                             <div class="qty-selector">
-                                <button class="qty-btn" onclick="updateLocalQty(this, -1)">-</button>
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
                                 <input type="text" class="qty-input" value="1" readonly>
-                                <button class="qty-btn" onclick="updateLocalQty(this, 1)">+</button>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
                             </div>
-                            <button class="btn-cart" onclick="addToCart(this, 'Fresh Mint Lemonade')">Add</button>
+                            <button class="btn-cart" onclick="addToCart(this, 'Old Dhaka Beef Tehari')">Add</button>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <div class="product-item-card desserts">
+                <span class="badge-popular badge-bestseller">Must Try</span>
+                <img src="0ddd6c12-16ec-45c4-b487-b80951e661d3.png" alt="Golap Jam" onerror="this.src='https://images.unsplash.com/photo-1589115795325-1eec578961fb?w=400'">
+                <div class="product-card-body">
+                    <h3>Premium Golap Jam</h3>
+                    <p>Soft, juicy, deep-fried milk balls dipped in sweet sugar syrup.</p>
+                    <div class="product-dropdown-control">
+                        <label>Weight:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="150">250 gm ( ৳ 150)</option>
+                            <option value="300">500 gm ( ৳ 300)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="150"> ৳ 150</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Premium Golap Jam')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card desserts">
+                <img src="5c9a67e3-cf74-4c1d-8284-d8286d70bffe.png" alt="Kalo Jam" onerror="this.src='https://images.unsplash.com/photo-1589115795325-1eec578961fb?w=400'">
+                <div class="product-card-body">
+                    <h3>Traditional Kalo Jam</h3>
+                    <p>Dense, delicious traditional dark-fried Bengali sweet delicacy.</p>
+                    <div class="product-dropdown-control">
+                        <label>Weight:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="160">250 gm ( ৳ 160)</option>
+                            <option value="320">500 gm ( ৳ 320)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="160"> ৳ 160</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Traditional Kalo Jam')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card desserts">
+                <img src="32592ad6-fe80-41e8-a7a3-872e94c0bc1c.png" alt="Roshogolla" onerror="this.src='https://images.unsplash.com/photo-1589115795325-1eec578961fb?w=400'">
+                <div class="product-card-body">
+                    <h3>Spongy Roshogolla</h3>
+                    <p>Light, sweet, circular cottage cheese dumplings boiled in syrup.</p>
+                    <div class="product-dropdown-control">
+                        <label>Weight:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="140">250 gm ( ৳ 140)</option>
+                            <option value="280">500 gm ( ৳ 280)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="140"> ৳ 140</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Spongy Roshogolla')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card desserts">
+                <img src="74221d1f-efce-452f-8731-e368a05f2e5b.png" alt="Sondesh" onerror="this.src='https://images.unsplash.com/photo-1589115795325-1eec578961fb?w=400'">
+                <div class="product-card-body">
+                    <h3>Premium Sondesh</h3>
+                    <p>Authentic condensed milk sweet crafted with rich date jaggery.</p>
+                    <div class="product-dropdown-control">
+                        <label>Quantity:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="180">4 Pieces ( ৳ 180)</option>
+                            <option value="360">8 Pieces ( ৳ 360)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="180"> ৳ 180</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Premium Sondesh')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card desserts">
+                <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=400" alt="Chocolate Cake">
+                <div class="product-card-body">
+                    <h3>Dark Chocolate Cake</h3>
+                    <p>Rich, moist chocolate cake layers with velvety chocolate frosting.</p>
+                    <div class="product-dropdown-control">
+                        <label>Size:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="150">1 Slice ( ৳ 150)</option>
+                            <option value="800">1 Pound ( ৳ 800)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="150"> ৳ 150</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Dark Chocolate Cake')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card desserts">
+                <img src="0f144ebe-252c-474d-b4fd-5b2fb102b76b.png" alt="Sponge Cake" onerror="this.src='https://images.unsplash.com/photo-1557308536-ee471ef2c390?w=400'">
+                <div class="product-card-body">
+                    <h3>Premium Sponge Cake</h3>
+                    <p>Super airy, light, fluffy cake baked with premium butter blends.</p>
+                    <div class="product-dropdown-control">
+                        <label>Size:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="120">1 Slice ( ৳ 120)</option>
+                            <option value="650">1 Pound ( ৳ 650)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="120"> ৳ 120</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Premium Sponge Cake')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card desserts">
+                <img src="efbacffe-7036-4fd0-beb4-43eafe0c7e00.png" alt="Vanilla Cake" onerror="this.src='https://images.unsplash.com/photo-1557308536-ee471ef2c390?w=400'">
+                <div class="product-card-body">
+                    <h3>Vanilla Bean Cake</h3>
+                    <p>Classic golden cake infused with rich pure aromatic vanilla bean extract.</p>
+                    <div class="product-dropdown-control">
+                        <label>Size:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="130">1 Slice ( ৳ 130)</option>
+                            <option value="700">1 Pound ( ৳ 700)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="130"> ৳ 130</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Vanilla Bean Cake')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card lunch dinner">
+                <span class="badge-popular">Appetizer</span>
+                <img src="https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&q=80&w=400" alt="Premium Hot Soup">
+                <div class="product-card-body">
+                    <h3>Premium Hot Soup</h3>
+                    <p>Rich Thai Clear Soup or Thick Chicken Corn Soup with herbs.</p>
+                    <div class="product-dropdown-control">
+                        <label>Flavor:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="150">Thai Clear ( ৳ 150)</option>
+                            <option value="130">Chicken Corn ( ৳ 130)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="150"> ৳ 150</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Premium Hot Soup')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card lunch dinner">
+                <img src="https://images.unsplash.com/photo-1505253758473-96b7015fcd40?auto=format&fit=crop&q=80&w=400" alt="Soft Tandoori Naan">
+                <div class="product-card-body">
+                    <h3>Soft Tandoori Naan</h3>
+                    <p>Traditional clay oven baked tandoori naan brushed with premium butter.</p>
+                    <div class="product-dropdown-control">
+                        <label>Type:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="40">Butter Naan ( ৳ 40)</option>
+                            <option value="60">Garlic Naan ( ৳ 60)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="40"> ৳ 40</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Soft Tandoori Naan')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card lunch dinner">
+                <span class="badge-popular"><i class="fa-solid fa-pepper-hot"></i> Hot & Spicy</span>
+                <img src="download (15).jpg" alt="Tom Yum Goong" onerror="this.src='https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400'">
+                <div class="product-card-body">
+                    <h3>Authentic Tom Yum Goong</h3>
+                    <p>World-famous spicy and sour Thai soup with fresh prawns and lemongrass.</p>
+                    <div class="product-dropdown-control">
+                        <label>Size:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="350">Regular Bowl ( ৳ 350)</option>
+                            <option value="600">Family Bowl ( ৳ 600)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="350"> ৳ 350</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Authentic Tom Yum Goong')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card lunch dinner">
+                <span class="badge-popular badge-bestseller">Must Try</span>
+                <img src="https://images.unsplash.com/photo-1559314809-0d155014e29e?auto=format&fit=crop&q=80&w=400" alt="Pad Thai">
+                <div class="product-card-body">
+                    <h3>Classic Pad Thai Noodles</h3>
+                    <p>Stir-fried rice noodles with eggs, peanuts, bean sprouts, and authentic sauce.</p>
+                    <div class="product-dropdown-control">
+                        <label>Flavor:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="250">Chicken Pad Thai ( ৳ 250)</option>
+                            <option value="300">Prawn Pad Thai ( ৳ 300)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="250"> ৳ 250</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Classic Pad Thai Noodles')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card lunch dinner">
+                <img src="https://images.unsplash.com/photo-1564834724105-918b73d1b9e0?auto=format&fit=crop&q=80&w=400" alt="Thai Basil Chicken">
+                <div class="product-card-body">
+                    <h3>Thai Basil Chicken (Kra Pao)</h3>
+                    <p>Minced chicken stir-fried with holy basil, garlic, and chilies.</p>
+                    <div class="product-dropdown-control">
+                        <label>Portion:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="280">1 Plate ( ৳ 280)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="280"> ৳ 280</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Thai Basil Chicken')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card lunch dinner">
+                <span class="badge-popular">Crowd Favorite</span>
+                <img src="https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&q=80&w=400" alt="Thai Fried Rice">
+                <div class="product-card-body">
+                    <h3>Special Thai Fried Rice</h3>
+                    <p>Aromatic jasmine rice tossed with egg, veggies, and special soy sauce.</p>
+                    <div class="product-dropdown-control">
+                        <label>Type:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="220">Chicken ( ৳ 220)</option>
+                            <option value="260">Mixed (Chicken+Prawn) ( ৳ 260)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="220"> ৳ 220</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Special Thai Fried Rice')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card drinks lunch dinner">
+                <span class="badge-popular">Digestive</span>
+                <img src="images (11).jpg" alt="Borhani" onerror="this.src='https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400'">
+                <div class="product-card-body">
+                    <h3>Traditional Borhani</h3>
+                    <p>Spicy, tangy signature yogurt drink infused with roasted spices.</p>
+                    <div class="product-dropdown-control">
+                        <label>Size:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="80">1 Glass ( ৳ 80)</option>
+                            <option value="300">1 Liter ( ৳ 300)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="80"> ৳ 80</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Traditional Borhani')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card drinks lunch dinner">
+                <span class="badge-popular">Chilled</span>
+                <img src="https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&q=80&w=400" alt="Coca-Cola">
+                <div class="product-card-body">
+                    <h3>Coca-Cola</h3>
+                    <p>Ice-cold refreshing classic Coca-Cola to perfectly complement your meal.</p>
+                    <div class="product-dropdown-control">
+                        <label>Size:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="20">250 ml ( ৳ 20)</option>
+                            <option value="50">500 ml ( ৳ 50)</option>
+                            <option value="75">1 Liter ( ৳ 75)</option>
+                            <option value="95">1.5 Liter ( ৳ 95)</option>
+                            <option value="110">2 Liter ( ৳ 110)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="20"> ৳ 20</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Coca-Cola')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card drinks lunch dinner">
+                <img src="7up.jpg" alt="7 Up" onerror="this.src='https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400'">
+                <div class="product-card-body">
+                    <h3>Refreshing 7 Up</h3>
+                    <p>Crisp, clean lemon-lime flavored carbonated soft drink.</p>
+                    <div class="product-dropdown-control">
+                        <label>Size:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="20">250 ml ( ৳ 20)</option>
+                            <option value="50">500 ml ( ৳ 50)</option>
+                            <option value="75">1 Liter ( ৳ 75)</option>
+                            <option value="95">1.5 Liter ( ৳ 95)</option>
+                            <option value="110">2 Liter ( ৳ 110)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="20"> ৳ 20</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Refreshing 7 Up')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card drinks lunch dinner">
+                <img src="mojo.jpg" alt="Mojo" onerror="this.src='https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400'">
+                <div class="product-card-body">
+                    <h3>Mojo</h3>
+                    <p>Popular local carbonated cola drink with a bold and refreshing taste.</p>
+                    <div class="product-dropdown-control">
+                        <label>Size:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="20">250 ml ( ৳ 20)</option>
+                            <option value="50">500 ml ( ৳ 50)</option>
+                            <option value="75">1 Liter ( ৳ 75)</option>
+                            <option value="95">1.5 Liter ( ৳ 95)</option>
+                            <option value="110">2 Liter ( ৳ 110)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="20"> ৳ 20</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Mojo')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </section>
 
-    <!-- Reservation Section -->
     <section id="reservation-section" class="reservation-section-wrapper">
         <div class="reservation-box-card">
             <div class="reservation-header">
@@ -196,19 +757,18 @@
         </div>
     </section>
 
-    <!-- Contact & Footer Section -->
     <section id="contact" style="padding: 50px 8%; text-align: center; background-color: #fff;">
         <div class="section-title-block" style="margin-bottom: 30px;">
             <h2 style="color: var(--brand-orange-accent); font-size: 28px;">Contact & Support</h2>
             <p style="color: var(--slate-muted); font-size: 14px; margin-top: 8px;">Have questions or special event requests? Reach out to us directly.</p>
         </div>
         <div class="centered-contact-flex">
-            <div class="contact-card" style="width: 250px; display:inline-block; margin:10px;">
+            <div class="contact-card" style="width: 250px; display:inline-block;">
                 <i class="fa-solid fa-phone" style="font-size: 24px; color: var(--brand-orange-accent); margin-bottom: 10px;"></i>
                 <h4>Call / WhatsApp</h4>
                 <p class="contact-highlight">+880 1998-453990</p>
             </div>
-            <div class="contact-card" style="width: 250px; display:inline-block; margin:10px;">
+            <div class="contact-card" style="width: 250px; display:inline-block;">
                 <i class="fa-solid fa-envelope" style="font-size: 24px; color: var(--brand-orange-accent); margin-bottom: 10px;"></i>
                 <h4>Email Us</h4>
                 <p>info@samisrestaurant.com</p>
@@ -220,9 +780,6 @@
         </div>
     </section>
 
-    <!-- ==================== FOODPANDA STYLE CART SYSTEM ==================== -->
-    
-    <!-- Floating Basket Button -->
     <div id="floating-cart" class="floating-basket-bar hidden" onclick="openFpSidebar()">
         <div class="cart-left">
             <div class="cart-icon-wrapper">
@@ -236,26 +793,17 @@
         </div>
     </div>
 
-    <!-- Right Sidebar Cart Modal (Foodpanda Style) -->
     <div id="fp-sidebar-overlay" class="fp-overlay" onclick="closeFpSidebar()"></div>
-    
     <div id="fp-sidebar" class="fp-sidebar">
-        <!-- Sidebar Header -->
         <div class="fp-header">
             <h2>Basket</h2>
             <button class="fp-close-btn" onclick="closeFpSidebar()"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
-        <!-- Sidebar Body (Scrollable) -->
         <div class="fp-body">
-            
-            <!-- Items Container -->
             <div class="fp-section-title">Your Order</div>
-            <div id="fp-cart-items-container">
-                <!-- Cart items will be injected here via JS -->
-            </div>
+            <div id="fp-cart-items-container"></div>
 
-            <!-- Delivery Info Section -->
             <div class="fp-section-title" style="margin-top: 25px;">Delivery Details</div>
             <div class="fp-delivery-card">
                 <div class="fp-input-group">
@@ -269,7 +817,6 @@
                 </div>
             </div>
 
-            <!-- Payment Method Section -->
             <div class="fp-section-title" style="margin-top: 25px;">Payment Method</div>
             <div class="fp-payment-options">
                 <label class="fp-pay-card active" onclick="selectFpPayment('cod', this)">
@@ -288,7 +835,6 @@
                 </label>
             </div>
 
-            <!-- Digital Payment / OTP Section -->
             <div id="fp-otp-section" class="fp-otp-container" style="display: none;">
                 <p class="otp-instruction">Enter your mobile wallet number to verify</p>
                 <div class="fp-input-group flex-row">
@@ -307,10 +853,8 @@
                     <p id="fp-otp-status" class="otp-status-text"></p>
                 </div>
             </div>
-
         </div>
 
-        <!-- Sticky Footer for Confirm Order -->
         <div class="fp-footer">
             <button class="fp-checkout-btn" onclick="submitFpOrder()">
                 <span class="btn-text">Confirm Order</span>
@@ -319,7 +863,6 @@
         </div>
     </div>
 
-    <!-- Order Success Notification Overlay -->
     <div id="orderSuccessOverlay" class="system-modal-backdrop">
         <div class="modal-card-container" style="text-align: center; padding: 40px; background:#fff; border-radius:12px; max-width:400px; margin: 100px auto;">
             <i class="fa-solid fa-circle-check" style="color: #27ae60; font-size: 60px; margin-bottom: 15px;"></i>

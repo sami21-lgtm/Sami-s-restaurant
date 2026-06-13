@@ -1,3 +1,14 @@
+// ==================== Image Preview ====================
+function previewOwnerImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('owner-profile-img').src = e.target.result;
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
 // ==================== Menu Filter ====================
 function filterMenu(category) {
     const allCards = document.querySelectorAll('.product-item-card');
@@ -14,14 +25,21 @@ function filterMenu(category) {
     });
 }
 
-// ==================== Quantity Controls (HTML Button sync) ====================
+// ==================== Quantity Controls (+ / - Functionality) ====================
 function updateQty(btn, delta) {
     const container = btn.closest('.qty-selector');
     const input = container.querySelector('.qty-input');
-    let val = parseInt(input.value) || 1;
-    val += delta;
+    
+    // Parse the value carefully
+    let val = parseInt(input.value);
+    if (isNaN(val)) val = 1;
+    
+    val += delta; // Add or subtract
+    
+    // Constraints: Min 1, Max 50
     if (val < 1) val = 1;
-    if (val > 99) val = 99;
+    if (val > 50) val = 50;
+    
     input.value = val;
 }
 
@@ -32,17 +50,6 @@ function updateDynamicPricing(selectEl) {
     const newPrice = selectEl.value;
     priceEl.textContent = ' ৳ ' + newPrice;
     priceEl.setAttribute('data-base-price', newPrice);
-}
-
-// ==================== Image Preview ====================
-function previewOwnerImage(input) {
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('owner-profile-img').src = e.target.result;
-        }
-        reader.readAsDataURL(input.files[0]);
-    }
 }
 
 // =========================================================================
@@ -61,9 +68,10 @@ function addToCart(btnEl, itemName) {
     const variantSelect = card.querySelector('.variant-select');
     
     const price = parseInt(priceEl.getAttribute('data-base-price'));
-    const qty = parseInt(qtyInput.value) || 1;
+    const qty = parseInt(qtyInput.value) || 1; // Take exact quantity user selected
     const variant = variantSelect ? variantSelect.options[variantSelect.selectedIndex].text : 'Regular';
     
+    // If exact item + variant already exists, just increase quantity
     const existingIndex = cart.findIndex(item => item.name === itemName && item.variant === variant);
     if (existingIndex > -1) {
         cart[existingIndex].qty += qty;
@@ -71,9 +79,11 @@ function addToCart(btnEl, itemName) {
         cart.push({ id: Date.now(), name: itemName, variant: variant, price: price, qty: qty });
     }
     
+    // Reset the quantity input back to 1 after adding
     qtyInput.value = 1; 
+    
     showToast(`🛒 ${qty}x ${itemName} added to basket!`);
-    renderCartData();
+    renderCartData(); // Update the sidebar cart immediately
 }
 
 // ==================== Render Core UI based on Cart Data ====================
@@ -82,6 +92,7 @@ function renderCartData() {
     let totalPrice = 0;
     let itemsHtml = '';
 
+    // Loop through cart array
     cart.forEach(item => {
         totalItems += item.qty;
         totalPrice += (item.price * item.qty);
@@ -99,13 +110,14 @@ function renderCartData() {
                     <span>${item.qty}</span>
                     <button onclick="adjustCartQty(${item.id}, 1)">+</button>
                 </div>
-                <button class="fp-delete-btn" onclick="deleteCartItem(${item.id})" title="Delete Item">
+                <button class="fp-delete-btn" onclick="deleteCartItem(${item.id})" title="Remove Item">
                     <i class="fa-solid fa-trash-can"></i>
                 </button>
             </div>
         </div>`;
     });
 
+    // Update Floating Basket Button
     const floatingBar = document.getElementById('floating-cart');
     document.getElementById('cart-item-count').textContent = totalItems;
     document.getElementById('cart-total-price').textContent = '৳' + totalPrice;
@@ -114,9 +126,10 @@ function renderCartData() {
         floatingBar.classList.remove('hidden');
     } else {
         floatingBar.classList.add('hidden');
-        closeFpSidebar();
+        closeFpSidebar(); // Automatically close sidebar if cart becomes empty
     }
 
+    // Inject into Sidebar HTML
     const container = document.getElementById('fp-cart-items-container');
     if (cart.length === 0) {
         container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">Your basket is empty. Add some delicious food!</p>';
@@ -124,9 +137,11 @@ function renderCartData() {
         container.innerHTML = itemsHtml;
     }
     
+    // Update Checkout sticky button total
     document.getElementById('fp-sticky-total').textContent = '৳' + totalPrice;
 }
 
+// Adjust quantity from inside the sidebar
 function adjustCartQty(itemId, delta) {
     const item = cart.find(i => i.id === itemId);
     if (!item) return;
@@ -139,9 +154,12 @@ function adjustCartQty(itemId, delta) {
     renderCartData();
 }
 
+// Delete whole item from sidebar
 function deleteCartItem(itemId) {
     const item = cart.find(i => i.id === itemId);
-    if(item) { showToast(`🗑️ ${item.name} removed from basket`); }
+    if(item) { 
+        showToast(`🗑️ ${item.name} removed from basket`); 
+    }
     cart = cart.filter(i => i.id !== itemId);
     renderCartData();
 }
@@ -227,8 +245,14 @@ function submitFpOrder() {
     if (paymentMethod === 'digital' && !fpOtpVerified) { showToast('⚠️ Please verify your bKash/Nagad number with OTP'); return; }
 
     closeFpSidebar();
-    document.getElementById('orderSuccessOverlay').classList.add('active');
     
+    const successModal = document.getElementById('orderSuccessOverlay');
+    if (successModal) {
+        successModal.style.display = 'flex'; // Trigger display
+        successModal.classList.add('active');
+    }
+    
+    // Reset Data
     cart = [];
     renderCartData();
     document.getElementById('fp-custName').value = '';
@@ -241,16 +265,24 @@ function submitFpOrder() {
     const boxes = document.querySelectorAll('.fp-otp-box');
     boxes.forEach(b => { b.value = ''; b.disabled = false; b.style.borderColor = '#e0e0e0'; });
     const sendBtn = document.getElementById('fp-sendBtn');
-    sendBtn.innerHTML = 'Send OTP'; sendBtn.classList.remove('success');
+    if(sendBtn){
+        sendBtn.innerHTML = 'Send OTP'; 
+        sendBtn.classList.remove('success');
+    }
 }
 
 function closeOrderSuccess() {
-    document.getElementById('orderSuccessOverlay').classList.remove('active');
+    const successModal = document.getElementById('orderSuccessOverlay');
+    if (successModal) {
+        successModal.style.display = 'none';
+        successModal.classList.remove('active');
+    }
 }
 
 // ==================== Toast Notification ====================
 function showToast(message) {
     const toast = document.getElementById('toast-notification');
+    if(!toast) return;
     toast.textContent = message;
     toast.classList.add('show-alert');
     setTimeout(() => { toast.classList.remove('show-alert'); }, 2800);

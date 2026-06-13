@@ -1,32 +1,35 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vee's Restaurant | Premium Dining</title>
+    <title>Sami's Restaurant | Premium Dining</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+    <!-- ======== Promo Banner ======== -->
     <div class="promo-discount-bar">
         Enjoy 20% off on all authentic Bangladeshi dishes this weekend! Use code: DHAKA20
     </div>
-    
+
+    <!-- ======== Sticky Header ======== -->
     <header>
-        <div class="logo">Vee's Restaurant</div>
+        <div class="logo">Sami's Restaurant</div>
         <nav>
             <a href="#home">Home</a>
             <a href="#about">About</a>
             <a href="#menu">Menu</a>
-            <a href="#gallery">Gallery</a>
             <a href="#contact">Contact</a>
         </nav>
         <button class="btn-reserve" onclick="window.location.href='#reservation-section'">Reserve Table</button>
     </header>
 
+    <!-- ======== Hero Section ======== -->
     <section id="home" class="hero-viewport" style="padding: 0;">
         <div class="hero-overlay-content">
-            <h1>Vee's Restaurant</h1>
+            <h1>Sami's Restaurant</h1>
             <p>Exquisite flavors, warm hospitality in the heart of Dhaka's culinary scene. Authentic Bangladeshi warmth and global flair.</p>
             <div class="hero-action-btns">
                 <button class="btn-primary" onclick="window.location.href='#menu'">Explore Menu</button>
@@ -35,6 +38,7 @@
         </div>
     </section>
 
+    <!-- ======== About / Owner Section (No Camera/Upload) ======== -->
     <section id="about" class="about-story-section">
         <div class="section-title-block">
             <h2>Our Story & Leadership</h2>
@@ -43,12 +47,7 @@
         <div class="chefs-flex-row">
             <div class="chef-profile-card owner-highlight">
                 <div class="profile-image-wrapper">
-                    <img id="owner-profile-img" src="Md. EmTIAZ hOSSAIN sAMI LOGO.png" alt="Md. Emtiaz Hossain Sami">
-                    <label for="owner-upload-input" class="image-upload-overlay" title="Upload Your Custom Photo">
-                        <i class="fa-solid fa-camera"></i>
-                        <span>Change</span>
-                    </label>
-                    <input type="file" id="owner-upload-input" accept="image/*" onchange="previewOwnerImage(this)">
+                    <img src="Md. EmTIAZ hOSSAIN sAMI LOGO.png" alt="Md. Emtiaz Hossain Sami">
                 </div>
                 <h3>Md. Emtiaz Hossain Sami</h3>
                 <p class="chef-role-tag">Owner & Founder</p>
@@ -65,6 +64,7 @@
         </div>
     </section>
 
+    <!-- ======== Menu Section ======== -->
     <section id="menu">
         <div class="section-title-block">
             <h4 class="sub-heading-accent">Our Signature Menu</h4>
@@ -78,8 +78,10 @@
             <button class="filter-tab-btn" onclick="filterMenu('drinks')">Drinks</button>
             <button class="filter-tab-btn" onclick="filterMenu('desserts')">Desserts & Cakes</button>
         </div>
-        
+
         <div class="menu-products-container">
+
+            <!-- ===== Breakfast ===== -->
             <div class="product-item-card breakfast">
                 <img src="images (12).jpg" alt="Soft Ruti / Paratha">
                 <div class="product-card-body">
@@ -185,6 +187,7 @@
                 </div>
             </div>
 
+            <!-- ===== Lunch ===== -->
             <div class="product-item-card lunch">
                 <span class="badge-popular badge-bestseller"><i class="fa-solid fa-star"></i> Bestseller</span>
                 <img src="images (14).jpg" alt="Mutton Kacchi">
@@ -265,6 +268,167 @@
                 </div>
             </div>
 
+            <!-- ===== Dinner / Thai ===== -->
+            <div class="product-item-card lunch dinner">
+                <span class="badge-popular">Appetizer</span>
+                <img src="https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&q=80&w=400" alt="Premium Hot Soup">
+                <div class="product-card-body">
+                    <h3>Premium Hot Soup</h3>
+                    <p>Rich Thai Clear Soup or Thick Chicken Corn Soup with herbs.</p>
+                    <div class="product-dropdown-control">
+                        <label>Flavor:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="150">Thai Clear (৳150)</option>
+                            <option value="130">Chicken Corn (৳130)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="150">৳150</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Premium Hot Soup')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card lunch dinner">
+                <img src="https://images.unsplash.com/photo-1505253758473-96b7015fcd40?auto=format&fit=crop&q=80&w=400" alt="Soft Tandoori Naan">
+                <div class="product-card-body">
+                    <h3>Soft Tandoori Naan</h3>
+                    <p>Traditional clay oven baked tandoori naan brushed with premium butter.</p>
+                    <div class="product-dropdown-control">
+                        <label>Type:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="40">Butter Naan (৳40)</option>
+                            <option value="60">Garlic Naan (৳60)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="40">৳40</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Soft Tandoori Naan')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card lunch dinner">
+                <span class="badge-popular"><i class="fa-solid fa-pepper-hot"></i> Hot & Spicy</span>
+                <img src="download (15).jpg" alt="Tom Yum Goong">
+                <div class="product-card-body">
+                    <h3>Authentic Tom Yum Goong</h3>
+                    <p>World-famous spicy and sour Thai soup with fresh prawns and lemongrass.</p>
+                    <div class="product-dropdown-control">
+                        <label>Size:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="350">Regular Bowl (৳350)</option>
+                            <option value="600">Family Bowl (৳600)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="350">৳350</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Authentic Tom Yum Goong')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card lunch dinner">
+                <span class="badge-popular badge-bestseller">Must Try</span>
+                <img src="https://images.unsplash.com/photo-1559314809-0d155014e29e?auto=format&fit=crop&q=80&w=400" alt="Pad Thai">
+                <div class="product-card-body">
+                    <h3>Classic Pad Thai Noodles</h3>
+                    <p>Stir-fried rice noodles with eggs, peanuts, bean sprouts, and authentic sauce.</p>
+                    <div class="product-dropdown-control">
+                        <label>Flavor:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="250">Chicken Pad Thai (৳250)</option>
+                            <option value="300">Prawn Pad Thai (৳300)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="250">৳250</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Classic Pad Thai Noodles')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card lunch dinner">
+                <img src="https://images.unsplash.com/photo-1564834724105-918b73d1b9e0?auto=format&fit=crop&q=80&w=400" alt="Thai Basil Chicken">
+                <div class="product-card-body">
+                    <h3>Thai Basil Chicken (Kra Pao)</h3>
+                    <p>Minced chicken stir-fried with holy basil, garlic, and chilies.</p>
+                    <div class="product-dropdown-control">
+                        <label>Portion:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="280">1 Plate (৳280)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="280">৳280</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Thai Basil Chicken')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-item-card lunch dinner">
+                <span class="badge-popular">Crowd Favorite</span>
+                <img src="https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&q=80&w=400" alt="Thai Fried Rice">
+                <div class="product-card-body">
+                    <h3>Special Thai Fried Rice</h3>
+                    <p>Aromatic jasmine rice tossed with egg, veggies, and special soy sauce.</p>
+                    <div class="product-dropdown-control">
+                        <label>Type:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="220">Chicken (৳220)</option>
+                            <option value="260">Mixed (Chicken+Prawn) (৳260)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="220">৳220</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Special Thai Fried Rice')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Desserts ===== -->
             <div class="product-item-card desserts">
                 <span class="badge-popular badge-bestseller">Must Try</span>
                 <img src="0ddd6c12-16ec-45c4-b487-b80951e661d3.png" alt="Golap Jam">
@@ -448,165 +612,7 @@
                 </div>
             </div>
 
-            <div class="product-item-card lunch dinner">
-                <span class="badge-popular">Appetizer</span>
-                <img src="https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&q=80&w=400" alt="Premium Hot Soup">
-                <div class="product-card-body">
-                    <h3>Premium Hot Soup</h3>
-                    <p>Rich Thai Clear Soup or Thick Chicken Corn Soup with herbs.</p>
-                    <div class="product-dropdown-control">
-                        <label>Flavor:</label>
-                        <select class="variant-select" onchange="updateDynamicPricing(this)">
-                            <option value="150">Thai Clear (৳150)</option>
-                            <option value="130">Chicken Corn (৳130)</option>
-                        </select>
-                    </div>
-                    <div class="product-price-action">
-                        <span class="product-base-price dynamic-render-price" data-base-price="150">৳150</span>
-                        <div class="cart-action-group">
-                            <div class="qty-selector">
-                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
-                                <input type="text" class="qty-input" value="1" readonly>
-                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
-                            </div>
-                            <button class="btn-cart" onclick="addToCart(this, 'Premium Hot Soup')">Add</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-item-card lunch dinner">
-                <img src="https://images.unsplash.com/photo-1505253758473-96b7015fcd40?auto=format&fit=crop&q=80&w=400" alt="Soft Tandoori Naan">
-                <div class="product-card-body">
-                    <h3>Soft Tandoori Naan</h3>
-                    <p>Traditional clay oven baked tandoori naan brushed with premium butter.</p>
-                    <div class="product-dropdown-control">
-                        <label>Type:</label>
-                        <select class="variant-select" onchange="updateDynamicPricing(this)">
-                            <option value="40">Butter Naan (৳40)</option>
-                            <option value="60">Garlic Naan (৳60)</option>
-                        </select>
-                    </div>
-                    <div class="product-price-action">
-                        <span class="product-base-price dynamic-render-price" data-base-price="40">৳40</span>
-                        <div class="cart-action-group">
-                            <div class="qty-selector">
-                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
-                                <input type="text" class="qty-input" value="1" readonly>
-                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
-                            </div>
-                            <button class="btn-cart" onclick="addToCart(this, 'Soft Tandoori Naan')">Add</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-item-card lunch dinner">
-                <span class="badge-popular"><i class="fa-solid fa-pepper-hot"></i> Hot & Spicy</span>
-                <img src="https://images.unsplash.com/photo-1548946526-f69e2424cf45?auto=format&fit=crop&q=80&w=400" alt="Tom Yum Goong">
-                <div class="product-card-body">
-                    <h3>Authentic Tom Yum Goong</h3>
-                    <p>World-famous spicy and sour Thai soup with fresh prawns and lemongrass.</p>
-                    <div class="product-dropdown-control">
-                        <label>Size:</label>
-                        <select class="variant-select" onchange="updateDynamicPricing(this)">
-                            <option value="350">Regular Bowl (৳350)</option>
-                            <option value="600">Family Bowl (৳600)</option>
-                        </select>
-                    </div>
-                    <div class="product-price-action">
-                        <span class="product-base-price dynamic-render-price" data-base-price="350">৳350</span>
-                        <div class="cart-action-group">
-                            <div class="qty-selector">
-                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
-                                <input type="text" class="qty-input" value="1" readonly>
-                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
-                            </div>
-                            <button class="btn-cart" onclick="addToCart(this, 'Authentic Tom Yum Goong')">Add</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-item-card lunch dinner">
-                <span class="badge-popular badge-bestseller">Must Try</span>
-                <img src="https://images.unsplash.com/photo-1559314809-0d155014e29e?auto=format&fit=crop&q=80&w=400" alt="Pad Thai">
-                <div class="product-card-body">
-                    <h3>Classic Pad Thai Noodles</h3>
-                    <p>Stir-fried rice noodles with eggs, peanuts, bean sprouts, and authentic sauce.</p>
-                    <div class="product-dropdown-control">
-                        <label>Flavor:</label>
-                        <select class="variant-select" onchange="updateDynamicPricing(this)">
-                            <option value="250">Chicken Pad Thai (৳250)</option>
-                            <option value="300">Prawn Pad Thai (৳300)</option>
-                        </select>
-                    </div>
-                    <div class="product-price-action">
-                        <span class="product-base-price dynamic-render-price" data-base-price="250">৳250</span>
-                        <div class="cart-action-group">
-                            <div class="qty-selector">
-                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
-                                <input type="text" class="qty-input" value="1" readonly>
-                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
-                            </div>
-                            <button class="btn-cart" onclick="addToCart(this, 'Classic Pad Thai Noodles')">Add</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-item-card lunch dinner">
-                <img src="https://images.unsplash.com/photo-1564834724105-918b73d1b9e0?auto=format&fit=crop&q=80&w=400" alt="Thai Basil Chicken">
-                <div class="product-card-body">
-                    <h3>Thai Basil Chicken (Kra Pao)</h3>
-                    <p>Minced chicken stir-fried with holy basil, garlic, and chilies.</p>
-                    <div class="product-dropdown-control">
-                        <label>Portion:</label>
-                        <select class="variant-select" onchange="updateDynamicPricing(this)">
-                            <option value="280">1 Plate (৳280)</option>
-                        </select>
-                    </div>
-                    <div class="product-price-action">
-                        <span class="product-base-price dynamic-render-price" data-base-price="280">৳280</span>
-                        <div class="cart-action-group">
-                            <div class="qty-selector">
-                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
-                                <input type="text" class="qty-input" value="1" readonly>
-                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
-                            </div>
-                            <button class="btn-cart" onclick="addToCart(this, 'Thai Basil Chicken')">Add</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-item-card lunch dinner">
-                <span class="badge-popular">Crowd Favorite</span>
-                <img src="https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&q=80&w=400" alt="Thai Fried Rice">
-                <div class="product-card-body">
-                    <h3>Special Thai Fried Rice</h3>
-                    <p>Aromatic jasmine rice tossed with egg, veggies, and special soy sauce.</p>
-                    <div class="product-dropdown-control">
-                        <label>Type:</label>
-                        <select class="variant-select" onchange="updateDynamicPricing(this)">
-                            <option value="220">Chicken (৳220)</option>
-                            <option value="260">Mixed (Chicken+Prawn) (৳260)</option>
-                        </select>
-                    </div>
-                    <div class="product-price-action">
-                        <span class="product-base-price dynamic-render-price" data-base-price="220">৳220</span>
-                        <div class="cart-action-group">
-                            <div class="qty-selector">
-                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
-                                <input type="text" class="qty-input" value="1" readonly>
-                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
-                            </div>
-                            <button class="btn-cart" onclick="addToCart(this, 'Special Thai Fried Rice')">Add</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+            <!-- ===== Drinks ===== -->
             <div class="product-item-card drinks lunch dinner">
                 <span class="badge-popular">Digestive</span>
                 <img src="images (11).jpg" alt="Borhani">
@@ -725,61 +731,66 @@
         </div>
     </section>
 
-    <section id="reservation-section" style="padding: 60px 8%; background-color: #fdfdfd; border-top: 1px solid #eee;">
-        <div class="reservation-box-wrapper">
-            <h2 style="color: var(--brand-orange-accent); margin-bottom: 10px; font-size: 28px;">Reserve Your Table</h2>
-            <p style="color: var(--slate-muted); font-size: 14px; margin-bottom: 25px;">Book a table in advance to enjoy a premium dining experience without the wait.</p>
-            
-            <form onsubmit="event.preventDefault(); alert('Your table reservation request has been received successfully! We will contact you soon.'); this.reset();">
-                <div class="reservation-form-grid">
-                    <div>
+    <!-- ======== Reservation Section ======== -->
+    <section id="reservation-section" class="reservation-section-wrapper">
+        <div class="reservation-box-card">
+            <div class="reservation-header">
+                <h2>Reserve Your Table</h2>
+                <p>Book a table in advance to enjoy a premium dining experience without the wait.</p>
+            </div>
+            <form class="reservation-form" onsubmit="event.preventDefault(); showToast('Reservation confirmed! We will contact you shortly.'); this.reset();">
+                <div class="form-grid">
+                    <div class="input-wrapper">
                         <label>Full Name</label>
                         <input type="text" required placeholder="Your Name">
                     </div>
-                    <div>
+                    <div class="input-wrapper">
                         <label>Phone Number</label>
                         <input type="tel" required placeholder="017XXXXXXXX">
                     </div>
-                    <div>
+                    <div class="input-wrapper">
                         <label>Date & Time</label>
                         <input type="datetime-local" required>
                     </div>
-                    <div>
+                    <div class="input-wrapper">
                         <label>Number of Guests</label>
                         <input type="number" min="1" required placeholder="E.g., 4">
                     </div>
                 </div>
-                <button type="submit" class="btn-primary" style="margin-top: 25px; width: 100%; padding: 14px; font-size: 16px;">Confirm Reservation</button>
+                <button type="submit" class="btn-primary btn-full-width">Confirm Reservation</button>
             </form>
         </div>
     </section>
 
-    <section id="contact" style="padding: 50px 8%; text-align: center; background-color: #fff;">
-        <div class="section-title-block" style="margin-bottom: 30px;">
+    <!-- ======== Contact Section ======== -->
+    <section id="contact" class="contact-section">
+        <div class="section-title-block">
             <h2 style="color: var(--brand-orange-accent); font-size: 28px;">Contact & Support</h2>
             <p style="color: var(--slate-muted); font-size: 14px; margin-top: 8px;">Have questions or special event requests? Reach out to us directly.</p>
         </div>
-        
-        <div class="centered-contact-flex">
-            <div class="contact-card" style="width: 250px;">
-                <i class="fa-solid fa-phone" style="font-size: 24px; color: var(--brand-orange-accent); margin-bottom: 10px;"></i>
+        <div class="contact-flex-row">
+            <div class="contact-card">
+                <i class="fa-solid fa-phone"></i>
                 <h4>Call / WhatsApp</h4>
                 <p class="contact-highlight">+880 1998-453990</p>
             </div>
-            <div class="contact-card" style="width: 250px;">
-                <i class="fa-solid fa-envelope" style="font-size: 24px; color: var(--brand-orange-accent); margin-bottom: 10px;"></i>
+            <div class="contact-card">
+                <i class="fa-solid fa-envelope"></i>
                 <h4>Email Us</h4>
                 <p>info@veesrestaurant.com</p>
             </div>
         </div>
-        
-        <div style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 20px;">
-            <p style="color: #666; font-size: 14px;">&copy; 2026 Vee's Restaurant. All Rights Reserved.</p>
-            <p style="color: #666; font-size: 14px; margin-top: 5px;">Proprietor: <strong style="color: #333;">Md. Emtiaz Hossain Sami</strong></p>
-        </div>
     </section>
 
-    <div id="floating-cart" class="floating-cart hidden" onclick="toggleCheckoutModal(true)">
+    <!-- ======== Footer ======== -->
+    <footer class="premium-centered-footer">
+        <div class="footer-divider-line"></div>
+        <p class="copyright-text">&copy; 2026 Sami's Restaurant. All Rights Reserved.</p>
+        <p class="proprietor-tag">Proprietor: <span>Md. Emtiaz Hossain Sami</span></p>
+    </footer>
+
+    <!-- ======== Floating Cart Bar ======== -->
+    <div id="floating-cart" class="floating-basket-bar hidden" onclick="openCartPanel()">
         <div class="cart-left">
             <div class="cart-icon-wrapper">
                 <i class="fa-solid fa-basket-shopping"></i>
@@ -787,63 +798,194 @@
             </div>
             <span class="cart-view-text">View your basket</span>
         </div>
-        <div class="cart-right">
-            <span id="cart-total-price">৳0</span>
+        <span id="cart-total-price">৳0</span>
+    </div>
+
+    <!-- ======== Foodpanda-Style Cart Slide Panel ======== -->
+    <div class="cart-overlay" id="cartOverlay" onclick="closeCartPanel()"></div>
+    <div class="cart-slide-panel" id="cartSlidePanel">
+        <div class="cart-panel-header">
+            <h2><i class="fa-solid fa-basket-shopping"></i> Your Basket</h2>
+            <button class="cart-close-btn" onclick="closeCartPanel()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="cart-panel-body" id="cartPanelBody">
+            <div class="cart-empty-state">
+                <i class="fa-solid fa-basket-shopping"></i>
+                <p>Your basket is empty</p>
+            </div>
+        </div>
+        <div class="cart-panel-footer" id="cartPanelFooter" style="display: none;">
+            <div class="cart-summary-row">
+                <span>Subtotal</span>
+                <span id="cartSubtotal">৳0</span>
+            </div>
+            <div class="cart-summary-row">
+                <span>Delivery Fee</span>
+                <span>৳0</span>
+            </div>
+            <div class="cart-summary-total">
+                <span>Total</span>
+                <span id="cartGrandTotal">৳0</span>
+            </div>
+            <button class="btn-go-checkout" onclick="openCheckout()">
+                <i class="fa-solid fa-lock"></i> Go to Checkout
+            </button>
         </div>
     </div>
 
-    <div id="checkoutModal" class="system-modal-backdrop">
-        <div class="modal-card-container">
-            <span class="modal-dismiss-trigger" onclick="toggleCheckoutModal(false)">&times;</span>
-            <h2 style="color: var(--dark-charcoal); margin-bottom: 5px;">Your Basket</h2>
-            <p style="font-size: 13px; color: var(--slate-muted); margin-bottom: 20px;">Review your premium selections below and confirm shipment setup.</p>
-            
-            <div class="checkout-summary-box">
-                <div id="checkout-items-list">
+    <!-- ======== Checkout Modal ======== -->
+    <div class="checkout-overlay" id="checkoutOverlay">
+        <div class="checkout-modal-card">
+            <div class="checkout-modal-header">
+                <h2><i class="fa-solid fa-bag-shopping"></i> Checkout</h2>
+                <button class="checkout-dismiss" onclick="closeCheckout()">&times;</button>
+            </div>
+            <div class="checkout-modal-body">
+                <div class="checkout-items-summary">
+                    <div id="checkoutItemsList"></div>
+                    <div class="checkout-total-line">
+                        <span>Total</span>
+                        <span id="checkoutTotalVal">৳0</span>
                     </div>
-                <div class="summary-total-row">
-                    <span>Grand Total:</span>
-                    <span id="summary-total-val" style="color: #d70f64; font-weight: 800;">৳0</span>
                 </div>
+
+                <form id="orderCheckoutForm" onsubmit="handleOrderSubmission(event)">
+                    <div class="checkout-field">
+                        <label>Full Name *</label>
+                        <input type="text" id="custName" required placeholder="Md. Emtiaz Hossain">
+                    </div>
+                    <div class="checkout-field">
+                        <label>Phone Number *</label>
+                        <input type="tel" id="custPhone" required placeholder="017XXXXXXXX">
+                    </div>
+                    <div class="checkout-field">
+                        <label>Delivery Address *</label>
+                        <textarea id="custAddress" rows="2" required placeholder="House, Road, Area Details..."></textarea>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="checkout-field">
+                        <label>Payment Method</label>
+                        <div class="payment-method-group">
+                            <div class="payment-option bkash selected" onclick="selectPayment('bkash', this)">
+                                <input type="radio" name="payment" value="bkash" checked>
+                                <div class="payment-option-icon"><i class="fa-solid fa-wallet"></i></div>
+                                <div class="payment-option-label">bKash</div>
+                            </div>
+                            <div class="payment-option nagad" onclick="selectPayment('nagad', this)">
+                                <input type="radio" name="payment" value="nagad">
+                                <div class="payment-option-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
+                                <div class="payment-option-label">Nagad</div>
+                            </div>
+                            <div class="payment-option cod" onclick="selectPayment('cod', this)">
+                                <input type="radio" name="payment" value="cod">
+                                <div class="payment-option-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+                                <div class="payment-option-label">Cash</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- bKash Fields -->
+                    <div class="mobile-banking-fields active" id="bkashFields">
+                        <div class="banking-header bkash-header">
+                            <i class="fa-solid fa-wallet"></i>
+                            <span>Pay with bKash</span>
+                        </div>
+                        <div class="checkout-field">
+                            <label>bKash Number *</label>
+                            <div class="mobile-number-input">
+                                <span class="country-code">+880</span>
+                                <input type="tel" id="bkashNumber" placeholder="1XXXXXXXXX" maxlength="10">
+                            </div>
+                        </div>
+                        <div class="otp-section" id="bkashOtpSection" style="display: none;">
+                            <div class="otp-info-row">
+                                <i class="fa-solid fa-shield-halved"></i>
+                                <span>Verification code sent to <strong id="bkashOtpNumber"></strong></span>
+                            </div>
+                            <div class="checkout-field" style="margin-bottom: 0;">
+                                <label>Enter OTP *</label>
+                                <div class="otp-input-row">
+                                    <input type="text" class="otp-digit" maxlength="1" data-otp-group="bkash" oninput="handleOtpInput(this)" onkeydown="handleOtpKeydown(event, this)">
+                                    <input type="text" class="otp-digit" maxlength="1" data-otp-group="bkash" oninput="handleOtpInput(this)" onkeydown="handleOtpKeydown(event, this)">
+                                    <input type="text" class="otp-digit" maxlength="1" data-otp-group="bkash" oninput="handleOtpInput(this)" onkeydown="handleOtpKeydown(event, this)">
+                                    <input type="text" class="otp-digit" maxlength="1" data-otp-group="bkash" oninput="handleOtpInput(this)" onkeydown="handleOtpKeydown(event, this)">
+                                    <input type="text" class="otp-digit" maxlength="1" data-otp-group="bkash" oninput="handleOtpInput(this)" onkeydown="handleOtpKeydown(event, this)">
+                                    <input type="text" class="otp-digit" maxlength="1" data-otp-group="bkash" oninput="handleOtpInput(this)" onkeydown="handleOtpKeydown(event, this)">
+                                </div>
+                            </div>
+                            <div class="otp-timer-row">
+                                <span id="bkashOtpTimer">Resend code in <strong>60s</strong></span>
+                                <button type="button" class="otp-resend-btn" id="bkashResendBtn" style="display: none;" onclick="resendOtp('bkash')">Resend OTP</button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-send-otp" id="bkashSendOtpBtn" onclick="sendOtp('bkash')">
+                            <i class="fa-solid fa-paper-plane"></i> Send OTP to Verify
+                        </button>
+                    </div>
+
+                    <!-- Nagad Fields -->
+                    <div class="mobile-banking-fields" id="nagadFields">
+                        <div class="banking-header nagad-header">
+                            <i class="fa-solid fa-mobile-screen-button"></i>
+                            <span>Pay with Nagad</span>
+                        </div>
+                        <div class="checkout-field">
+                            <label>Nagad Number *</label>
+                            <div class="mobile-number-input">
+                                <span class="country-code">+880</span>
+                                <input type="tel" id="nagadNumber" placeholder="1XXXXXXXXX" maxlength="10">
+                            </div>
+                        </div>
+                        <div class="otp-section" id="nagadOtpSection" style="display: none;">
+                            <div class="otp-info-row">
+                                <i class="fa-solid fa-shield-halved"></i>
+                                <span>Verification code sent to <strong id="nagadOtpNumber"></strong></span>
+                            </div>
+                            <div class="checkout-field" style="margin-bottom: 0;">
+                                <label>Enter OTP *</label>
+                                <div class="otp-input-row">
+                                    <input type="text" class="otp-digit" maxlength="1" data-otp-group="nagad" oninput="handleOtpInput(this)" onkeydown="handleOtpKeydown(event, this)">
+                                    <input type="text" class="otp-digit" maxlength="1" data-otp-group="nagad" oninput="handleOtpInput(this)" onkeydown="handleOtpKeydown(event, this)">
+                                    <input type="text" class="otp-digit" maxlength="1" data-otp-group="nagad" oninput="handleOtpInput(this)" onkeydown="handleOtpKeydown(event, this)">
+                                    <input type="text" class="otp-digit" maxlength="1" data-otp-group="nagad" oninput="handleOtpInput(this)" onkeydown="handleOtpKeydown(event, this)">
+                                    <input type="text" class="otp-digit" maxlength="1" data-otp-group="nagad" oninput="handleOtpInput(this)" onkeydown="handleOtpKeydown(event, this)">
+                                    <input type="text" class="otp-digit" maxlength="1" data-otp-group="nagad" oninput="handleOtpInput(this)" onkeydown="handleOtpKeydown(event, this)">
+                                </div>
+                            </div>
+                            <div class="otp-timer-row">
+                                <span id="nagadOtpTimer">Resend code in <strong>60s</strong></span>
+                                <button type="button" class="otp-resend-btn" id="nagadResendBtn" style="display: none;" onclick="resendOtp('nagad')">Resend OTP</button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-send-otp" id="nagadSendOtpBtn" onclick="sendOtp('nagad')">
+                            <i class="fa-solid fa-paper-plane"></i> Send OTP to Verify
+                        </button>
+                    </div>
+
+                    <button type="submit" class="btn-confirm-order" id="btnConfirmOrder">
+                        <i class="fa-solid fa-check-circle"></i> Confirm & Place Order
+                    </button>
+                </form>
             </div>
-            
-            <form id="orderCheckoutForm" onsubmit="handleOrderSubmission(event)">
-                <div class="input-form-field">
-                    <label>Full Name *</label>
-                    <input type="text" id="custName" required placeholder="Md. Emtiaz Hossain">
-                </div>
-                <div class="input-form-field">
-                    <label>Phone Number *</label>
-                    <input type="tel" id="custPhone" required placeholder="017XXXXXXXX">
-                </div>
-                <div class="input-form-field">
-                    <label>Delivery Address *</label>
-                    <textarea id="custAddress" rows="2" required placeholder="House, Road, Area Details..."></textarea>
-                </div>
-                <div class="input-form-field">
-                    <label>Payment Method</label>
-                    <select id="custPayment">
-                        <option value="cod">Cash On Delivery (COD)</option>
-                        <option value="bkash">bKash / Nagad Wallet Online</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn-checkout-confirm">Confirm & Place Order</button>
-            </form>
         </div>
     </div>
 
-    <div id="bookingModal" class="system-modal-backdrop">
-        <div class="modal-card-container">
-            <span class="modal-dismiss-trigger" onclick="closeBooking()">&times;</span>
-            <div style="text-align: center;">
-                <h2>Book a Table</h2>
-                <p style="margin-bottom: 20px; color: #666;">Reserve your elite spot quickly!</p>
-                <button class="btn-primary" onclick="closeBooking()">Confirm Booking</button>
+    <!-- ======== Order Success Modal ======== -->
+    <div class="order-success-overlay" id="orderSuccessOverlay">
+        <div class="order-success-card">
+            <div class="order-success-icon">
+                <i class="fa-solid fa-check"></i>
             </div>
+            <h2>Order Placed!</h2>
+            <p>Your order has been confirmed successfully. We'll contact you shortly for delivery details.</p>
+            <button class="btn-close-success" onclick="closeOrderSuccess()">Continue Browsing</button>
         </div>
     </div>
 
+    <!-- ======== Toast ======== -->
     <div id="toast-notification"></div>
+
     <script src="script.js"></script>
 </body>
 </html>

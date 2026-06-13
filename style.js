@@ -1,7 +1,47 @@
-// ==================== Global Application State ====================
 let cart = [];
 let fpOtpVerified = false;
-let generatedOtp = '1234'; // Fallback static check parameter
+let generatedOtp = '1234';
+
+// Dynamic CSS Injection for Foodpanda Buttons (Zate HTML/CSS e haat na deya lage)
+const fpStyle = document.createElement('style');
+fpStyle.innerHTML = `
+    .fp-inline-stepper {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #d70f64 !important;
+        color: white !important;
+        border-radius: 20px;
+        padding: 2px;
+        width: 100px;
+        height: 36px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        margin: 5px auto 0 auto;
+    }
+    .fp-stepper-btn {
+        background: none;
+        border: none;
+        color: white !important;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        width: 30px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.1s ease;
+    }
+    .fp-stepper-btn:active { transform: scale(0.85); }
+    .fp-stepper-val {
+        font-weight: bold;
+        font-size: 14px;
+        min-width: 20px;
+        text-align: center;
+        color: white !important;
+    }
+`;
+document.head.appendChild(fpStyle);
 
 // ==================== Owner Image Preview Engine ====================
 function previewOwnerImage(input) {
@@ -20,16 +60,9 @@ function filterMenu(category) {
     const tabs = document.querySelectorAll('.filter-tab-btn');
     tabs.forEach(tab => tab.classList.remove('active'));
     
-    // Add active context indicator dynamically
-    const eventTarget = event ? event.currentTarget : null;
+    const eventTarget = window.event ? window.event.currentTarget : null;
     if (eventTarget) {
         eventTarget.classList.add('active');
-    } else {
-        tabs.forEach(tab => {
-            if (tab.getAttribute('onclick').includes(`'${category}'`)) {
-                tab.classList.add('active');
-            }
-        });
     }
 
     const cards = document.querySelectorAll('.product-item-card');
@@ -42,66 +75,121 @@ function filterMenu(category) {
     });
 }
 
-// ==================== Product Interface Quantity Counter Manager ====================
-function updateQty(button, delta) {
-    const container = button.closest('.qty-selector');
-    if (!container) return;
-    const input = container.querySelector('.qty-input');
-    if (!input) return;
-    
-    let val = parseInt(input.value) || 1;
-    val += delta;
-    if (val < 1) val = 1;
-    if (val > 50) val = 50; // Dynamic safety bound restriction limit execution
-    input.value = val;
-}
-
 // ==================== Component Context Dropdown Variation Pricing Sync ====================
 function updateDynamicPricing(selectEl) {
-    const card = selectEl.closest('.product-item-card') || selectEl.closest('.product-card-body').parentElement;
+    const card = selectEl.closest('.product-item-card');
+    if (!card) return;
     const priceEl = card.querySelector('.dynamic-render-price');
     if (!priceEl) return;
     
     const newPrice = selectEl.value;
     priceEl.textContent = ' ৳ ' + newPrice;
     priceEl.setAttribute('data-base-price', newPrice);
+    
+    // Auto-sync buttons if variant changes
+    syncCardButtons();
 }
 
-// ==================== Pure Foodpanda Structural Cart Framework Core Operations ====================
+// ==================== Foodpanda Structural Cart Framework Core Operations ====================
 function addToCart(btnEl, itemName) {
     const card = btnEl.closest('.product-item-card');
     const priceEl = card.querySelector('.dynamic-render-price');
-    const qtyInput = card.querySelector('.qty-input');
     const variantSelect = card.querySelector('.variant-select');
     const imgEl = card.querySelector('img');
 
-    if (!priceEl || !qtyInput) return;
+    if (!priceEl) return;
 
     const basePrice = parseInt(priceEl.getAttribute('data-base-price')) || parseInt(priceEl.textContent.replace(/[^0-9]/g, '')) || 0;
-    const qty = parseInt(qtyInput.value) || 1;
-    
-    // Exact text extraction matching the dropdown variation label maps
     const variant = variantSelect ? variantSelect.options[variantSelect.selectedIndex].text.split('(')[0].trim() : 'Regular';
     const imgSrc = imgEl ? imgEl.src : '';
 
     const existingIndex = cart.findIndex(item => item.name === itemName && item.variant === variant);
     
     if (existingIndex > -1) {
-        cart[existingIndex].qty += qty;
+        cart[existingIndex].qty += 1;
     } else {
         cart.push({
             id: Date.now() + Math.random(),
             name: itemName,
             variant: variant,
             price: basePrice,
-            qty: qty,
+            qty: 1,
             image: imgSrc
         });
     }
 
-    qtyInput.value = 1; // Reset product selector count block
-    showToast(`🛒 ${itemName} (${variant}) basket-e add hoyeche!`);
+    showToast(`🛒 ${itemName} basket-e add hoyeche!`);
     renderCartData();
+    syncCardButtons();
+}
+
+// ==================== Card Buttons UI State Sync Matrix ====================
+function syncCardButtons() {
+    document.querySelectorAll('.product-item-card').forEach(card => {
+        const h3 = card.querySelector('h3');
+        if (!h3) return;
+        const itemName = h3.innerText.trim();
+        
+        const variantSelect = card.querySelector('.variant-select');
+        const variant = variantSelect ? variantSelect.options[variantSelect.selectedIndex].text.split('(')[0].trim() : 'Regular';
+        
+        const cartItem = cart.find(item => item.name === itemName && item.variant === variant);
+        
+        // Find original native button (Add to Cart / Add)
+        let originalBtn = card.querySelector('.btn-cart') || card.querySelector('button[onclick^="addToCart"]');
+        let inlineStepper = card.querySelector('.fp-inline-stepper');
+        
+        if (cartItem) {
+            // If item is inside cart array: Hide button, inject/show Foodpanda stepper [ - | 1 | + ]
+            if (originalBtn) originalBtn.style.display = 'none';
+            
+            if (!inlineStepper) {
+                inlineStepper = document.createElement('div');
+                inlineStepper.className = 'fp-inline-stepper';
+                inlineStepper.innerHTML = `
+                    <button type="button" class="fp-stepper-btn minus-btn">-</button>
+                    <span class="fp-stepper-val">${cartItem.qty}</span>
+                    <button type="button" class="fp-stepper-btn plus-btn">+</button>
+                `;
+                
+                // Click events inside food card
+                inlineStepper.querySelector('.minus-btn').onclick = (e) => {
+                    e.stopPropagation();
+                    adjustQtyByMeta(itemName, variant, -1);
+                };
+                inlineStepper.querySelector('.plus-btn').onclick = (e) => {
+                    e.stopPropagation();
+                    adjustQtyByMeta(itemName, variant, 1);
+                };
+                
+                // Append directly to action row wrapper
+                if (originalBtn) {
+                    originalBtn.parentNode.insertBefore(inlineStepper, originalBtn.nextSibling);
+                }
+            } else {
+                inlineStepper.style.display = 'flex';
+                inlineStepper.querySelector('.fp-stepper-val').innerText = cartItem.qty;
+            }
+        } else {
+            // If completely removed or 0: Restore standard Add button state
+            if (originalBtn) originalBtn.style.display = 'block';
+            if (inlineStepper) inlineStepper.style.display = 'none';
+        }
+    });
+}
+
+// Helper to routing updates from card interfaces
+function adjustQtyByMeta(name, variant, delta) {
+    const item = cart.find(i => i.name === name && i.variant === variant);
+    if (!item) return;
+    
+    item.qty += delta;
+    if (item.qty < 1) {
+        cart = cart.filter(i => i.id !== item.id);
+        showToast(`🗑️ ${name} bad deya hoyeche`);
+    }
+    renderCartData();
+    syncCardButtons();
 }
 
 // ==================== Reactively Re-render Core Floating Basket UI Data Blocks ====================
@@ -115,7 +203,6 @@ function renderCartData() {
     let totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
     let totalAmt = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
 
-    // Dynamic state reactive tracking display controllers
     if (floatingBtn) {
         if (totalQty > 0) {
             floatingBtn.style.display = 'flex';
@@ -131,7 +218,6 @@ function renderCartData() {
     if (totalAmountBadge) totalAmountBadge.textContent = '৳ ' + totalAmt;
     if (summaryTotalVal) summaryTotalVal.textContent = '৳ ' + totalAmt;
 
-    // Injecting inner structural layouts safely supporting standard adjustments
     if (itemsContainer) {
         if (cart.length === 0) {
             itemsContainer.innerHTML = `
@@ -145,22 +231,27 @@ function renderCartData() {
         let itemsHtml = '';
         cart.forEach(item => {
             itemsHtml += `
-                <div class="fp-cart-item">
-                    <div class="fp-item-details">
-                        <img src="${item.image}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=120'">
+                <div class="fp-cart-item" style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; border-bottom:1px solid #f5f5f5; gap:10px;">
+                    <div class="fp-item-details" style="display:flex; align-items:center; gap:12px; flex:1;">
+                        <img src="${item.image}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=120'" style="width:45px; height:45px; object-fit:cover; border-radius:6px;">
                         <div class="fp-item-meta">
-                            <h4>${item.name}</h4>
-                            <p class="fp-variant-label">${item.variant}</p>
-                            <span class="fp-unit-price">৳${item.price}</span>
+                            <h4 style="margin:0; font-size:14px; color:#333; font-weight:600;">${item.name}</h4>
+                            <p class="fp-variant-label" style="margin:2px 0 0; font-size:11px; color:#777;">${item.variant}</p>
+                            <span class="fp-unit-price" style="font-size:12px; color:#d70f64; font-weight:600;">৳${item.price}</span>
                         </div>
                     </div>
-                    <div class="fp-item-controls">
-                        <div class="fp-sidebar-qty-ctrl">
-                            <button type="button" class="fp-sq-btn" onclick="adjustCartQty(${item.id}, -1)">-</button>
-                            <span class="fp-sq-output">${item.qty}</span>
-                            <button type="button" class="fp-sq-btn" onclick="adjustCartQty(${item.id}, 1)">+</button>
+                    <div class="fp-item-controls" style="display:flex; align-items:center; gap:15px;">
+                        <div class="fp-sidebar-qty-ctrl" style="display:flex; align-items:center; background:#f7f7f7; border-radius:20px; padding:2px 6px; border:1px solid #e0e0e0;">
+                            <button type="button" onclick="adjustCartQty(${item.id}, -1)" style="background:none; border:none; color:#d70f64; font-weight:bold; font-size:16px; cursor:pointer; width:24px; height:24px;">-</button>
+                            <span style="font-size:13px; font-weight:bold; color:#333; min-width:18px; text-align:center;">${item.qty}</span>
+                            <button type="button" onclick="adjustCartQty(${item.id}, 1)" style="background:none; border:none; color:#d70f64; font-weight:bold; font-size:16px; cursor:pointer; width:24px; height:24px;">+</button>
                         </div>
-                        <span class="fp-item-subtotal">৳${item.price * item.qty}</span>
+                        <div style="display:flex; align-items:center; gap:12px; min-width:75px; justify-content:flex-end;">
+                            <span style="font-weight:bold; color:#222; font-size:13px;">৳${item.price * item.qty}</span>
+                            <button type="button" onclick="removeDirectItem(${item.id})" style="background:none; border:none; color:#d70f64; cursor:pointer; font-size:14px;">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>`;
         });
@@ -168,7 +259,7 @@ function renderCartData() {
     }
 }
 
-// ==================== Modify Quantity Intersections Directly Inside the Sidebar ====================
+// Modify Quantity Intersections Directly Inside the Sidebar/Checkout Drawer
 function adjustCartQty(itemId, delta) {
     const item = cart.find(i => i.id === itemId);
     if (!item) return;
@@ -179,6 +270,18 @@ function adjustCartQty(itemId, delta) {
         showToast(`🗑️ ${item.name} basket theke bad deya hoyeche`);
     }
     renderCartData();
+    syncCardButtons();
+}
+
+// Trash bin delete trigger pipeline
+function removeDirectItem(itemId) {
+    const item = cart.find(i => i.id === itemId);
+    if (item) {
+        cart = cart.filter(i => i.id !== itemId);
+        showToast(`🗑️ ${item.name} basket theke bad deya hoyeche`);
+    }
+    renderCartData();
+    syncCardButtons();
 }
 
 // ==================== Visual Sidebar Modal Opening/Closing Controllers ====================
@@ -200,12 +303,10 @@ function closeCartPanel() {
 
 // ==================== Dynamic Form Control Interaction Router Pipeline ====================
 function selectFpPayment(method, element) {
-    // Clean and remove active layout metrics across parallel sibling cards
     const cards = document.querySelectorAll('.fp-pay-card');
     cards.forEach(c => c.classList.remove('active'));
     if (element) element.classList.add('active');
 
-    // Always reset verification parameters when route swaps
     fpOtpVerified = false;
     const otpSection = document.getElementById('fp-otp-section');
     const sendBtn = document.getElementById('fp-sendBtn');
@@ -231,7 +332,7 @@ function selectFpPayment(method, element) {
 function triggerWalletOtp() {
     const phoneInput = document.getElementById('fp-walletNumber');
     if (!phoneInput || phoneInput.value.trim().length < 11) {
-        showToast("⚠️ Error: Valid 11-digit number shortcut entry prod korun!");
+        showToast("⚠️ Error: Valid 11-digit number output korun!");
         return;
     }
 
@@ -241,7 +342,6 @@ function triggerWalletOtp() {
         sendBtn.disabled = true;
     }
 
-    // Standard fast network timeout simulator injection
     setTimeout(() => {
         if (sendBtn) {
             sendBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> OTP Verified';
@@ -252,14 +352,9 @@ function triggerWalletOtp() {
         const boxesArea = document.getElementById('fp-otp-boxes-area');
         if (boxesArea) {
             boxesArea.style.display = 'block';
-            
-            // Random secure string generator mapped cleanly inside consecutive input nodes
             const digitInputs = document.querySelectorAll('.fp-otp-box');
-            generatedOtp = '';
             digitInputs.forEach(box => {
-                const randomDigit = Math.floor(Math.random() * 10);
-                generatedOtp += randomDigit;
-                box.value = randomDigit;
+                box.value = Math.floor(Math.random() * 10);
                 box.disabled = true;
                 box.style.borderColor = '#27ae60';
             });
@@ -276,7 +371,7 @@ function handleOrderSubmission(event) {
 
 function submitFpOrder() {
     if (cart.length === 0) {
-        showToast("⚠️ Error: Checkout run korar jonno prothome item basket-e add korun!");
+        showToast("⚠️ Error: Basket khali, item add korun!");
         return;
     }
 
@@ -285,17 +380,16 @@ function submitFpOrder() {
     const address = document.getElementById('fp-custAddress')?.value.trim();
 
     if (!name || !phone || !address) {
-        showToast("⚠️ Shobgulo core mandatory form elements properly input korun!");
+        showToast("⚠️ Shobgulo mandatory form information input korun!");
         return;
     }
 
     const otpSection = document.getElementById('fp-otp-section');
     if (otpSection && otpSection.style.display === 'block' && !fpOtpVerified) {
-        showToast("⚠️ Verification strictly standard check fail: Prothome dynamic wallet code complete korun!");
+        showToast("⚠️ Prothome wallet OTP complete korun!");
         return;
     }
 
-    // Trigger explicit display modal changes on processing completions
     closeCartPanel();
     const successModal = document.getElementById('orderSuccessOverlay');
     if (successModal) {
@@ -305,19 +399,16 @@ function submitFpOrder() {
         alert("🎉 Order Placed Successfully!");
     }
 
-    // Flush and completely clear operational parameter metrics cleanly
     cart = [];
     renderCartData();
+    syncCardButtons();
 
-    // Soft reset input nodes values safely
     document.getElementById('fp-custName').value = '';
     document.getElementById('fp-custPhone').value = '';
     document.getElementById('fp-custAddress').value = '';
-    
     const walletNumInput = document.getElementById('fp-walletNumber');
     if (walletNumInput) walletNumInput.value = '';
 
-    // Standard fallback UI routine parameters updates
     selectFpPayment('cod', document.querySelector('.fp-pay-card'));
 }
 
@@ -333,16 +424,14 @@ function closeOrderSuccess() {
 function showToast(message) {
     const toast = document.getElementById('toast-notification');
     if (!toast) return;
-    
     toast.textContent = message;
     toast.classList.add('show-alert');
-    
     setTimeout(() => {
         toast.classList.remove('show-alert');
     }, 2500);
 }
 
-// ==================== Dynamic Operational Key Controls Mappings ====================
+// Keyboard interactions listener mappings
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeCartPanel();
@@ -350,7 +439,8 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-// Auto initialize and map the global application logic lifecycle instances
+// Auto initialize and run core sync on DOM contents completion
 document.addEventListener('DOMContentLoaded', function() {
     renderCartData();
+    syncCardButtons();
 });

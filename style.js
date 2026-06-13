@@ -1,3 +1,40 @@
+// ==================== Menu Filter ====================
+function filterMenu(category) {
+    const allCards = document.querySelectorAll('.product-item-card');
+    const allBtns = document.querySelectorAll('.filter-tab-btn');
+    allBtns.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    allCards.forEach(card => {
+        if (category === 'all' || card.classList.contains(category)) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+// ==================== Quantity Controls (HTML Button sync) ====================
+function updateQty(btn, delta) {
+    const container = btn.closest('.qty-selector');
+    const input = container.querySelector('.qty-input');
+    let val = parseInt(input.value) || 1;
+    val += delta;
+    if (val < 1) val = 1;
+    if (val > 99) val = 99;
+    input.value = val;
+}
+
+// ==================== Dynamic Pricing ====================
+function updateDynamicPricing(selectEl) {
+    const card = selectEl.closest('.product-item-card') || selectEl.closest('.product-card-body').parentElement;
+    const priceEl = card.querySelector('.dynamic-render-price');
+    const newPrice = selectEl.value;
+    priceEl.textContent = ' ৳ ' + newPrice;
+    priceEl.setAttribute('data-base-price', newPrice);
+}
+
+// ==================== Image Preview ====================
 function previewOwnerImage(input) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
@@ -8,51 +45,15 @@ function previewOwnerImage(input) {
     }
 }
 
-// ==================== Menu Filtering Logic ====================
-function filterMenu(category, btn) {
-    // Update active button styling
-    document.querySelectorAll('.filter-tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-
-    // Filter Items
-    const items = document.querySelectorAll('.product-item-card');
-    items.forEach(item => {
-        if (category === 'all' || item.getAttribute('data-category').includes(category)) {
-            item.style.display = 'block';
-        } else {
-            item.style.display = 'none';
-        }
-    });
-}
-
-// ==================== Local Menu Quantity (Product Card e) ====================
-function updateLocalQty(btn, delta) {
-    const input = btn.parentElement.querySelector('.qty-input');
-    let val = parseInt(input.value) || 1;
-    val += delta;
-    if (val < 1) val = 1;
-    if (val > 99) val = 99;
-    input.value = val;
-}
-
-// ==================== Dynamic Pricing Update ====================
-function updateDynamicPricing(selectEl) {
-    const card = selectEl.closest('.product-item-card') || selectEl.closest('.product-card-body').parentElement;
-    const priceEl = card.querySelector('.dynamic-render-price');
-    const newPrice = selectEl.value;
-    priceEl.textContent = '৳' + newPrice;
-    priceEl.setAttribute('data-base-price', newPrice);
-}
-
 // =========================================================================
-// ==================== FOODPANDA STYLE CART/SIDEBAR ENGINE ================
+// ==================== FOODPANDA STYLE CART ENGINE ========================
 // =========================================================================
 
 let cart = [];
 let fpOtpVerified = false;
-let generatedOtp = '1234'; // Demo OTP System
+let generatedOtp = '1234';
 
-// ==================== ADD TO CART (Direct trigger to floating bar) ====================
+// ==================== Add to Cart Logic ====================
 function addToCart(btnEl, itemName) {
     const card = btnEl.closest('.product-item-card');
     const priceEl = card.querySelector('.dynamic-render-price');
@@ -63,26 +64,15 @@ function addToCart(btnEl, itemName) {
     const qty = parseInt(qtyInput.value) || 1;
     const variant = variantSelect ? variantSelect.options[variantSelect.selectedIndex].text : 'Regular';
     
-    // Check if item exists in cart
     const existingIndex = cart.findIndex(item => item.name === itemName && item.variant === variant);
     if (existingIndex > -1) {
         cart[existingIndex].qty += qty;
     } else {
-        cart.push({
-            id: Date.now(),
-            name: itemName,
-            variant: variant,
-            price: price,
-            qty: qty
-        });
+        cart.push({ id: Date.now(), name: itemName, variant: variant, price: price, qty: qty });
     }
     
-    qtyInput.value = 1; // Reset product card input back to 1
-    
-    // Show modern toast
+    qtyInput.value = 1; 
     showToast(`🛒 ${qty}x ${itemName} added to basket!`);
-    
-    // Update UI
     renderCartData();
 }
 
@@ -96,7 +86,6 @@ function renderCartData() {
         totalItems += item.qty;
         totalPrice += (item.price * item.qty);
         
-        // Build items for the Sidebar
         itemsHtml += `
         <div class="fp-cart-item">
             <div class="fp-item-info">
@@ -117,7 +106,6 @@ function renderCartData() {
         </div>`;
     });
 
-    // Update Floating Basket Button
     const floatingBar = document.getElementById('floating-cart');
     document.getElementById('cart-item-count').textContent = totalItems;
     document.getElementById('cart-total-price').textContent = '৳' + totalPrice;
@@ -126,10 +114,9 @@ function renderCartData() {
         floatingBar.classList.remove('hidden');
     } else {
         floatingBar.classList.add('hidden');
-        closeFpSidebar(); // Hide sidebar if empty
+        closeFpSidebar();
     }
 
-    // Inject into Sidebar
     const container = document.getElementById('fp-cart-items-container');
     if (cart.length === 0) {
         container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">Your basket is empty. Add some delicious food!</p>';
@@ -137,11 +124,9 @@ function renderCartData() {
         container.innerHTML = itemsHtml;
     }
     
-    // Update Checkout sticky button total
     document.getElementById('fp-sticky-total').textContent = '৳' + totalPrice;
 }
 
-// ==================== Manage Cart Qty & Deletion ====================
 function adjustCartQty(itemId, delta) {
     const item = cart.find(i => i.id === itemId);
     if (!item) return;
@@ -156,9 +141,7 @@ function adjustCartQty(itemId, delta) {
 
 function deleteCartItem(itemId) {
     const item = cart.find(i => i.id === itemId);
-    if(item) {
-        showToast(`🗑️ ${item.name} removed from basket`);
-    }
+    if(item) { showToast(`🗑️ ${item.name} removed from basket`); }
     cart = cart.filter(i => i.id !== itemId);
     renderCartData();
 }
@@ -168,7 +151,7 @@ function openFpSidebar() {
     if (cart.length === 0) return;
     document.getElementById('fp-sidebar-overlay').classList.add('active');
     document.getElementById('fp-sidebar').classList.add('active');
-    document.body.style.overflow = 'hidden'; // Stop background scrolling
+    document.body.style.overflow = 'hidden'; 
 }
 
 function closeFpSidebar() {
@@ -179,50 +162,40 @@ function closeFpSidebar() {
 
 // ==================== Payment & OTP Engine ====================
 function selectFpPayment(method, element) {
-    // UI Style changes
     document.querySelectorAll('.fp-pay-card').forEach(card => card.classList.remove('active'));
     element.classList.add('active');
     
-    // Show/Hide Digital Wallet OTP section
     const otpSection = document.getElementById('fp-otp-section');
     if(method === 'digital') {
         otpSection.style.display = 'block';
     } else {
         otpSection.style.display = 'none';
-        fpOtpVerified = true; // COD is default verified
+        fpOtpVerified = true; 
     }
 }
 
 function triggerFpOtp() {
     const num = document.getElementById('fp-walletNumber').value;
-    if(num.length < 10) {
-        showToast('⚠️ Enter a valid mobile wallet number');
-        return;
-    }
+    if(num.length < 10) { showToast('⚠️ Enter a valid mobile wallet number'); return; }
+    
     const btn = document.getElementById('fp-sendBtn');
-    btn.innerHTML = 'Sent!';
-    btn.classList.add('success');
+    btn.innerHTML = 'Sent!'; btn.classList.add('success');
     
     document.getElementById('fp-otp-boxes-area').style.display = 'block';
     document.getElementById('fp-otp-status').innerHTML = 'OTP sent! Hint: Type <strong>1234</strong> to test verification.';
     document.getElementById('fp-otp-status').style.color = '#333';
     
-    // Focus first box
     document.querySelector('.fp-otp-box').focus();
     fpOtpVerified = false;
 }
 
 function handleFpOtpBox(input, index) {
-    // Restrict non-numeric
     input.value = input.value.replace(/[^0-9]/g, '');
-    
     if(input.value !== '') {
-        // move to next
         const nextBox = input.nextElementSibling;
         if(nextBox) nextBox.focus();
     }
     
-    // Check if fully typed
     const boxes = document.querySelectorAll('.fp-otp-box');
     let code = '';
     boxes.forEach(b => code += b.value);
@@ -250,29 +223,19 @@ function submitFpOrder() {
     const address = document.getElementById('fp-custAddress').value.trim();
     const paymentMethod = document.querySelector('input[name="fp_payment"]:checked').value;
 
-    if (!name || !phone || !address) {
-        showToast('⚠️ Please fill out all delivery details');
-        return;
-    }
+    if (!name || !phone || !address) { showToast('⚠️ Please fill out all delivery details'); return; }
+    if (paymentMethod === 'digital' && !fpOtpVerified) { showToast('⚠️ Please verify your bKash/Nagad number with OTP'); return; }
 
-    if (paymentMethod === 'digital' && !fpOtpVerified) {
-        showToast('⚠️ Please verify your bKash/Nagad number with OTP');
-        return;
-    }
-
-    // Success Action
     closeFpSidebar();
     document.getElementById('orderSuccessOverlay').classList.add('active');
     
-    // Reset Everything
     cart = [];
     renderCartData();
     document.getElementById('fp-custName').value = '';
     document.getElementById('fp-custPhone').value = '';
     document.getElementById('fp-custAddress').value = '';
-    selectFpPayment('cod', document.querySelector('.fp-pay-card')); // Reset to COD
+    selectFpPayment('cod', document.querySelector('.fp-pay-card')); 
     
-    // Clean OTP Box
     document.getElementById('fp-walletNumber').value = '';
     document.getElementById('fp-otp-boxes-area').style.display = 'none';
     const boxes = document.querySelectorAll('.fp-otp-box');
@@ -285,12 +248,10 @@ function closeOrderSuccess() {
     document.getElementById('orderSuccessOverlay').classList.remove('active');
 }
 
-// ==================== Simple Toast Manager ====================
+// ==================== Toast Notification ====================
 function showToast(message) {
     const toast = document.getElementById('toast-notification');
     toast.textContent = message;
     toast.classList.add('show-alert');
-    setTimeout(() => {
-        toast.classList.remove('show-alert');
-    }, 2800);
+    setTimeout(() => { toast.classList.remove('show-alert'); }, 2800);
 }

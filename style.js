@@ -1,276 +1,300 @@
-// ==================== Image Preview ====================
+// Global Shopping Basket State Array Array
+let cart = [];
+
+// ==================== Owner Live Image Photo Preview ====================
 function previewOwnerImage(input) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
         reader.onload = function(e) {
             document.getElementById('owner-profile-img').src = e.target.result;
-        }
+            showToast("Founder's profile picture updated locally!");
+        };
         reader.readAsDataURL(input.files[0]);
     }
 }
 
-// ==================== Menu Filter ====================
+// ==================== Menu Filter Tab Category Sorting ====================
 function filterMenu(category) {
-    const allCards = document.querySelectorAll('.product-item-card');
-    const allBtns = document.querySelectorAll('.filter-tab-btn');
-    allBtns.forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
+    // Active tabs class switching handle
+    const tabs = document.querySelectorAll('.filter-tab-btn');
+    tabs.forEach(tab => tab.classList.remove('active'));
     
-    allCards.forEach(card => {
+    // Automatic element selection matcher based on standard parameters inline trigger
+    const clickedTab = Array.from(tabs).find(t => t.getAttribute('onclick').includes(category));
+    if (clickedTab) clickedTab.classList.add('active');
+
+    // Product cards animation filtering view controller
+    const cards = document.querySelectorAll('.product-item-card');
+    cards.forEach(card => {
         if (category === 'all' || card.classList.contains(category)) {
-            card.style.display = '';
+            card.style.display = 'block';
         } else {
             card.style.display = 'none';
         }
     });
 }
 
-// ==================== Quantity Controls (+ / - Functionality) ====================
-function updateQty(btn, delta) {
-    const container = btn.closest('.qty-selector');
-    const input = container.querySelector('.qty-input');
-    
-    // Parse the value carefully
-    let val = parseInt(input.value);
-    if (isNaN(val)) val = 1;
-    
-    val += delta; // Add or subtract
-    
-    // Constraints: Min 1, Max 50
-    if (val < 1) val = 1;
-    if (val > 50) val = 50;
-    
-    input.value = val;
-}
-
-// ==================== Dynamic Pricing ====================
+// ==================== Dynamic Live Pricing Selector via Dropdowns Options ====================
 function updateDynamicPricing(selectEl) {
-    const card = selectEl.closest('.product-item-card') || selectEl.closest('.product-card-body').parentElement;
-    const priceEl = card.querySelector('.dynamic-render-price');
-    const newPrice = selectEl.value;
-    priceEl.textContent = ' ৳ ' + newPrice;
-    priceEl.setAttribute('data-base-price', newPrice);
+    const chosenPrice = selectEl.value;
+    const card = selectEl.closest('.product-item-card');
+    const priceDisplay = card.querySelector('.dynamic-render-price');
+    if (priceDisplay) {
+        priceDisplay.textContent = ' ৳ ' + chosenPrice;
+        priceDisplay.setAttribute('data-base-price', chosenPrice);
+    }
 }
 
-// =========================================================================
-// ==================== FOODPANDA STYLE CART ENGINE ========================
-// =========================================================================
+// ==================== Foodpanda Card Quantity Counter Handler (+/- Button) ====================
+function updateQty(btn, change) {
+    const input = btn.closest('.qty-selector').querySelector('.qty-input');
+    let currentVal = parseInt(input.value) || 1;
+    currentVal += change;
+    if (currentVal < 1) currentVal = 1; // 1 er niche jabe na counter value
+    input.value = currentVal;
+}
 
-let cart = [];
-let fpOtpVerified = false;
-let generatedOtp = '1234';
-
-// ==================== Add to Cart Logic ====================
-function addToCart(btnEl, itemName) {
-    const card = btnEl.closest('.product-item-card');
-    const priceEl = card.querySelector('.dynamic-render-price');
-    const qtyInput = card.querySelector('.qty-input');
+// ==================== Add To Cart Main Functionality ====================
+function addToCart(btn, itemName) {
+    const card = btn.closest('.product-item-card');
     const variantSelect = card.querySelector('.variant-select');
+    let variantText = '';
     
-    const price = parseInt(priceEl.getAttribute('data-base-price'));
-    const qty = parseInt(qtyInput.value) || 1; // Take exact quantity user selected
-    const variant = variantSelect ? variantSelect.options[variantSelect.selectedIndex].text : 'Regular';
+    if (variantSelect) {
+        // Dropdown variations option display text cleanup filter
+        variantText = variantSelect.options[variantSelect.selectedIndex].text.split('(')[0].trim();
+    }
     
-    // If exact item + variant already exists, just increase quantity
-    const existingIndex = cart.findIndex(item => item.name === itemName && item.variant === variant);
+    const priceDisplay = card.querySelector('.dynamic-render-price');
+    const priceValue = parseFloat(priceDisplay.getAttribute('data-base-price')) || 0;
+    const qtyInput = card.querySelector('.qty-input');
+    const qtyValue = parseInt(qtyInput.value) || 1;
+    
+    // Existing item variant checker in local checkout state array
+    const existingIndex = cart.findIndex(item => item.name === itemName && item.variant === variantText);
+    
     if (existingIndex > -1) {
-        cart[existingIndex].qty += qty;
+        cart[existingIndex].qty += qtyValue;
     } else {
-        cart.push({ id: Date.now(), name: itemName, variant: variant, price: price, qty: qty });
+        cart.push({
+            name: itemName,
+            variant: variantText,
+            price: priceValue,
+            qty: qtyValue
+        });
     }
     
-    // Reset the quantity input back to 1 after adding
-    qtyInput.value = 1; 
+    // Default item selection state card value resetting index back to 1
+    qtyInput.value = 1;
     
-    showToast(`🛒 ${qty}x ${itemName} added to basket!`);
-    renderCartData(); // Update the sidebar cart immediately
+    // Local storage sidebar viewport refreshing flow
+    renderCartData();
+    showToast(`${qtyValue}x ${itemName} added to your basket successfully!`);
 }
 
-// ==================== Render Core UI based on Cart Data ====================
+// ==================== Foodpanda Basket Sidebar Visibility Toggle UI ====================
+function toggleFpCart() {
+    const panel = document.getElementById('fp-cart-sidebar');
+    if (panel) {
+        panel.classList.toggle('active');
+    }
+}
+
+// ==================== Render Reactive Dynamic Cart Interface Renderer ====================
 function renderCartData() {
-    let totalItems = 0;
-    let totalPrice = 0;
-    let itemsHtml = '';
-
-    // Loop through cart array
-    cart.forEach(item => {
-        totalItems += item.qty;
-        totalPrice += (item.price * item.qty);
-        
-        itemsHtml += `
-        <div class="fp-cart-item">
-            <div class="fp-item-info">
-                <h4>${item.name}</h4>
-                <p>${item.variant}</p>
-                <span class="fp-item-price">৳${item.price * item.qty}</span>
-            </div>
-            <div class="fp-item-actions">
-                <div class="fp-qty-controls">
-                    <button onclick="adjustCartQty(${item.id}, -1)">-</button>
-                    <span>${item.qty}</span>
-                    <button onclick="adjustCartQty(${item.id}, 1)">+</button>
-                </div>
-                <button class="fp-delete-btn" onclick="deleteCartItem(${item.id})" title="Remove Item">
-                    <i class="fa-solid fa-trash-can"></i>
-                </button>
-            </div>
-        </div>`;
-    });
-
-    // Update Floating Basket Button
-    const floatingBar = document.getElementById('floating-cart');
-    document.getElementById('cart-item-count').textContent = totalItems;
-    document.getElementById('cart-total-price').textContent = '৳' + totalPrice;
+    const body = document.getElementById('fp-cart-items-body');
+    const countBadge = document.getElementById('fp-basket-count');
+    const totalAmountDisplay = document.getElementById('fp-total-amount');
     
-    if (totalItems > 0) {
-        floatingBar.classList.remove('hidden');
-    } else {
-        floatingBar.classList.add('hidden');
-        closeFpSidebar(); // Automatically close sidebar if cart becomes empty
-    }
-
-    // Inject into Sidebar HTML
-    const container = document.getElementById('fp-cart-items-container');
+    if (!body) return;
+    
     if (cart.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">Your basket is empty. Add some delicious food!</p>';
-    } else {
-        container.innerHTML = itemsHtml;
+        body.innerHTML = '<div class="fp-empty-msg">Your basket is empty. Add delicious meals to start ordering!</div>';
+        if (countBadge) countBadge.textContent = '0';
+        if (totalAmountDisplay) totalAmountDisplay.textContent = '৳ 0';
+        return;
     }
     
-    // Update Checkout sticky button total
-    document.getElementById('fp-sticky-total').textContent = '৳' + totalPrice;
-}
-
-// Adjust quantity from inside the sidebar
-function adjustCartQty(itemId, delta) {
-    const item = cart.find(i => i.id === itemId);
-    if (!item) return;
+    let totalItems = 0;
+    let totalSum = 0;
+    let htmlContent = '';
     
-    item.qty += delta;
-    if (item.qty < 1) {
-        cart = cart.filter(i => i.id !== itemId);
-        showToast(`🗑️ ${item.name} removed from basket`);
+    cart.forEach((item, index) => {
+        const itemCost = item.price * item.qty;
+        totalSum += itemCost;
+        totalItems += item.qty;
+        
+        htmlContent += `
+            <div class="fp-cart-item">
+                <div class="fp-item-info">
+                    <h4>${item.name}</h4>
+                    ${item.variant ? `<p style="margin:2px 0; color:#666; font-size:13px;">${item.variant}</p>` : ''}
+                    <div style="display:flex; align-items:center; gap:10px; margin-top:5px;">
+                        <span style="font-size:14px; color:#555;">Qty: <strong>${item.qty}</strong></span>
+                    </div>
+                </div>
+                <div style="text-align: right; display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+                    <span class="fp-item-price" style="font-weight:700; color:#d70f64;">৳ ${itemCost}</span>
+                    <button onclick="removeCartItem(${index})" style="background:none; border:none; color:#e74c3c; cursor:pointer; font-size:14px;" title="Remove Item">
+                        <i class="fa-solid fa-trash-can"></i> Remove
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+    
+    body.innerHTML = htmlContent;
+    if (countBadge) countBadge.textContent = totalItems;
+    if (totalAmountDisplay) totalAmountDisplay.textContent = '৳ ' + totalSum;
+}
+
+// ==================== Remove Single Target Item from Basket Handler ====================
+function removeCartItem(index) {
+    if (index > -1 && index < cart.length) {
+        const removedItem = cart[index];
+        cart.splice(index, 1);
+        renderCartData();
+        showToast(`Removed ${removedItem.name} from basket.`);
     }
-    renderCartData();
 }
 
-// Delete whole item from sidebar
-function deleteCartItem(itemId) {
-    const item = cart.find(i => i.id === itemId);
-    if(item) { 
-        showToast(`🗑️ ${item.name} removed from basket`); 
-    }
-    cart = cart.filter(i => i.id !== itemId);
-    renderCartData();
-}
-
-// ==================== Sidebar Core Engine ====================
-function openFpSidebar() {
-    if (cart.length === 0) return;
-    document.getElementById('fp-sidebar-overlay').classList.add('active');
-    document.getElementById('fp-sidebar').classList.add('active');
-    document.body.style.overflow = 'hidden'; 
-}
-
-function closeFpSidebar() {
-    document.getElementById('fp-sidebar-overlay').classList.remove('active');
-    document.getElementById('fp-sidebar').classList.remove('active');
-    document.body.style.overflow = '';
-}
-
-// ==================== Payment & OTP Engine ====================
-function selectFpPayment(method, element) {
-    document.querySelectorAll('.fp-pay-card').forEach(card => card.classList.remove('active'));
+// ==================== Dynamic Payment Method Type Select Control Card ====================
+function selectFpPayment(type, element) {
+    // Resetting states on current payment components fields
+    const cards = document.querySelectorAll('.fp-pay-card');
+    cards.forEach(c => {
+        c.classList.remove('active');
+        const radio = c.querySelector('input[type="radio"]');
+        if (radio) radio.checked = false;
+    });
+    
+    // Highlight active card components node selection
     element.classList.add('active');
+    const currentRadio = element.querySelector('input[type="radio"]');
+    if (currentRadio) currentRadio.checked = true;
     
+    // Secure Digital Mobile Wallet Verification component toggle container visibility
     const otpSection = document.getElementById('fp-otp-section');
-    if(method === 'digital') {
-        otpSection.style.display = 'block';
-    } else {
-        otpSection.style.display = 'none';
-        fpOtpVerified = true; 
-    }
-}
-
-function triggerFpOtp() {
-    const num = document.getElementById('fp-walletNumber').value;
-    if(num.length < 10) { showToast('⚠️ Enter a valid mobile wallet number'); return; }
-    
-    const btn = document.getElementById('fp-sendBtn');
-    btn.innerHTML = 'Sent!'; btn.classList.add('success');
-    
-    document.getElementById('fp-otp-boxes-area').style.display = 'block';
-    document.getElementById('fp-otp-status').innerHTML = 'OTP sent! Hint: Type <strong>1234</strong> to test verification.';
-    document.getElementById('fp-otp-status').style.color = '#333';
-    
-    document.querySelector('.fp-otp-box').focus();
-    fpOtpVerified = false;
-}
-
-function handleFpOtpBox(input, index) {
-    input.value = input.value.replace(/[^0-9]/g, '');
-    if(input.value !== '') {
-        const nextBox = input.nextElementSibling;
-        if(nextBox) nextBox.focus();
-    }
-    
-    const boxes = document.querySelectorAll('.fp-otp-box');
-    let code = '';
-    boxes.forEach(b => code += b.value);
-    
-    if(code.length === 4) {
-        if(code === generatedOtp) {
-            fpOtpVerified = true;
-            document.getElementById('fp-otp-status').innerHTML = '✅ Verified Successfully!';
-            document.getElementById('fp-otp-status').style.color = '#27ae60';
-            boxes.forEach(b => { b.style.borderColor = '#27ae60'; b.disabled = true; });
+    if (otpSection) {
+        if (type === 'digital') {
+            otpSection.style.display = 'block';
         } else {
-            fpOtpVerified = false;
-            document.getElementById('fp-otp-status').innerHTML = '❌ Incorrect OTP. Try again (1234)';
-            document.getElementById('fp-otp-status').style.color = '#e74c3c';
-            boxes.forEach(b => { b.value = ''; b.style.borderColor = '#e74c3c'; });
-            boxes[0].focus();
+            otpSection.style.display = 'none';
         }
     }
 }
 
-// ==================== Submit Order Final ====================
-function submitFpOrder() {
-    const name = document.getElementById('fp-custName').value.trim();
-    const phone = document.getElementById('fp-custPhone').value.trim();
-    const address = document.getElementById('fp-custAddress').value.trim();
-    const paymentMethod = document.querySelector('input[name="fp_payment"]:checked').value;
-
-    if (!name || !phone || !address) { showToast('⚠️ Please fill out all delivery details'); return; }
-    if (paymentMethod === 'digital' && !fpOtpVerified) { showToast('⚠️ Please verify your bKash/Nagad number with OTP'); return; }
-
-    closeFpSidebar();
+// ==================== Digital Mobile Wallet Gateway: Send OTP simulated action flow ====================
+function handleFpSendOtp() {
+    const walletNum = document.getElementById('fp-walletNumber').value.trim();
+    const sendBtn = document.getElementById('fp-sendBtn');
     
-    const successModal = document.getElementById('orderSuccessOverlay');
-    if (successModal) {
-        successModal.style.display = 'flex'; // Trigger display
-        successModal.classList.add('active');
+    if (!walletNum) {
+        showToast("Please enter a valid bKash or Nagad wallet number first!");
+        return;
     }
     
-    // Reset Data
-    cart = [];
-    renderCartData();
-    document.getElementById('fp-custName').value = '';
-    document.getElementById('fp-custPhone').value = '';
-    document.getElementById('fp-custAddress').value = '';
-    selectFpPayment('cod', document.querySelector('.fp-pay-card')); 
+    if (sendBtn.classList.contains('success')) {
+        // Guard check if transaction system status verified already
+        return;
+    }
     
-    document.getElementById('fp-walletNumber').value = '';
-    document.getElementById('fp-otp-boxes-area').style.display = 'none';
-    const boxes = document.querySelectorAll('.fp-otp-box');
-    boxes.forEach(b => { b.value = ''; b.disabled = false; b.style.borderColor = '#e0e0e0'; });
-    const sendBtn = document.getElementById('fp-sendBtn');
-    if(sendBtn){
-        sendBtn.innerHTML = 'Send OTP'; 
-        sendBtn.classList.remove('success');
+    sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+    sendBtn.disabled = true;
+    
+    // Simulated asynchronous automated mock security transaction layer response timeout
+    setTimeout(() => {
+        sendBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> OTP Verified Successfully';
+        sendBtn.classList.add('success');
+        sendBtn.disabled = false;
+        
+        // Automated insertion simulated layout logic inside target security code input elements fields
+        const boxesArea = document.getElementById('fp-otp-boxes-area');
+        if (boxesArea) {
+            boxesArea.style.display = 'block';
+            const boxes = document.querySelectorAll('.fp-otp-box');
+            boxes.forEach((b) => {
+                b.value = Math.floor(Math.random() * 10);
+                b.disabled = true;
+                b.style.borderColor = '#27ae60';
+            });
+        }
+        showToast("Simulated Digital Secure Payment Verified!");
+    }, 1500);
+}
+
+// ==================== Manual Secure 4 Digit Input Focus Controller Shift ====================
+function moveFpOtpFocus(current, nextIndex) {
+    if (current.value.length >= 1) {
+        const boxes = document.querySelectorAll('.fp-otp-box');
+        if (boxes[nextIndex]) {
+            boxes[nextIndex].focus();
+        }
     }
 }
 
+// ==================== Final Confirm Checkout Submit Form Validation Handler ====================
+function submitFpOrder() {
+    if (cart.length === 0) {
+        showToast("Your basket is empty. Add items before checking out!");
+        return;
+    }
+    
+    const name = document.getElementById('fp-custName').value.trim();
+    const phone = document.getElementById('fp-custPhone').value.trim();
+    const address = document.getElementById('fp-custAddress').value.trim();
+    
+    if (!name || !phone || !address) {
+        showToast("Please complete your delivery details: Name, Phone, and Address!");
+        return;
+    }
+    
+    // Digital validation gate keeper filter options state
+    const selectedPayOption = document.querySelector('input[name="fp_payment"]:checked').value;
+    if (selectedPayOption === 'digital') {
+        const sendBtn = document.getElementById('fp-sendBtn');
+        if (!sendBtn.classList.contains('success')) {
+            showToast("Please complete and verify your Mobile Wallet OTP before finalizing delivery!");
+            return;
+        }
+    }
+    
+    // Trigger animated order confirmation overlay modal screen
+    const successModal = document.getElementById('orderSuccessOverlay');
+    if (successModal) {
+        successModal.style.display = 'flex';
+        successModal.classList.add('active');
+    }
+    
+    // Resetting structural logic arrays data objects state back to pristine empty structure state
+    cart = [];
+    renderCartData();
+    
+    // Clear targeted visual information inputs field items forms
+    document.getElementById('fp-custName').value = '';
+    document.getElementById('fp-custPhone').value = '';
+    document.getElementById('fp-custAddress').value = '';
+    
+    // Revert checkout default components selection structure
+    const codLabel = document.querySelector('.fp-pay-card');
+    if (codLabel) selectFpPayment('cod', codLabel);
+    
+    // Reset verification views panels status
+    const walletInput = document.getElementById('fp-walletNumber');
+    if (walletInput) walletInput.value = '';
+    
+    const boxesArea = document.getElementById('fp-otp-boxes-area');
+    if (boxesArea) boxesArea.style.display = 'none';
+    
+    const sendBtn = document.getElementById('fp-sendBtn');
+    if (sendBtn) {
+        sendBtn.innerHTML = 'Send OTP';
+        sendBtn.classList.remove('success');
+        sendBtn.disabled = false;
+    }
+}
+
+// ==================== Success Confirmation Modal Action Dismiss Window Window ====================
 function closeOrderSuccess() {
     const successModal = document.getElementById('orderSuccessOverlay');
     if (successModal) {
@@ -279,11 +303,27 @@ function closeOrderSuccess() {
     }
 }
 
-// ==================== Toast Notification ====================
+// ==================== Global Toast Notification System Handler ====================
 function showToast(message) {
     const toast = document.getElementById('toast-notification');
-    if(!toast) return;
+    if (!toast) return;
     toast.textContent = message;
     toast.classList.add('show-alert');
-    setTimeout(() => { toast.classList.remove('show-alert'); }, 2800);
+    setTimeout(() => {
+        toast.classList.remove('show-alert');
+    }, 3000);
 }
+
+// ==================== Keyboard Accessibility Escape Listener Event Mode Dismiss ====================
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const panel = document.getElementById('fp-cart-sidebar');
+        if (panel) panel.classList.remove('active');
+        closeOrderSuccess();
+    }
+});
+
+// ==================== App Application Setup Lifecycle State Initializer ====================
+document.addEventListener('DOMContentLoaded', function() {
+    renderCartData();
+});

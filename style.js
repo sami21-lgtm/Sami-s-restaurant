@@ -91,6 +91,7 @@ function updateDynamicPricing(selectEl) {
 }
 
 // ==================== Foodpanda Structural Cart Framework Core Operations ====================
+// ==================== Foodpanda Structural Cart Framework Core Operations ====================
 function addToCart(btnEl, itemName) {
     const card = btnEl.closest('.product-item-card');
     const priceEl = card.querySelector('.dynamic-render-price');
@@ -121,6 +122,13 @@ function addToCart(btnEl, itemName) {
     showToast(`🛒 ${itemName} basket-e add hoyeche!`);
     renderCartData();
     syncCardButtons();
+
+    // 🔥 জাস্ট এই নিচের কোডটুকু ২য় পিকচার-এর চেকআউট ইন্টারফেসটি অটোমেটিক ওপেন করে দেবে:
+    const sidebar = document.getElementById('fp-cart-sidebar') || document.getElementById('cart-sidebar');
+    if (sidebar) {
+        sidebar.classList.add('active');
+        document.body.style.overflow = 'hidden'; // ব্যাকগ্রাউন্ড স্ক্রল বন্ধ করার জন্য
+    }
 }
 
 // ==================== Card Buttons UI State Sync Matrix ====================

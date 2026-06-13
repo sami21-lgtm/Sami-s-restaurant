@@ -41,14 +41,10 @@
             <p>Where premium culinary vision meets authentic warmth and global flair.</p>
         </div>
         <div class="chefs-flex-row">
+            
             <div class="chef-profile-card owner-highlight">
                 <div class="profile-image-wrapper">
                     <img id="owner-profile-img" src="Md. EmTIAZ hOSSAIN sAMI LOGO.png" alt="Md. Emtiaz Hossain Sami" onerror="this.src='https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400'">
-                    <label for="owner-upload-input" class="image-upload-overlay" title="Upload Your Custom Photo">
-                        <i class="fa-solid fa-camera"></i>
-                        <span>Change</span>
-                    </label>
-                    <input type="file" id="owner-upload-input" accept="image/*" onchange="previewOwnerImage(this)">
                 </div>
                 <h3>Md. Emtiaz Hossain Sami</h3>
                 <p class="chef-role-tag">Owner & Founder</p>
@@ -57,7 +53,12 @@
             
             <div class="chef-profile-card">
                 <div class="profile-image-wrapper normal-chef-border">
-                    <img src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&q=80&w=300" alt="Chef Vera">
+                    <img id="chef-vera-img" src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&q=80&w=300" alt="Chef Vera">
+                    <label for="chef-upload-input" class="image-upload-overlay" title="Upload Your Custom Photo">
+                        <i class="fa-solid fa-camera"></i>
+                        <span>Change</span>
+                    </label>
+                    <input type="file" id="chef-upload-input" accept="image/*" onchange="previewChefImage(this)">
                 </div>
                 <h3>Chef Vera Okonkwo</h3>
                 <p class="chef-role-tag">Executive Chef</p>
@@ -79,9 +80,8 @@
             <button class="filter-tab-btn" onclick="filterMenu('drinks')">Drinks</button>
             <button class="filter-tab-btn" onclick="filterMenu('desserts')">Desserts & Cakes</button>
         </div>
-
+        
         <div class="menu-products-container">
-            
             <div class="product-item-card breakfast">
                 <img src="images (12).jpg" alt="Soft Ruti / Paratha" onerror="this.src='https://images.unsplash.com/photo-1505253758473-96b7015fcd40?w=400'">
                 <div class="product-card-body">
@@ -794,16 +794,16 @@
     </div>
 
     <div id="fp-sidebar-overlay" class="fp-overlay" onclick="closeFpSidebar()"></div>
+    
     <div id="fp-sidebar" class="fp-sidebar">
         <div class="fp-header">
             <h2>Basket</h2>
             <button class="fp-close-btn" onclick="closeFpSidebar()"><i class="fa-solid fa-xmark"></i></button>
         </div>
-
         <div class="fp-body">
             <div class="fp-section-title">Your Order</div>
             <div id="fp-cart-items-container"></div>
-
+            
             <div class="fp-section-title" style="margin-top: 25px;">Delivery Details</div>
             <div class="fp-delivery-card">
                 <div class="fp-input-group">
@@ -816,7 +816,7 @@
                     <textarea id="fp-custAddress" rows="2" placeholder="Delivery Address (House, Road, Details)" required></textarea>
                 </div>
             </div>
-
+            
             <div class="fp-section-title" style="margin-top: 25px;">Payment Method</div>
             <div class="fp-payment-options">
                 <label class="fp-pay-card active" onclick="selectFpPayment('cod', this)">
@@ -834,27 +834,25 @@
                     </div>
                 </label>
             </div>
-
+            
             <div id="fp-otp-section" class="fp-otp-container" style="display: none;">
                 <p class="otp-instruction">Enter your mobile wallet number to verify</p>
                 <div class="fp-input-group flex-row">
                     <input type="tel" id="fp-walletNumber" placeholder="01XXXXXXXXX">
                     <button type="button" class="fp-send-otp-btn" id="fp-sendBtn" onclick="triggerFpOtp()">Send OTP</button>
                 </div>
-                
                 <div id="fp-otp-boxes-area" style="display:none; margin-top: 15px;">
                     <p class="otp-instruction">Enter the 4-digit code sent to your number</p>
                     <div class="fp-otp-inputs">
-                        <input type="text" maxlength="1" class="fp-otp-box" oninput="handleFpOtpBox(this, 1)">
-                        <input type="text" maxlength="1" class="fp-otp-box" oninput="handleFpOtpBox(this, 2)">
-                        <input type="text" maxlength="1" class="fp-otp-box" oninput="handleFpOtpBox(this, 3)">
-                        <input type="text" maxlength="1" class="fp-otp-box" oninput="handleFpOtpBox(this, 4)">
+                        <input type="text" maxlength="1" class="fp-otp-box">
+                        <input type="text" maxlength="1" class="fp-otp-box">
+                        <input type="text" maxlength="1" class="fp-otp-box">
+                        <input type="text" maxlength="1" class="fp-otp-box">
                     </div>
                     <p id="fp-otp-status" class="otp-status-text"></p>
                 </div>
             </div>
         </div>
-
         <div class="fp-footer">
             <button class="fp-checkout-btn" onclick="submitFpOrder()">
                 <span class="btn-text">Confirm Order</span>

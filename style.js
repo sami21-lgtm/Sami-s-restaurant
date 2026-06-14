@@ -1,26 +1,24 @@
 // ==================== Global Array ====================
 let cart = []; 
 
-// ==================== 1. Smart Add To Cart Engine (Foodpanda Style) ====================
+// ==================== 1. Clean Add To Cart Engine ====================
 function addToCart(btnElement, itemName) {
     let price = 0;
     let image = '';
 
-    // Docx html theke auto price ar image track korar magic code
+    // Docx html theke auto price ar image track korar code
     try {
         let parentCard = btnElement.closest('.menu-card') || btnElement.closest('.card') || btnElement.parentElement.parentElement;
         if(parentCard) {
-            // Find price text from the card
             let cardText = parentCard.innerText;
             let priceMatch = cardText.match(/Tk\s*(\d+)/i) || cardText.match(/৳\s*(\d+)/i);
             if(priceMatch) price = parseInt(priceMatch[1]);
             
-            // Find image URL
             let imgTag = parentCard.parentElement.querySelector('img') || parentCard.querySelector('img');
             if(imgTag) image = imgTag.src;
         }
     } catch(e) {
-        console.log("Card HTML exact match fail, using defaults.");
+        console.log("Card HTML match failed.");
     }
 
     // Add to Array
@@ -44,57 +42,12 @@ function addToCart(btnElement, itemName) {
         floatingCart.style.setProperty('display', 'flex', 'important');
     }
 
-    // Magic happens here: Update the DOM directly without opening sidebar
     renderCartData();
-    syncCardButtons(); // <--- This will change the 'Add' button to '- 1 +' Foodpanda style!
+    // Foodpanda-r moto automatically sidebar open korte chaile nicher line-ta un-comment korben
+    // openFpSidebar(); 
 }
 
-// ==================== 2. Menu Card Button Transformer (The Foodpanda Interface) ====================
-function syncCardButtons() {
-    const addButtons = document.querySelectorAll('.btn-cart');
-    
-    addButtons.forEach(btn => {
-        const onclickText = btn.getAttribute('onclick');
-        if(!onclickText) return;
-        
-        // Extract exact item name from the docx format: addToCart(this, 'Item Name')
-        const match = onclickText.match(/'([^']+)'/);
-        if(match) {
-            const itemName = match[1];
-            const cartItem = cart.find(i => i.name === itemName);
-            
-            let parentDiv = btn.parentElement;
-            let toggleDiv = parentDiv.querySelector('.fp-qty-controls');
-            
-            // Jodi item cart-e thake tahole "Add" button hide kore [- 1 +] show korbo
-            if (cartItem && cartItem.qty > 0) {
-                btn.style.setProperty('display', 'none', 'important'); // Hide Add
-                
-                // Create the pill if it doesn't exist
-                if (!toggleDiv) {
-                    toggleDiv = document.createElement('div');
-                    toggleDiv.className = 'fp-qty-controls';
-                    // Foodpanda style pink pill CSS inline inject
-                    toggleDiv.style.cssText = 'display:inline-flex; align-items:center; background:#e21b70; color:#fff; border-radius:25px; padding:6px 12px; gap:15px; font-weight:bold; box-shadow: 0 3px 6px rgba(226,27,112,0.3); transition:all 0.3s;';
-                    parentDiv.appendChild(toggleDiv);
-                }
-                
-                toggleDiv.style.display = 'inline-flex';
-                toggleDiv.innerHTML = `
-                    <div onclick="updateMenuQty('${itemName}', -1)" style="cursor:pointer; width:22px; height:22px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:rgba(255,255,255,0.25); font-size:16px;">-</div>
-                    <span style="font-size:15px; width:15px; text-align:center;">${cartItem.qty}</span>
-                    <div onclick="updateMenuQty('${itemName}', 1)" style="cursor:pointer; width:22px; height:22px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:rgba(255,255,255,0.25); font-size:16px;">+</div>
-                `;
-            } else {
-                // Cart e na thakle abar normal "Add" button chole ashbe
-                btn.style.setProperty('display', 'inline-block', 'important');
-                if (toggleDiv) toggleDiv.style.display = 'none';
-            }
-        }
-    });
-}
-
-// Global Quantity handler for the Card Pill buttons
+// Global Quantity handler (For Sidebar & Checkout only)
 function updateMenuQty(name, change) {
     let existingItem = cart.find(item => item.name === name);
     if (existingItem) {
@@ -111,10 +64,9 @@ function updateMenuQty(name, change) {
     }
     
     renderCartData();
-    syncCardButtons();
 }
 
-// ==================== 3. UI Display Rendering (Sidebar & Checkout) ====================
+// ==================== 2. UI Display Rendering (Sidebar & Checkout) ====================
 function renderCartData() {
     const cartItemsContainer = document.getElementById('fp-cart-items-container');
     const checkoutItemsList = document.getElementById('checkout-items-list');
@@ -142,7 +94,7 @@ function renderCartData() {
             cartItemsContainer.innerHTML = `<div style="text-align:center; padding:30px; color:#aaa;">Your basket is empty</div>`;
         } else {
             let itemsHtml = '';
-            cart.forEach((item, index) => {
+            cart.forEach((item) => {
                 itemsHtml += `
                     <div style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
                         <div>
@@ -173,7 +125,7 @@ function renderCartData() {
     }
 }
 
-// Sidebar Drawer specific code
+// ==================== 3. Modals & Sidebars ====================
 function openFpSidebar() {
     const sidebar = document.getElementById('fp-sidebar');
     const overlay = document.getElementById('fp-sidebar-overlay');
@@ -221,7 +173,6 @@ function submitFinalOrder() {
     }
     cart = [];
     renderCartData();
-    syncCardButtons(); // Reset buttons back to "Add"
 }
 
 function closeOrderSuccess() {
@@ -232,5 +183,4 @@ function closeOrderSuccess() {
 
 document.addEventListener('DOMContentLoaded', function() {
     renderCartData();
-    syncCardButtons(); // On load sync up layout
 });

@@ -1,154 +1,115 @@
-// ==================== Global Cart Array ====================
-let cart = []; 
+// Global State management for shopping cart
+let shoppingCartState = [];
 
-// ==================== 1. Click "Add" -> Open Basket/Checkout Directly ====================
-function addToCart(btnElement, itemName) {
-    let price = 0;
-    let image = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=120'; 
+// DOM Element Referencing variables
+const cartSidebarElement = document.getElementById('cart-sidebar-window');
+const openCartBtn = document.getElementById('open-cart-btn');
+const closeCartBtn = document.getElementById('close-cart-btn');
+const cartItemsContainer = document.getElementById('cart-items-display-list');
+const cartTotalPriceTag = document.getElementById('cart-total-price-tag');
+const cartBadgeCount = document.getElementById('cart-badge-count');
+const checkoutModalPopup = document.getElementById('checkout-modal-popup');
 
-    // Menu card theke automatic price ar image dhorbe
-    try {
-        let parentCard = btnElement.closest('.menu-card') || btnElement.closest('.card') || btnElement.parentElement.parentElement;
-        if(parentCard) {
-            let cardText = parentCard.innerText;
-            let priceMatch = cardText.match(/Tk\s*(\d+)/i) || cardText.match(/৳\s*(\d+)/i);
-            if(priceMatch) price = parseInt(priceMatch[1]);
-            
-            let imgTag = parentCard.parentElement.querySelector('img') || parentCard.querySelector('img');
-            if(imgTag) image = imgTag.src;
-        }
-    } catch(e) {}
+// Event Hook listeners for operational UI
+openCartBtn.addEventListener('click', () => cartSidebarElement.classList.add('active'));
+closeCartBtn.addEventListener('click', () => cartSidebarElement.classList.remove('active'));
 
-    // Cart-e item add kora
-    let existingItem = cart.find(item => item.name === itemName);
-    if (existingItem) {
-        existingItem.qty += 1;
+// Cart manipulation business operations
+function addItemToCart(itemName, itemPrice) {
+    const analyticalExistingItemIndex = shoppingCartState.findIndex(entry => entry.name === itemName);
+    
+    if(analyticalExistingItemIndex > -1) {
+        shoppingCartState[analyticalExistingItemIndex].quantity += 1;
     } else {
-        cart.push({ id: Date.now(), name: itemName, price: price || 0, qty: 1, image: image });
+        shoppingCartState.push({
+            name: itemName,
+            price: itemPrice,
+            quantity: 1
+        });
     }
-
-    // Data render kore sathe sathe Checkout open kora!
-    renderCartData();
-    openFullCheckout(); 
+    synchronizeCartUI();
+    cartSidebarElement.classList.add('active'); // Pull up drawer immediately upon selection
 }
 
-// ==================== 2. Quantity Change & Delete Options ====================
-function updateQty(index, change) {
-    if (cart[index]) {
-        cart[index].qty += change;
-        
-        // Quantity 0 ba tar niche ashte chaile item delete hoye jabe
-        if (cart[index].qty <= 0) {
-            cart.splice(index, 1);
+function adjustmentItemQuantity(itemName, deltaAmount) {
+    const targetedItemIndex = shoppingCartState.findIndex(entry => entry.name === itemName);
+    if(targetedItemIndex > -1) {
+        shoppingCartState[targetedItemIndex].quantity += deltaAmount;
+        if(shoppingCartState[targetedItemIndex].quantity <= 0) {
+            shoppingCartState.splice(targetedItemIndex, 1);
         }
-    }
-    renderCartData();
-    
-    // Basket khali hoye gele page auto close hobe
-    if (cart.length === 0) closeFullCheckout();
-}
-
-function deleteItem(index) {
-    cart.splice(index, 1);
-    renderCartData();
-    if (cart.length === 0) closeFullCheckout();
-}
-
-// ==================== 3. Checkout Data Rendering (+, -, Delete Button) ====================
-function renderCartData() {
-    const checkoutItemsList = document.getElementById('checkout-items-list');
-    const chkSubtotal = document.getElementById('chk-subtotal');
-    const chkFinalTotal = document.getElementById('chk-final-total');
-
-    // Total hishab kora
-    let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-    let deliveryFee = subtotal > 0 ? 32 : 0; // Apnar delivery fee
-    let serviceFee = subtotal > 0 ? 19 : 0;  // Apnar service fee
-    let grandTotal = subtotal > 0 ? (subtotal + deliveryFee + serviceFee) : 0;
-
-    if (chkSubtotal) chkSubtotal.textContent = 'Tk ' + subtotal;
-    if (chkFinalTotal) chkFinalTotal.textContent = 'Tk ' + grandTotal;
-
-    // Checkout/Basket-er item list banano
-    if (checkoutItemsList) {
-        if (cart.length === 0) {
-            checkoutItemsList.innerHTML = `<p style="text-align:center; color:#888;">Your basket is empty.</p>`;
-        } else {
-            let html = '';
-            cart.forEach((item, index) => {
-                html += `
-                <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #eee; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
-                    
-                    <div style="display:flex; align-items:center; gap:12px;">
-                        <img src="${item.image}" style="width:50px; height:50px; object-fit:cover; border-radius:8px;">
-                        <div>
-                            <strong style="display:block; font-size:15px; color:#333;">${item.name}</strong>
-                            <span style="color:#e21b70; font-weight:bold;">Tk ${item.price * item.qty}</span>
-                        </div>
-                    </div>
-                    
-                    <div style="display:flex; align-items:center; gap:15px;">
-                        
-                        <div style="display:flex; align-items:center; background:#f7f7f7; border-radius:20px; border:1px solid #ddd;">
-                            <button onclick="updateQty(${index}, -1)" style="border:none; background:none; width:30px; height:30px; font-size:18px; cursor:pointer; color:#333;">-</button>
-                            <span style="font-weight:bold; font-size:14px; width:20px; text-align:center;">${item.qty}</span>
-                            <button onclick="updateQty(${index}, 1)" style="border:none; background:none; width:30px; height:30px; font-size:18px; cursor:pointer; color:#e21b70;">+</button>
-                        </div>
-                        
-                        <button onclick="deleteItem(${index})" style="background:none; border:none; color:#ff4757; font-size:18px; cursor:pointer;" title="Delete">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-
-                    </div>
-                </div>`;
-            });
-            checkoutItemsList.innerHTML = html;
-        }
+        synchronizeCartUI();
     }
 }
 
-// ==================== 4. Modal Open/Close Logic ====================
-function openFullCheckout() {
-    const checkoutPage = document.getElementById('full-checkout-page');
-    if (checkoutPage) checkoutPage.style.setProperty('display', 'block', 'important');
-}
-
-function closeFullCheckout() {
-    const checkoutPage = document.getElementById('full-checkout-page');
-    if (checkoutPage) checkoutPage.style.setProperty('display', 'none', 'important');
-}
-
-// Payment method select logic
-function selectFpPayment(method, element) {
-    document.querySelectorAll('.fp-pay-card').forEach(c => c.classList.remove('active'));
-    if(element) element.classList.add('active');
-}
-
-// ==================== 5. Final Order Confirmation ====================
-function submitFinalOrder() {
-    if (cart.length === 0) return alert("Basket is empty!");
+function synchronizeCartUI() {
+    // Count overall total dynamic inventory contents
+    let cumulativeItemCounter = 0;
+    let netAggregateBillAmount = 0;
     
-    const street = document.getElementById('chk-street');
-    if (street && !street.value.trim()) {
-        alert("⚠️ Please enter your Street / House Number!");
-        if(street) street.focus();
+    if(shoppingCartState.length === 0) {
+        cartItemsContainer.innerHTML = `<p class="empty-cart-message">Your shopping basket is completely empty.</p>`;
+    } else {
+        cartItemsContainer.innerHTML = '';
+        shoppingCartState.forEach(item => {
+            cumulativeItemCounter += item.quantity;
+            netAggregateBillAmount += (item.price * item.quantity);
+            
+            const renderedRowNode = document.createElement('div');
+            renderedRowNode.className = 'cart-item';
+            renderedRowNode.innerHTML = `
+                <div class="cart-item-info">
+                    <h4>${item.name}</h4>
+                    <p>৳ ${item.price * item.quantity}</p>
+                </div>
+                <div class="cart-item-qty">
+                    <button class="qty-btn" onclick="adjustmentItemQuantity('${item.name}', -1)">-</button>
+                    <span>${item.quantity}</span>
+                    <button class="qty-btn" onclick="adjustmentItemQuantity('${item.name}', 1)">+</button>
+                </div>
+            `;
+            cartItemsContainer.appendChild(renderedRowNode);
+        });
+    }
+    
+    // Apply variables neatly back over tracking parameters
+    cartBadgeCount.innerText = cumulativeItemCounter;
+    cartTotalPriceTag.innerText = '৳ ' + netAggregateBillAmount;
+}
+
+// Functional processing handlers for Modal interfaces
+function openCheckoutProcess() {
+    if(shoppingCartState.length === 0) {
+        alert('Your food basket is currently empty. Add dishes prior to attempting checkout!');
         return;
     }
-
-    const successOverlay = document.getElementById('orderSuccessOverlay');
-    if (successOverlay) {
-        successOverlay.style.display = 'flex';
-    } else {
-        alert("🎉 Order Placed Successfully!");
-    }
-
-    cart = [];
-    renderCartData();
-    if(street) street.value = '';
+    checkoutModalPopup.classList.add('active');
 }
 
-function closeOrderSuccess() {
-    const successOverlay = document.getElementById('orderSuccessOverlay');
-    if (successOverlay) successOverlay.style.display = 'none';
-    closeFullCheckout();
+function closeCheckoutProcess() {
+    checkoutModalPopup.classList.remove('active');
+}
+
+function handleCheckoutSubmit(eventEvent) {
+    eventEvent.preventDefault();
+    const locationAddressField = document.getElementById('chk-address').value;
+    const chosenPaymentRadioOption = document.querySelector('input[name="payment"]:checked').value;
+    
+    alert(`🎉 Splendid Choice! Order successfully placed via ${chosenPaymentRadioOption}.\nDelivery allocated to address: ${locationAddressField}.\nOur delivery specialist is processing your tracking parameter!`);
+    
+    // Purge existing variables resetting overall state machine safely
+    shoppingCartState = [];
+    synchronizeCartUI();
+    closeCheckoutProcess();
+    cartSidebarElement.classList.remove('active');
+    document.getElementById('order-checkout-form').reset();
+}
+
+function handleReservationSubmit(eventEvent) {
+    eventEvent.preventDefault();
+    const prospectiveGuestName = document.getElementById('res-name').value;
+    const chosenTargetedDate = document.getElementById('res-date').value;
+    
+    alert(`🍽️ Table Reserved Successfully!\nGreetings ${prospectiveGuestName}, your booking confirmation parameter has been verified for date: ${chosenTargetedDate}.\nA formal configuration SMS has been transmitted to your provided device line.`);
+    document.getElementById('table-reservation-form').reset();
 }

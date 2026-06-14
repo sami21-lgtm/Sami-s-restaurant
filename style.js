@@ -100,7 +100,7 @@ function updateCartUI() {
     }
 }
 
-// Show/Hide Checkout Modal
+// Show/Hide Basic Checkout Modal (Old Design)
 function toggleCheckoutModal(show) {
     const modal = document.getElementById('checkoutModal');
     modal.style.display = show ? 'flex' : 'none';
@@ -110,7 +110,7 @@ function toggleCheckoutModal(show) {
     }
 }
 
-// Render items inside the checkout modal
+// Render items inside the basic checkout modal
 function renderCheckoutItems() {
     const listContainer = document.getElementById('checkout-items-list');
     listContainer.innerHTML = '';
@@ -135,7 +135,7 @@ function renderCheckoutItems() {
     document.getElementById('summary-total-val').innerText = '৳' + grandTotal;
 }
 
-// Handle Checkout Order Submission
+// Handle Checkout Order Submission (Old Design)
 function handleOrderSubmission(event) {
     event.preventDefault(); // Prevent page reload
     
@@ -170,4 +170,137 @@ function showToast(message) {
     setTimeout(() => {
         toast.className = toast.className.replace("show-alert", "");
     }, 3000);
+}
+
+
+// =========================================================
+// MISSING CART & CHECKOUT FUNCTIONS (NEWLY ADDED)
+// =========================================================
+
+// Open Cart Sidebar
+function openFpSidebar() {
+    document.getElementById('fp-sidebar').classList.add('active');
+    
+    // Overlay jodi thake HTML e
+    const overlay = document.getElementById('fp-sidebar-overlay');
+    if(overlay) overlay.classList.add('active');
+    
+    renderFpCartItems();
+}
+
+// Close Cart Sidebar
+function closeFpSidebar() {
+    document.getElementById('fp-sidebar').classList.remove('active');
+    
+    const overlay = document.getElementById('fp-sidebar-overlay');
+    if(overlay) overlay.classList.remove('active');
+}
+
+// Render Items inside Sidebar
+function renderFpCartItems() {
+    const container = document.getElementById('fp-cart-items-container');
+    if(!container) return; // Jodi element na pay error thekabey
+    
+    container.innerHTML = '';
+    let subtotal = 0;
+    
+    if (cart.length === 0) {
+        container.innerHTML = '<p style="text-align:center; margin-top:20px; color:#888;">Your basket is empty.</p>';
+    } else {
+        cart.forEach(item => {
+            let itemTotal = item.price * item.qty;
+            subtotal += itemTotal;
+            container.innerHTML += `
+                <div style="display:flex; justify-content:space-between; padding: 12px 15px; border-bottom: 1px solid #eee; background:#fff; margin-bottom:8px; border-radius:8px;">
+                    <span style="font-weight:600;">${item.qty}x ${item.name}</span>
+                    <span style="color:var(--brand-orange-accent); font-weight:bold;">৳${itemTotal}</span>
+                </div>
+            `;
+        });
+    }
+    
+    const totalElement = document.getElementById('fp-sticky-total');
+    if(totalElement) totalElement.innerText = '৳ ' + subtotal;
+}
+
+// Open Full Checkout Page
+function openFullCheckout() {
+    if (cart.length === 0) {
+        showToast("Please add some items to your cart first!");
+        return;
+    }
+    closeFpSidebar();
+    
+    const fullCheckout = document.getElementById('full-checkout-page');
+    if(fullCheckout) {
+        fullCheckout.classList.add('active');
+        renderFullCheckoutItems();
+    }
+}
+
+// Close Full Checkout Page
+function closeFullCheckout() {
+    const fullCheckout = document.getElementById('full-checkout-page');
+    if(fullCheckout) fullCheckout.classList.remove('active');
+}
+
+// Render Items in Final Checkout
+function renderFullCheckoutItems() {
+    const container = document.getElementById('checkout-items-list-fp'); // Note: ID changed slightly to avoid conflict with old modal
+    if(!container) return;
+    
+    container.innerHTML = '';
+    let subtotal = 0;
+    
+    cart.forEach(item => {
+        let itemTotal = item.price * item.qty;
+        subtotal += itemTotal;
+        container.innerHTML += `
+            <div style="display:flex; justify-content:space-between; margin-bottom: 8px; font-size:14px;">
+                <span>${item.qty}x ${item.name}</span>
+                <span style="font-weight:600;">৳${itemTotal}</span>
+            </div>
+        `;
+    });
+    
+    const deliveryFee = 32;
+    const platformFee = 19;
+    const finalTotal = subtotal + deliveryFee + platformFee;
+    
+    if(document.getElementById('chk-subtotal')) document.getElementById('chk-subtotal').innerText = '৳ ' + subtotal;
+    if(document.getElementById('chk-final-total')) document.getElementById('chk-final-total').innerText = '৳ ' + finalTotal;
+}
+
+// Submit Final Order from Fullscreen
+function submitFinalOrder() {
+    const name = document.getElementById('fp-custName') ? document.getElementById('fp-custName').value : '';
+    const phone = document.getElementById('fp-custPhone') ? document.getElementById('fp-custPhone').value : '';
+    const address = document.getElementById('fp-custAddress') ? document.getElementById('fp-custAddress').value : '';
+
+    if(!name || !phone || !address) {
+        showToast("Please fill in all delivery details!");
+        return;
+    }
+
+    // Hide checkout page & show success screen
+    const fullCheckout = document.getElementById('full-checkout-page');
+    if(fullCheckout) fullCheckout.classList.remove('active');
+    
+    const successOverlay = document.getElementById('checkout-success-view');
+    if(successOverlay) successOverlay.classList.add('active');
+    
+    // Clear the cart
+    cart = [];
+    updateCartUI();
+}
+
+// Return Home after success
+function resetToHome() {
+    const successOverlay = document.getElementById('checkout-success-view');
+    if(successOverlay) successOverlay.classList.remove('active');
+    
+    // Reset inputs
+    if(document.getElementById('fp-custName')) document.getElementById('fp-custName').value = '';
+    if(document.getElementById('fp-custPhone')) document.getElementById('fp-custPhone').value = '';
+    if(document.getElementById('fp-custAddress')) document.getElementById('fp-custAddress').value = '';
 }

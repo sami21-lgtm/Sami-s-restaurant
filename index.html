@@ -791,7 +791,7 @@
         </div>
     </div>
 
-    <div id="fp-sidebar-overlay" class="fp-overlay" onclick="closeFpSidebar()"></div>
+       <div id="fp-sidebar-overlay" class="fp-overlay" onclick="closeFpSidebar()"></div>
     <div id="fp-sidebar" class="fp-sidebar">
         <div class="fp-header">
             <h2>Basket</h2>
@@ -817,69 +817,30 @@
 
             <div class="fp-section-title" style="margin-top: 25px;">Payment Method</div>
             <div class="fp-payment-options">
-                <label class="fp-pay-card active" onclick="selectFpPayment('cod', this)">
-                    <input type="radio" name="fp_payment" value="cod" checked>
-                    <div class="pay-card-content">
-                        <i class="fa-solid fa-money-bill-1-wave" style="color:#27ae60;"></i>
-                        <span>Cash on Delivery</span>
-                    </div>
-                </label>
-                <label class="fp-pay-card" onclick="selectFpPayment('digital', this)">
-                    <input type="radio" name="fp_payment" value="digital">
-                    <div class="pay-card-content">
-                        <i class="fa-solid fa-mobile-screen" style="color:#d70f64;"></i>
-                        <span>bKash / Nagad</span>
-                    </div>
-                </label>
-            </div>
-
-            <div id="fp-otp-section" class="fp-otp-container" style="display: none;">
-                <p class="otp-instruction">Enter your mobile wallet number to verify</p>
-                <div class="fp-input-group flex-row">
-                    <input type="tel" id="fp-walletNumber" placeholder="01XXXXXXXXX">
-                    <button type="button" class="fp-send-otp-btn" id="fp-sendBtn" onclick="triggerFpOtp()">Send OTP</button>
-                </div>
-                
-                <div id="fp-otp-boxes-area" style="display:none; margin-top: 15px;">
-                    <p class="otp-instruction">Enter the 4-digit code sent to your number</p>
-                    <div class="fp-otp-inputs">
-                        <input type="text" maxlength="1" class="fp-otp-box" oninput="handleFpOtpBox(this, 1)">
-                        <input type="text" maxlength="1" class="fp-otp-box" oninput="handleFpOtpBox(this, 2)">
-                        <input type="text" maxlength="1" class="fp-otp-box" oninput="handleFpOtpBox(this, 3)">
-                        <input type="text" maxlength="1" class="fp-otp-box" oninput="handleFpOtpBox(this, 4)">
-                    </div>
-                    <p id="fp-otp-status" class="otp-status-text"></p>
-                </div>
+                <label class="fp-pay-opt active-opt"><input type="radio" name="pay_method" checked> Cash on Delivery</label>
+                <label class="fp-pay-opt"><input type="radio" name="pay_method"> bKash / Nagad</label>
             </div>
         </div>
-
-        <div class="fp-footer">
-            <button class="fp-checkout-btn" onclick="submitFpOrder()">
-                <span class="btn-text">Confirm Order</span>
-                <span class="btn-price" id="fp-sticky-total">৳0</span>
-            </button>
+        
+        <div class="fp-sidebar-footer">
+            <div class="fp-summary-row">
+                <span>Total</span>
+                <strong id="fp-sticky-total">৳ 0</strong>
+            </div>
+            <button class="fp-review-btn" onclick="submitFinalOrder()">Place Order</button>
         </div>
     </div>
 
-   <button class="btn-place-order" onclick="submitFinalOrder()">Place order</button>
-            </div>
-          </div>
+    <!-- Success Overlay -->
+    <div id="checkout-success-view" class="order-success-overlay" style="display: none;">
+        <div class="success-content">
+            <div class="success-icon-circle"><i class="fa-solid fa-check"></i></div>
+            <h1>Order Placed Successfully!</h1>
+            <p>Your delicious food is being prepared and will be delivered shortly.</p>
+            <button class="fp-review-btn" onclick="resetToHome()" style="margin-top:20px; background-color: var(--brand-orange-accent);">Continue Exploring</button>
         </div>
-      </div> <!-- checkout-content শেষ -->
-      
-      <!-- ====== এখানে সাকসেস স্ক্রিনের কোড বসবে ====== -->
-      <div class="order-success-overlay" id="checkout-success-view" style="display:none;">
-          <div class="success-content">
-              <div class="success-icon-circle"><i class="fa-solid fa-check"></i></div>
-              <h1>Order Placed Successfully!</h1>
-              <p>Your delicious food is being prepared and will be delivered shortly.</p>
-              <button class="btn-place-order" onclick="resetToHome()" style="margin-top:20px; width:auto; padding: 12px 30px;">Continue Exploring</button>
-          </div>
-      </div>
-      <!-- ====== সাকসেস স্ক্রিন শেষ ====== -->
+    </div>
 
-    </div> 
-    
     <div id="toast-notification"></div>
     <script src="script.js"></script>
 </body>

@@ -1,10 +1,13 @@
 // developed by Md. Emtiaz Hossain Sami 2026
 
+// গ্লোবাল কার্ট অ্যারে
 let cart = [];
 
+// ১. কার্টে খাবার যোগ করার মেইন ফাংশন
 function addFoodToCart(name, price) {
     price = parseInt(price);
     let existingItem = cart.find(item => item.name === name);
+    
     if (existingItem) { 
         existingItem.qty += 1; 
     } else { 
@@ -14,7 +17,7 @@ function addFoodToCart(name, price) {
     syncCardButtons();
     renderCartData();
     
-    // Add তে ক্লিক করলে নিচে কার্ট বার ভেসে উঠবে এবং সাথে সাথে সাইডবার ওপেন হবে
+    // আইটেম অ্যাড করার সাথে সাথে ফ্লোটিং বার শো করবে এবং সাইডবার ওপেন হবে
     const floatingCart = document.getElementById('floating-cart');
     if (floatingCart) {
         floatingCart.classList.remove('hidden');
@@ -24,6 +27,7 @@ function addFoodToCart(name, price) {
     showToast(`${name} added to cart!`);
 }
 
+// ২. মেইন মেনু কার্ড থেকে সরাসরি পরিমাপ (+/-) পরিবর্তন
 function updateCardItemQty(name, factor) {
     let index = cart.findIndex(item => item.name === name);
     if (index !== -1) {
@@ -36,10 +40,12 @@ function updateCardItemQty(name, factor) {
     renderCartData();
 }
 
+// ৩. সাইডবার কার্ট থেকে পরিমাপ (+/-) পরিবর্তন
 function updateSidebarQty(name, factor) {
     updateCardItemQty(name, factor);
 }
 
+// ৪. কার্ট থেকে সম্পূর্ণ আইটেم ট্র্যাশ ক্যান দিয়ে ডিলিট করা
 function deleteCartItem(name) {
     let index = cart.findIndex(item => item.name === name);
     if (index !== -1) {
@@ -50,6 +56,28 @@ function deleteCartItem(name) {
     showToast(`${name} removed from basket`);
 }
 
+// ৫. ড্রপডাউন ভেরিয়েন্ট পরিবর্তন হলে প্রাইস আপডেট করার ফাংশন
+function updateDynamicPricing(selectElement) {
+    const price = selectElement.value;
+    const cardBody = selectElement.closest('.product-card-body');
+    if (!cardBody) return;
+    
+    const priceDisplay = cardBody.querySelector('.dynamic-render-price');
+    const actionWrapper = cardBody.querySelector('.fp-card-action-wrapper');
+    
+    if (priceDisplay) priceDisplay.textContent = ` ৳ ${price}`;
+    if (actionWrapper) {
+        actionWrapper.dataset.price = price;
+        const name = actionWrapper.dataset.name;
+        const existingItem = cart.find(item => item.name === name);
+        if (existingItem) { 
+            existingItem.price = parseInt(price); 
+            renderCartData(); 
+        }
+    }
+}
+
+// ৬. মেনু কার্ডের 'Add' বাটন এবং '+ / -' কন্ট্রোলারের মধ্যে UI সিঙ্ক করা
 function syncCardButtons() {
     document.querySelectorAll('.fp-card-action-wrapper').forEach(wrapper => {
         const itemName = wrapper.getAttribute('data-name');
@@ -70,6 +98,7 @@ function syncCardButtons() {
     });
 }
 
+// ৭. কার্টের ডেটা রেন্ডার এবং ফুডপান্ডা স্টাইল বিলিং ক্যালকুলেশন
 function renderCartData() {
     const cartContainer = document.getElementById('fp-cart-items-container');
     const checkoutList = document.getElementById('checkout-items-list');
@@ -85,16 +114,24 @@ function renderCartData() {
     if (checkoutList) checkoutList.innerHTML = '';
 
     if (cart.length === 0) {
-        if (cartContainer) cartContainer.innerHTML = '<div style="text-align:center; padding: 50px 20px;"><i class="fa-solid fa-basket-shopping" style="font-size:40px; color:#ddd; margin-bottom:15px;"></i><p style="color:#777; font-weight:bold;">Your basket is empty</p></div>';
+        if (cartContainer) {
+            cartContainer.innerHTML = `
+                <div style="text-align:center; padding: 50px 20px;">
+                    <i class="fa-solid fa-basket-shopping" style="font-size:40px; color:#ddd; margin-bottom:15px;"></i>
+                    <p style="color:#777; font-weight:bold;">Your basket is empty</p>
+                </div>`;
+        }
         if (floatingBar) floatingBar.classList.add('hidden');
         closeFpSidebar();
     } else {
         if (floatingBar) floatingBar.classList.remove('hidden');
+        
         cart.forEach(item => {
             totalQty += item.qty;
             let itemTotal = item.price * item.qty;
             totalPrice += itemTotal;
 
+            // সাইডবারে আইটেম রেন্ডার
             if (cartContainer) {
                 cartContainer.innerHTML += `
                     <div class="sidebar-item" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:15px 0;">
@@ -115,6 +152,7 @@ function renderCartData() {
                     </div>`;
             }
             
+            // ফুল স্ক্রিন চেকআউট লিস্টে আইটেম রেন্ডার
             if (checkoutList) {
                 checkoutList.innerHTML += `
                     <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px; color:#333;">
@@ -125,18 +163,20 @@ function renderCartData() {
         });
     }
     
-    // Foodpanda Style Bill Calculation
+    // ফুডপান্ডা কনস্ট্যান্ট ফি সমূহ
     let deliveryFee = 32;
     let platformFeeAndVat = 19;
     let finalCheckoutTotal = totalPrice > 0 ? (totalPrice + deliveryFee + platformFeeAndVat) : 0; 
     
+    // UI অবজেক্টস আপডেট
     if (floatingCount) floatingCount.textContent = totalQty;
-    if (floatingPrice) floatingPrice.textContent = `Tk ${totalPrice}`;
-    if (checkoutSubtotal) checkoutSubtotal.textContent = `Tk ${totalPrice}`;
-    if (checkoutTotal) checkoutTotal.textContent = `Tk ${finalCheckoutTotal}`;
-    if (sidebarStickyTotal) sidebarStickyTotal.textContent = `Tk ${totalPrice}`;
+    if (floatingPrice) floatingPrice.textContent = ` ৳ ${totalPrice}`;
+    if (checkoutSubtotal) checkoutSubtotal.textContent = ` ৳ ${totalPrice}`;
+    if (checkoutTotal) checkoutTotal.textContent = ` ৳ ${finalCheckoutTotal}`;
+    if (sidebarStickyTotal) sidebarStickyTotal.textContent = ` ৳ ${totalPrice}`;
 }
 
+// ৮. সাইডবার ওপেন/ক্লোজ কন্ট্রোল
 function openFpSidebar() { 
     if(cart.length === 0) return;
     const overlay = document.getElementById('fp-sidebar-overlay');
@@ -152,12 +192,13 @@ function closeFpSidebar() {
     if (sidebar) sidebar.style.right = '-450px'; 
 }
 
+// ৯. ফুল স্ক্রিন চেকআউট পেজ ওপেন/ক্লোজ
 function openFullCheckout() {
     if (cart.length === 0) return;
     closeFpSidebar();
     const checkoutPage = document.getElementById('full-checkout-page');
     if (checkoutPage) checkoutPage.style.display = 'block';
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden'; // মেইন বডির স্ক্রল লক করার জন্য
     
     const checkoutContent = document.querySelector('.checkout-content');
     if (checkoutContent) checkoutContent.style.display = 'block';
@@ -168,9 +209,10 @@ function openFullCheckout() {
 function closeFullCheckout() { 
     const checkoutPage = document.getElementById('full-checkout-page');
     if (checkoutPage) checkoutPage.style.display = 'none'; 
-    document.body.style.overflow = 'auto'; 
+    document.body.style.overflow = 'auto'; // স্ক্রল নরমাল করা
 }
 
+// ১০. ফাইনাল অর্ডার সাবমিট এবং ভ্যালিডেশন
 function submitFinalOrder() {
     const name = document.getElementById('fp-custName').value.trim();
     const phone = document.getElementById('fp-custPhone').value.trim();
@@ -185,12 +227,14 @@ function submitFinalOrder() {
     if (successView) successView.style.display = 'flex';
 }
 
+// ১১. অর্ডার সাকসেস হওয়ার পর সবকিছু রিসেট করে হোমে ফিরে যাওয়া
 function resetToHome() {
     cart = [];
     renderCartData(); 
     syncCardButtons(); 
     closeFullCheckout();
     
+    // ফর্মের ইনপুট ফিল্ড খালি করা
     document.getElementById('fp-custName').value = '';
     document.getElementById('fp-custPhone').value = '';
     document.getElementById('fp-custAddress').value = '';
@@ -199,6 +243,25 @@ function resetToHome() {
     if (successView) successView.style.display = 'none';
 }
 
+// ১২. মেনু ক্যাটাগরি ফিল্টার ফাংশন
+function filterMenu(category) {
+    document.querySelectorAll('.filter-tab-btn').forEach(btn => btn.classList.remove('active'));
+    if (event && event.target) event.target.classList.add('active');
+    document.querySelectorAll('.product-item-card').forEach(card => {
+        card.style.display = (category === 'all' || card.classList.contains(category)) ? 'flex' : 'none';
+    });
+}
+
+// ১৩. শেফ ইমেজ প্রিভিউ ম্যানেজার
+function previewChefImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => document.getElementById('chef-vera-img').src = e.target.result;
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// ১৪. কাস্টম টোস্ট নোটিফিকেশন সিস্টেম
 function showToast(message) {
     const toast = document.getElementById('toast-notification');
     if (!toast) return;
@@ -208,6 +271,7 @@ function showToast(message) {
     setTimeout(() => toast.style.display = 'none', 2500);
 }
 
+// ১৫. DOM পুরোপুরি লোড হলে প্রাথমিক স্টেট রান করা
 document.addEventListener('DOMContentLoaded', () => { 
     syncCardButtons(); 
     renderCartData(); 

@@ -1,214 +1,267 @@
 let cart = [];
 
-// Filter Menu
-function filterMenu(category) {
-    let btns = document.querySelectorAll('.filter-tab-btn');
-    btns.forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
+// ==========================================
+// 1. ADD TO CART & QUANTITY CONTROLLERS
+// ==========================================
 
-    let items = document.querySelectorAll('.product-item-card');
-    items.forEach(item => {
-        if (category === 'all' || item.classList.contains(category)) {
-            item.style.display = 'block';
-        } else {
-            item.style.display = 'none';
-        }
-    });
-}
-
-// Update Price on Dropdown Change
-function updateDynamicPricing(selectElement) {
-    let price = selectElement.value;
-    let card = selectElement.closest('.product-item-card');
-    card.querySelector('.dynamic-render-price').innerText = '৳ ' + price;
-    
-    // Update wrapper data-price
-    let wrapper = card.querySelector('.fp-card-action-wrapper');
-    wrapper.setAttribute('data-price', price);
-
-    // If item is in cart, update its price
-    let name = wrapper.getAttribute('data-name');
-    let itemInCart = cart.find(item => item.name === name);
-    if (itemInCart) {
-        itemInCart.price = parseInt(price);
-        renderSidebarCart();
-        updateFloatingCart();
-    }
-}
-
-// Add to Cart
-function addFoodToCart(btnElement, name, price) {
-    let wrapper = btnElement.closest('.fp-card-action-wrapper');
-    let currentPrice = parseInt(wrapper.getAttribute('data-price'));
-    
-    let existingItem = cart.find(item => item.name === name);
+// Add item to cart from Menu Card
+function addFoodToCart(name, price) {
+    price = parseInt(price);
+    const existingItem = cart.find(item => item.name === name);
     if (existingItem) {
-        existingItem.qty++;
-        existingItem.price = currentPrice; // update price if variant changed
+        existingItem.qty += 1;
     } else {
-        cart.push({ name, price: currentPrice, qty: 1 });
+        cart.push({ name, price, qty: 1 });
     }
-
-    wrapper.classList.add('item-added');
-    wrapper.querySelector('.fp-card-qty-display').innerText = existingItem ? existingItem.qty : 1;
-    
-    renderSidebarCart();
-    updateFloatingCart();
+    renderMenuButtons();
+    renderCart();
+    showToast(`${name} added to cart!`);
 }
 
-// Update Quantity from Menu Card
-function updateCardItemQty(btnElement, name, delta) {
-    let wrapper = btnElement.closest('.fp-card-action-wrapper');
-    let item = cart.find(i => i.name === name);
+// Update quantity from Menu Card (+/-)
+function updateCardItemQty(name, delta) {
+    const existingItem = cart.find(item => item.name === name);
+    if (existingItem) {
+        existingItem.qty += delta;
+        if (existingItem.qty <= 0) {
+            cart = cart.filter(item => item.name !== name);
+        }
+    }
+    renderMenuButtons();
+    renderCart();
+}
+
+// Update quantity from Sidebar Cart (+/-)
+function updateSidebarQty(name, delta) {
+    const existingItem = cart.find(item => item.name === name);
+    if (existingItem) {
+        existingItem.qty += delta;
+        if (existingItem.qty <= 0) {
+            cart = cart.filter(item => item.name !== name);
+        }
+    }
+    renderMenuButtons();
+    renderCart();
+}
+
+// Update price when dropdown variant changes (e.g., Half/Full)
+function updateDynamicPricing(selectElement) {
+    const price = selectElement.value;
+    const cardBody = selectElement.closest('.product-card-body');
+    const priceDisplay = cardBody.querySelector('.dynamic-render-price');
+    const actionWrapper = cardBody.querySelector('.fp-card-action-wrapper');
     
-    if (item) {
-        item.qty += delta;
-        if (item.qty <= 0) {
-            cart = cart.filter(i => i.name !== name);
-            wrapper.classList.remove('item-added');
+    priceDisplay.textContent = ` ৳ ${price}`;
+    actionWrapper.dataset.price = price;
+    
+    // If item is already in cart, update its price dynamically
+    const name = actionWrapper.dataset.name;
+    const existingItem = cart.find(item => item.name === name);
+    if (existingItem) {
+        existingItem.price = parseInt(price);
+        renderCart();
+    }
+}
+
+// ==========================================
+// 2. RENDERING (UI UPDATES)
+// ==========================================
+
+// Render Add/Qty buttons on the Menu Cards
+function renderMenuButtons() {
+    document.querySelectorAll('.fp-card-action-wrapper').forEach(wrapper => {
+        const name = wrapper.dataset.name;
+        const itemInCart = cart.find(item => item.name === name);
+        const addBtn = wrapper.querySelector('.fp-card-add-btn');
+        const qtyControl = wrapper.querySelector('.fp-card-qty-control');
+        const qtyDisplay = wrapper.querySelector('.fp-card-qty-display');
+
+        if (itemInCart) {
+            addBtn.style.display = 'none';
+            qtyControl.style.display = 'flex';
+            qtyDisplay.textContent = itemInCart.qty;
         } else {
-            wrapper.querySelector('.fp-card-qty-display').innerText = item.qty;
+            addBtn.style.display = 'block';
+            qtyControl.style.display = 'none';
         }
-    }
-    
-    renderSidebarCart();
-    updateFloatingCart();
-}
-
-// Update Quantity from Sidebar
-function updateSidebarItemQty(name, delta) {
-    let item = cart.find(i => i.name === name);
-    if (item) {
-        item.qty += delta;
-        if (item.qty <= 0) {
-            cart = cart.filter(i => i.name !== name);
-            // Also update the menu card button
-            let cardWrapper = document.querySelector(`.fp-card-action-wrapper[data-name="${name}"]`);
-            if(cardWrapper) cardWrapper.classList.remove('item-added');
-        }
-    }
-    renderSidebarCart();
-    updateFloatingCart();
-}
-
-// Render Sidebar Cart
-function renderSidebarCart() {
-    let container = document.getElementById('fp-cart-items-container');
-    container.innerHTML = '';
-    
-    if (cart.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#888; margin-top:20px;">Your cart is empty</p>';
-        return;
-    }
-
-    cart.forEach(item => {
-        container.innerHTML += `
-            <div class="sidebar-item">
-                <div class="sidebar-item-info">
-                    <h4>${item.name}</h4>
-                    <span>৳ ${item.price} x ${item.qty}</span>
-                </div>
-                <div class="sidebar-item-qty">
-                    <button onclick="updateSidebarItemQty('${item.name}', -1)">-</button>
-                    <span>${item.qty}</span>
-                    <button onclick="updateSidebarItemQty('${item.name}', 1)">+</button>
-                </div>
-            </div>
-        `;
     });
 }
 
-// Update Floating Cart
-function updateFloatingCart() {
-    let totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
-    let totalPrice = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+// Render Cart Sidebar, Floating Bar, and Checkout Summary
+function renderCart() {
+    const cartContainer = document.getElementById('fp-cart-items-container');
+    const checkoutList = document.getElementById('checkout-items-list');
+    const floatingCount = document.getElementById('cart-item-count');
+    const floatingPrice = document.getElementById('cart-total-price');
+    const checkoutTotal = document.getElementById('chk-final-total');
+    const floatingBar = document.getElementById('floating-cart');
+
+    let totalQty = 0;
+    let totalPrice = 0;
     
-    document.getElementById('cart-item-count').innerText = totalItems;
-    document.getElementById('cart-total-price').innerText = 'Tk ' + totalPrice;
-    
-    let floatingCart = document.getElementById('floating-cart');
-    if (cart.length > 0) {
-        floatingCart.classList.remove('hidden');
+    cartContainer.innerHTML = '';
+    checkoutList.innerHTML = '';
+
+    if (cart.length === 0) {
+        cartContainer.innerHTML = '<p style="text-align:center; color:#777; padding:20px;">Your basket is empty</p>';
+        floatingBar.classList.add('hidden');
     } else {
-        floatingCart.classList.add('hidden');
+        floatingBar.classList.remove('hidden');
+        cart.forEach(item => {
+            totalQty += item.qty;
+            let itemTotal = item.price * item.qty;
+            totalPrice += itemTotal;
+
+            // Sidebar Cart Item HTML (With +/- to remove)
+            cartContainer.innerHTML += `
+                <div class="sidebar-item">
+                    <div style="flex:1">
+                        <strong style="display:block; margin-bottom:5px;">${item.name}</strong>
+                        <div class="fp-card-qty-control" style="display:flex; width:auto;">
+                            <button class="fp-card-qty-btn minus" onclick="updateSidebarQty('${item.name}', -1)">-</button>
+                            <span class="fp-card-qty-display" style="width:30px;">${item.qty}</span>
+                            <button class="fp-card-qty-btn plus" onclick="updateSidebarQty('${item.name}', 1)">+</button>
+                        </div>
+                    </div>
+                    <strong style="margin-left:15px;">৳ ${itemTotal}</strong>
+                </div>
+            `;
+            
+            // Checkout Summary Item HTML
+            checkoutList.innerHTML += `
+                <div class="chk-item-row">
+                    <span>${item.qty}x ${item.name}</span>
+                    <span>৳ ${itemTotal}</span>
+                </div>
+            `;
+        });
     }
+
+    floatingCount.textContent = totalQty;
+    floatingPrice.textContent = `Tk ${totalPrice}`;
+    checkoutTotal.textContent = `Tk ${totalPrice}`;
 }
 
-// Sidebar Open/Close
+// ==========================================
+// 3. CART SIDEBAR & CHECKOUT TOGGLES
+// ==========================================
+
 function openFpSidebar() {
-    document.getElementById('fp-sidebar').classList.add('open');
-    document.getElementById('fp-sidebar-overlay').classList.add('open');
+    document.getElementById('fp-sidebar-overlay').style.display = 'block';
+    document.getElementById('fp-sidebar').style.right = '0';
 }
 
 function closeFpSidebar() {
-    document.getElementById('fp-sidebar').classList.remove('open');
-    document.getElementById('fp-sidebar-overlay').classList.remove('open');
+    document.getElementById('fp-sidebar-overlay').style.display = 'none';
+    document.getElementById('fp-sidebar').style.right = '-450px';
 }
 
-// Checkout Page Open/Close
 function openFullCheckout() {
-    if (cart.length === 0) return alert("Your cart is empty!");
-    
+    if(cart.length === 0) {
+        showToast("Your cart is empty!");
+        return;
+    }
     closeFpSidebar();
-    renderCheckoutSummary();
-    document.getElementById('full-checkout-page').classList.add('open');
-    document.getElementById('order-success-msg').style.display = 'none';
-    document.getElementById('checkout-form-section').style.display = 'block';
-    document.body.style.overflow = 'hidden'; // prevent background scroll
+    document.getElementById('full-checkout-page').style.display = 'block';
+    document.body.style.overflow = 'hidden'; // Disable background scroll
+    
+    // Ensure form view is visible and success view is hidden initially
+    document.getElementById('checkout-form-view').style.display = 'block';
+    document.getElementById('checkout-success-view').style.display = 'none';
 }
 
 function closeFullCheckout() {
-    document.getElementById('full-checkout-page').classList.remove('open');
-    document.body.style.overflow = 'auto';
+    document.getElementById('full-checkout-page').style.display = 'none';
+    document.body.style.overflow = 'auto'; // Enable background scroll
 }
 
-// Render Checkout Summary
-function renderCheckoutSummary() {
-    let list = document.getElementById('checkout-items-list');
-    list.innerHTML = '';
-    let total = 0;
+// ==========================================
+// 4. ORDER SUCCESS & RESET (Image 1 Logic)
+// ==========================================
 
-    cart.forEach(item => {
-        let itemTotal = item.price * item.qty;
-        total += itemTotal;
-        list.innerHTML += `<div class="chk-item"><span>${item.qty}x ${item.name}</span> <span>৳ ${itemTotal}</span></div>`;
-    });
-
-    document.getElementById('chk-final-total').innerText = 'Tk ' + total;
-}
-
-// Submit Final Order
 function submitFinalOrder() {
-    let name = document.getElementById('chk-name').value;
-    let phone = document.getElementById('chk-phone').value;
-    let address = document.getElementById('chk-address').value;
+    const name = document.getElementById('chk-name').value.trim();
+    const phone = document.getElementById('chk-phone').value.trim();
+    const address = document.getElementById('chk-address').value.trim();
 
-    if (!name || !phone || !address) {
-        alert("Please fill in Name, Phone, and Address.");
+    if(!name || !phone || !address) {
+        showToast("Please fill in Name, Phone, and Address.");
         return;
     }
 
-    // Hide form, show success
-    document.getElementById('checkout-form-section').style.display = 'none';
-    document.getElementById('order-success-msg').style.display = 'block';
+    // Hide form view, show success overlay
+    document.getElementById('checkout-form-view').style.display = 'none';
+    document.getElementById('checkout-success-view').style.display = 'flex';
 }
 
-// Continue Dining (Reset)
-function continueDining() {
-    cart = [];
-    updateFloatingCart();
+// "Continue Exploring" / "Continue Dining" button logic
+function resetToHome() {
+    cart = []; // Empty the cart
+    renderCart(); // Update UI
+    renderMenuButtons(); // Reset menu buttons to "Add"
+    closeFullCheckout(); // Close checkout panel
     
-    // Reset all menu cards
-    document.querySelectorAll('.fp-card-action-wrapper').forEach(wrapper => {
-        wrapper.classList.remove('item-added');
-        wrapper.querySelector('.fp-card-qty-display').innerText = '1';
-    });
-    
-    // Clear inputs
+    // Clear checkout form inputs
     document.getElementById('chk-name').value = '';
     document.getElementById('chk-phone').value = '';
     document.getElementById('chk-address').value = '';
-
-    closeFullCheckout();
+    
+    // Scroll back to menu section
     window.location.href = '#menu';
+}
+
+// ==========================================
+// 5. MENU FILTERING
+// ==========================================
+
+function filterMenu(category) {
+    // Update active button
+    document.querySelectorAll('.filter-tab-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+
+    // Show/Hide cards
+    document.querySelectorAll('.product-item-card').forEach(card => {
+        if (category === 'all' || card.classList.contains(category)) {
+            card.style.display = 'flex';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+// ==========================================
+// 6. UTILITY FUNCTIONS
+// ==========================================
+
+// Chef Image Preview
+function previewChefImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('chef-vera-img').src = e.target.result;
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Toast Notification
+function showToast(message) {
+    const toast = document.getElementById('toast-notification');
+    toast.textContent = message;
+    toast.style.display = 'block';
+    toast.style.position = 'fixed';
+    toast.style.bottom = '100px';
+    toast.style.left = '50%';
+    toast.style.transform = 'translateX(-50%)';
+    toast.style.background = '#333';
+    toast.style.color = '#fff';
+    toast.style.padding = '10px 25px';
+    toast.style.borderRadius = '8px';
+    toast.style.zIndex = '9999';
+    toast.style.fontSize = '14px';
+    toast.style.boxShadow = '0 4px 10px rgba(0,0,0,0.2)';
+    
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 2000);
 }

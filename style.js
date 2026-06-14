@@ -1,12 +1,12 @@
-// ==================== Global Array ====================
+// ==================== Global Cart Array ====================
 let cart = []; 
 
-// ==================== 1. Clean Add To Cart Engine ====================
+// ==================== 1. Click "Add" -> Open Checkout Directly ====================
 function addToCart(btnElement, itemName) {
     let price = 0;
-    let image = '';
+    let image = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=120'; // Default image
 
-    // Docx html theke auto price ar image track korar code
+    // Card theke price ar image dhorar try korbe
     try {
         let parentCard = btnElement.closest('.menu-card') || btnElement.closest('.card') || btnElement.parentElement.parentElement;
         if(parentCard) {
@@ -17,170 +17,140 @@ function addToCart(btnElement, itemName) {
             let imgTag = parentCard.parentElement.querySelector('img') || parentCard.querySelector('img');
             if(imgTag) image = imgTag.src;
         }
-    } catch(e) {
-        console.log("Card HTML match failed.");
-    }
+    } catch(e) {}
 
-    // Add to Array
+    // Cart-e item add ba update kora
     let existingItem = cart.find(item => item.name === itemName);
     if (existingItem) {
         existingItem.qty += 1;
     } else {
-        cart.push({
-            id: Date.now(),
-            name: itemName,
-            price: price || 0,
-            qty: 1,
-            image: image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=120'
-        });
+        cart.push({ id: Date.now(), name: itemName, price: price || 0, qty: 1, image: image });
     }
 
-    // Update Floating Cart Visibility
-    const floatingCart = document.getElementById('floating-cart');
-    if (floatingCart) {
-        floatingCart.classList.remove('hidden');
-        floatingCart.style.setProperty('display', 'flex', 'important');
-    }
-
+    // Data render kore sathe sathe Checkout/Basket open kora!
     renderCartData();
-    // Foodpanda-r moto automatically sidebar open korte chaile nicher line-ta un-comment korben
-    // openFpSidebar(); 
+    openCheckoutSidebar(); // <--- Ei function direct sidebar open kore dibe!
 }
 
-// Global Quantity handler (For Sidebar & Checkout only)
-function updateMenuQty(name, change) {
-    let existingItem = cart.find(item => item.name === name);
-    if (existingItem) {
-        existingItem.qty += change;
-        if (existingItem.qty <= 0) {
-            cart = cart.filter(i => i.name !== name);
-        }
-    }
-    
-    // Check auto-hiding floating basket
-    if(cart.length === 0) {
-        const floatingCart = document.getElementById('floating-cart');
-        if(floatingCart) floatingCart.style.setProperty('display', 'none', 'important');
-    }
-    
-    renderCartData();
-}
-
-// ==================== 2. UI Display Rendering (Sidebar & Checkout) ====================
+// ==================== 2. Checkout Panel Data Rendering ====================
 function renderCartData() {
-    const cartItemsContainer = document.getElementById('fp-cart-items-container');
-    const checkoutItemsList = document.getElementById('checkout-items-list');
-    
-    const cartItemCount = document.getElementById('cart-item-count');
-    const cartTotalPrice = document.getElementById('cart-total-price');
-    const fpStickyTotal = document.getElementById('fp-sticky-total');
-    
-    const chkSubtotal = document.getElementById('chk-subtotal');
-    const chkFinalTotal = document.getElementById('chk-final-total');
+    const itemsContainer = document.getElementById('fp-cart-items-container');
+    const totalBadge = document.getElementById('fp-sticky-total');
 
-    let totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
-    let subtotalAmt = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-    let grandTotalAmt = subtotalAmt > 0 ? (subtotalAmt + 32 + 19) : 0;
+    let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    // Apnar delivery fee thakle ekhane add hobe
+    let grandTotal = subtotal > 0 ? subtotal : 0; 
 
-    if (cartItemCount) cartItemCount.textContent = totalItems;
-    if (cartTotalPrice) cartTotalPrice.textContent = 'Tk ' + subtotalAmt;
-    if (fpStickyTotal) fpStickyTotal.textContent = 'Tk ' + grandTotalAmt;
-    if (chkSubtotal) chkSubtotal.textContent = 'Tk ' + subtotalAmt;
-    if (chkFinalTotal) chkFinalTotal.textContent = 'Tk ' + grandTotalAmt;
+    if (totalBadge) totalBadge.textContent = 'Tk ' + grandTotal;
 
-    // Sidebar Items Compile
-    if (cartItemsContainer) {
+    // Checkout/Basket er bhetor item dekhano ar sathe DELETE option
+    if (itemsContainer) {
         if (cart.length === 0) {
-            cartItemsContainer.innerHTML = `<div style="text-align:center; padding:30px; color:#aaa;">Your basket is empty</div>`;
+            itemsContainer.innerHTML = `<p style="text-align:center; color:#888; padding: 20px;">Your basket is empty. Please add items.</p>`;
         } else {
             let itemsHtml = '';
-            cart.forEach((item) => {
+            cart.forEach((item, index) => {
                 itemsHtml += `
-                    <div style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
-                        <div>
-                            <div style="font-weight:600;">${item.name}</div>
-                            <div style="color:#e21b70; font-weight:bold; margin-top:5px;">Tk ${item.price * item.qty}</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#f9f9f9; padding:12px; border-radius:8px; margin-bottom:12px; border:1px solid #eee;">
+                        <div style="display:flex; gap:12px; align-items:center;">
+                            <img src="${item.image}" style="width:45px; height:45px; border-radius:8px; object-fit:cover;">
+                            <div>
+                                <strong style="font-size:14px; display:block; color:#333;">${item.name} (x${item.qty})</strong>
+                                <span style="color:#e21b70; font-weight:bold; font-size:14px;">Tk ${item.price * item.qty}</span>
+                            </div>
                         </div>
-                        <div style="display:flex; align-items:center; background:#f5f5f5; border-radius:20px; padding:2px 5px; height:32px;">
-                            <button onclick="updateMenuQty('${item.name}', -1)" style="border:none; background:none; cursor:pointer; width:24px;">-</button>
-                            <span style="padding:0 5px; font-weight:bold; font-size:13px;">${item.qty}</span>
-                            <button onclick="updateMenuQty('${item.name}', 1)" style="border:none; background:none; cursor:pointer; color:#e21b70; width:24px;">+</button>
-                        </div>
-                    </div>`;
+                        
+                        <button onclick="deleteItem(${index})" style="background:none; border:none; color:#ff4757; cursor:pointer; font-size:18px;" title="Delete Item">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                `;
             });
-            cartItemsContainer.innerHTML = itemsHtml;
+            itemsContainer.innerHTML = itemsHtml;
         }
-    }
-
-    // Checkout Items Compile
-    if (checkoutItemsList) {
-        let chkHtml = '';
-        cart.forEach(item => {
-            chkHtml += `<div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                <span><strong style="color:#e21b70;">${item.qty}x</strong> ${item.name}</span>
-                <strong>Tk ${item.price * item.qty}</strong>
-            </div>`;
-        });
-        checkoutItemsList.innerHTML = chkHtml || '<p>No items added yet</p>';
     }
 }
 
-// ==================== 3. Modals & Sidebars ====================
-function openFpSidebar() {
+// ==================== 3. Item Delete Logic ====================
+function deleteItem(index) {
+    cart.splice(index, 1); // Delete item from array
+    renderCartData(); // Update panel
+    
+    // Jodi shob delete kore dey, tahole panel auto close hoye jabe
+    if (cart.length === 0) {
+        closeCheckoutSidebar();
+    }
+}
+
+// ==================== 4. Modal / Sidebar Open & Close Logic ====================
+function openCheckoutSidebar() {
     const sidebar = document.getElementById('fp-sidebar');
     const overlay = document.getElementById('fp-sidebar-overlay');
     if (sidebar) sidebar.style.setProperty('right', '0px', 'important');
     if (overlay) overlay.style.setProperty('display', 'block', 'important');
-    renderCartData();
 }
 
-function closeFpSidebar() {
+function closeCheckoutSidebar() {
     const sidebar = document.getElementById('fp-sidebar');
     const overlay = document.getElementById('fp-sidebar-overlay');
     if (sidebar) sidebar.style.setProperty('right', '-450px', 'important');
     if (overlay) overlay.style.setProperty('display', 'none', 'important');
 }
 
-function openFullCheckout() {
-    if (cart.length === 0) return;
-    const checkoutPage = document.getElementById('full-checkout-page');
-    if (checkoutPage) {
-        checkoutPage.style.setProperty('display', 'block', 'important');
-        closeFpSidebar();
-        renderCartData();
+// Payment method select logic
+function selectFpPayment(method, element) {
+    document.querySelectorAll('.fp-pay-card').forEach(c => c.classList.remove('active'));
+    if(element) element.classList.add('active');
+    
+    // Digital payment select korle (bKash/Nagad) otp section dekhabe
+    const otpSection = document.getElementById('fp-otp-section');
+    if(otpSection) {
+        otpSection.style.display = (method === 'digital') ? 'block' : 'none';
     }
 }
 
-function closeFullCheckout() {
-    const checkoutPage = document.getElementById('full-checkout-page');
-    if (checkoutPage) checkoutPage.style.setProperty('display', 'none', 'important');
-}
+// ==================== 5. Final Order Confirmation ====================
+function submitFpOrder() {
+    if (cart.length === 0) {
+        alert("Please add at least one item to order.");
+        return;
+    }
+    
+    // Docx html theke inputs (Name, Address, Phone) check kora
+    const name = document.getElementById('fp-custName');
+    const phone = document.getElementById('fp-custPhone');
+    const address = document.getElementById('fp-custAddress');
+    
+    if (name && address && (!name.value || !address.value || !phone.value)) {
+        alert("⚠️ Please fill in your Full Name, Phone, and Delivery Address!");
+        return;
+    }
 
-function selectFpPayment(method, element) {
-    document.querySelectorAll('.fp-pay-card').forEach(card => card.classList.remove('active-opt'));
-    if (element) element.classList.add('active-opt');
-    const walletWrapper = document.getElementById('fp-walletPaymentFields');
-    if (walletWrapper) walletWrapper.style.display = (method !== 'cod') ? 'block' : 'none';
-}
-
-function submitFinalOrder() {
-    if (cart.length === 0) return;
-    const successModal = document.getElementById('orderSuccessOverlay');
-    if (successModal) {
-        successModal.style.setProperty('display', 'flex', 'important');
+    // Success Message
+    const successOverlay = document.getElementById('orderSuccessOverlay');
+    if (successOverlay) {
+        successOverlay.style.display = 'block';
     } else {
         alert("🎉 Order Placed Successfully!");
     }
+
+    // Reset everything
     cart = [];
     renderCartData();
+    closeCheckoutSidebar();
+    
+    // Clear form data
+    if(name) name.value = '';
+    if(phone) phone.value = '';
+    if(address) address.value = '';
 }
 
 function closeOrderSuccess() {
-    const successModal = document.getElementById('orderSuccessOverlay');
-    if (successModal) successModal.style.setProperty('display', 'none', 'important');
-    closeFullCheckout();
+    const successOverlay = document.getElementById('orderSuccessOverlay');
+    if (successOverlay) successOverlay.style.display = 'none';
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+// Run mapping inside initialization state setup
+document.addEventListener("DOMContentLoaded", () => {
     renderCartData();
 });

@@ -1,115 +1,133 @@
-// Global State management for shopping cart
-let shoppingCartState = [];
+// 1. Cart Data Store (Ekhan theke shob data control hobe)
+let cart = [];
 
-// DOM Element Referencing variables
-const cartSidebarElement = document.getElementById('cart-sidebar-window');
-const openCartBtn = document.getElementById('open-cart-btn');
-const closeCartBtn = document.getElementById('close-cart-btn');
-const cartItemsContainer = document.getElementById('cart-items-display-list');
-const cartTotalPriceTag = document.getElementById('cart-total-price-tag');
-const cartBadgeCount = document.getElementById('cart-badge-count');
-const checkoutModalPopup = document.getElementById('checkout-modal-popup');
+// 2. Add to Cart Function (Item add korar sathe sathe checkout open korbe)
+function addToCart(id, name, price, image) {
+    // Check korbe ei item age theke cart-e ache kina
+    let existingItemIndex = cart.findIndex(item => item.id === id);
 
-// Event Hook listeners for operational UI
-openCartBtn.addEventListener('click', () => cartSidebarElement.classList.add('active'));
-closeCartBtn.addEventListener('click', () => cartSidebarElement.classList.remove('active'));
-
-// Cart manipulation business operations
-function addItemToCart(itemName, itemPrice) {
-    const analyticalExistingItemIndex = shoppingCartState.findIndex(entry => entry.name === itemName);
-    
-    if(analyticalExistingItemIndex > -1) {
-        shoppingCartState[analyticalExistingItemIndex].quantity += 1;
+    if (existingItemIndex !== -1) {
+        // Jodi thake, tahole shudhu quantity (qty) 1 bariye dibe
+        cart[existingItemIndex].qty += 1;
     } else {
-        shoppingCartState.push({
-            name: itemName,
-            price: itemPrice,
-            quantity: 1
+        // Natun item hole cart array-te push korbe
+        cart.push({
+            id: id,
+            name: name,
+            price: price,
+            image: image,
+            qty: 1
         });
     }
-    synchronizeCartUI();
-    cartSidebarElement.classList.add('active'); // Pull up drawer immediately upon selection
+
+    // UI ba display update korbe
+    renderCartData();
+    
+    // Sathe sathe Checkout/Sidebar open korbe
+    openCheckoutView();
 }
 
-function adjustmentItemQuantity(itemName, deltaAmount) {
-    const targetedItemIndex = shoppingCartState.findIndex(entry => entry.name === itemName);
-    if(targetedItemIndex > -1) {
-        shoppingCartState[targetedItemIndex].quantity += deltaAmount;
-        if(shoppingCartState[targetedItemIndex].quantity <= 0) {
-            shoppingCartState.splice(targetedItemIndex, 1);
+// 3. Update Quantity (Plus & Minus button er jonno)
+function updateCardItemQty(id, factor) {
+    let index = cart.findIndex(item => item.id === id);
+
+    if (index !== -1) {
+        cart[index].qty += factor; // factor hobe +1 othoba -1
+
+        // Quantity komte komte 0 ba tar niche gele, delete kore dibe
+        if (cart[index].qty <= 0) {
+            cart.splice(index, 1);
         }
-        synchronizeCartUI();
+    }
+
+    // Abar UI update korbe
+    renderCartData();
+
+    // Delete howar por basket khali hoye gele auto close hobe
+    if (cart.length === 0) {
+        closeCheckoutView();
     }
 }
 
-function synchronizeCartUI() {
-    // Count overall total dynamic inventory contents
-    let cumulativeItemCounter = 0;
-    let netAggregateBillAmount = 0;
+// 4. Remove Item (Direct Delete Button er jonno)
+function removeFromCart(id) {
+    cart = cart.filter(item => item.id !== id); // oi item bad diye baki gulo rakhbe
     
-    if(shoppingCartState.length === 0) {
-        cartItemsContainer.innerHTML = `<p class="empty-cart-message">Your shopping basket is completely empty.</p>`;
-    } else {
-        cartItemsContainer.innerHTML = '';
-        shoppingCartState.forEach(item => {
-            cumulativeItemCounter += item.quantity;
-            netAggregateBillAmount += (item.price * item.quantity);
-            
-            const renderedRowNode = document.createElement('div');
-            renderedRowNode.className = 'cart-item';
-            renderedRowNode.innerHTML = `
-                <div class="cart-item-info">
-                    <h4>${item.name}</h4>
-                    <p>৳ ${item.price * item.quantity}</p>
+    renderCartData();
+
+    // Basket khali hole close hobe
+    if (cart.length === 0) {
+        closeCheckoutView();
+    }
+}
+
+// 5. Render Cart Data (Basket er bhitor HTML design show korar jonno)
+function renderCartData() {
+    // Apnar HTML er ID gulor nam milaye niben
+    const cartContainer = document.getElementById('cart-items-container'); 
+    const totalAmountEl = document.getElementById('cart-total-amount'); 
+    const cartBadgeEl = document.getElementById('cart-badge'); // icon er upore item count
+    
+    // Jodi HTML e ei ID gulo na thake tahole error thekanor jonno return korbe
+    if (!cartContainer) return; 
+
+    cartContainer.innerHTML = ''; // Purboborti item clear kora
+    let totalAmount = 0;
+    let totalItems = 0;
+
+    cart.forEach(item => {
+        let itemTotal = item.price * item.qty;
+        totalAmount += itemTotal;
+        totalItems += item.qty;
+
+        // Apnar Basket-er bhitorer design (Apnar CSS class er sathe milate paren)
+        cartContainer.innerHTML += `
+            <div class="cart-item" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
+                <img src="${item.image}" alt="${item.name}" width="50" style="border-radius: 5px;">
+                <div class="item-details" style="flex-grow: 1; margin-left: 10px;">
+                    <h4 style="margin: 0; font-size: 14px;">${item.name}</h4>
+                    <p style="margin: 0; font-size: 12px; color: gray;">Price: ৳${item.price}</p>
                 </div>
-                <div class="cart-item-qty">
-                    <button class="qty-btn" onclick="adjustmentItemQuantity('${item.name}', -1)">-</button>
-                    <span>${item.quantity}</span>
-                    <button class="qty-btn" onclick="adjustmentItemQuantity('${item.name}', 1)">+</button>
+                <div class="item-actions" style="display: flex; align-items: center; gap: 10px;">
+                    <button onclick="updateCardItemQty('${item.id}', -1)" style="padding: 5px 10px;">-</button>
+                    <span style="font-weight: bold;">${item.qty}</span>
+                    <button onclick="updateCardItemQty('${item.id}', 1)" style="padding: 5px 10px;">+</button>
+                    <button onclick="removeFromCart('${item.id}')" style="color: red; border: none; background: none; cursor: pointer;">X</button>
                 </div>
-            `;
-            cartItemsContainer.appendChild(renderedRowNode);
-        });
+            </div>
+        `;
+    });
+
+    // Total Amount ar Badge update kora
+    if (totalAmountEl) totalAmountEl.innerText = `৳${totalAmount.toFixed(2)}`;
+    if (cartBadgeEl) cartBadgeEl.innerText = totalItems;
+}
+
+// 6. Open Checkout Sidebar (Right side theke basket open korbe)
+function openCheckoutView() {
+    const checkoutSidebar = document.getElementById('fp-sidebar'); // Sidebar ID
+    const overlay = document.getElementById('fp-sidebar-overlay'); // Overlay ID
+    
+    // Error asha thekate null check
+    if (checkoutSidebar) {
+        checkoutSidebar.classList.add('active'); 
+        checkoutSidebar.style.right = '0px'; // CSS style force kora
     }
-    
-    // Apply variables neatly back over tracking parameters
-    cartBadgeCount.innerText = cumulativeItemCounter;
-    cartTotalPriceTag.innerText = '৳ ' + netAggregateBillAmount;
-}
-
-// Functional processing handlers for Modal interfaces
-function openCheckoutProcess() {
-    if(shoppingCartState.length === 0) {
-        alert('Your food basket is currently empty. Add dishes prior to attempting checkout!');
-        return;
+    if (overlay) {
+        overlay.style.display = 'block';
     }
-    checkoutModalPopup.classList.add('active');
 }
 
-function closeCheckoutProcess() {
-    checkoutModalPopup.classList.remove('active');
-}
-
-function handleCheckoutSubmit(eventEvent) {
-    eventEvent.preventDefault();
-    const locationAddressField = document.getElementById('chk-address').value;
-    const chosenPaymentRadioOption = document.querySelector('input[name="payment"]:checked').value;
+// 7. Close Checkout Sidebar (Basket bondho korbe)
+function closeCheckoutView() {
+    const checkoutSidebar = document.getElementById('fp-sidebar');
+    const overlay = document.getElementById('fp-sidebar-overlay');
     
-    alert(`🎉 Splendid Choice! Order successfully placed via ${chosenPaymentRadioOption}.\nDelivery allocated to address: ${locationAddressField}.\nOur delivery specialist is processing your tracking parameter!`);
-    
-    // Purge existing variables resetting overall state machine safely
-    shoppingCartState = [];
-    synchronizeCartUI();
-    closeCheckoutProcess();
-    cartSidebarElement.classList.remove('active');
-    document.getElementById('order-checkout-form').reset();
-}
-
-function handleReservationSubmit(eventEvent) {
-    eventEvent.preventDefault();
-    const prospectiveGuestName = document.getElementById('res-name').value;
-    const chosenTargetedDate = document.getElementById('res-date').value;
-    
-    alert(`🍽️ Table Reserved Successfully!\nGreetings ${prospectiveGuestName}, your booking confirmation parameter has been verified for date: ${chosenTargetedDate}.\nA formal configuration SMS has been transmitted to your provided device line.`);
-    document.getElementById('table-reservation-form').reset();
+    if (checkoutSidebar) {
+        checkoutSidebar.classList.remove('active');
+        checkoutSidebar.style.right = '-100%'; // Hide kore dibe
+    }
+    if (overlay) {
+        overlay.style.display = 'none';
+    }
 }

@@ -1,10 +1,5 @@
 let cart = [];
 
-// ==========================================
-// 1. ADD TO CART & QUANTITY CONTROLLERS
-// ==========================================
-
-// Add item to cart from Menu Card
 function addFoodToCart(name, price) {
     price = parseInt(price);
     const existingItem = cart.find(item => item.name === name);
@@ -18,43 +13,36 @@ function addFoodToCart(name, price) {
     showToast(`${name} added to cart!`);
 }
 
-// Update quantity from Menu Card (+/-)
 function updateCardItemQty(name, delta) {
     const existingItem = cart.find(item => item.name === name);
     if (existingItem) {
         existingItem.qty += delta;
-        if (existingItem.qty <= 0) {
-            cart = cart.filter(item => item.name !== name);
-        }
+        if (existingItem.qty <= 0) cart = cart.filter(item => item.name !== name);
     }
     renderMenuButtons();
     renderCart();
 }
 
-// Update quantity from Sidebar Cart (+/-)
+// সাইডবার এবং চেকআউট পেজ থেকে কাউন্টার আপডেট করার ফাংশন
 function updateSidebarQty(name, delta) {
     const existingItem = cart.find(item => item.name === name);
     if (existingItem) {
         existingItem.qty += delta;
-        if (existingItem.qty <= 0) {
-            cart = cart.filter(item => item.name !== name);
-        }
+        if (existingItem.qty <= 0) cart = cart.filter(item => item.name !== name);
     }
     renderMenuButtons();
     renderCart();
 }
 
-// Update price when dropdown variant changes (e.g., Half/Full)
 function updateDynamicPricing(selectElement) {
     const price = selectElement.value;
     const cardBody = selectElement.closest('.product-card-body');
     const priceDisplay = cardBody.querySelector('.dynamic-render-price');
-    const actionWrapper = cardBody.querySelector('.fp-card-action-wrapper');
+    const actionWrapper = cardBody.querySelector('.fp-action-wrapper');
     
-    priceDisplay.textContent = ` ৳ ${price}`;
+    priceDisplay.textContent = `৳ ${price}`;
     actionWrapper.dataset.price = price;
     
-    // If item is already in cart, update its price dynamically
     const name = actionWrapper.dataset.name;
     const existingItem = cart.find(item => item.name === name);
     if (existingItem) {
@@ -63,31 +51,25 @@ function updateDynamicPricing(selectElement) {
     }
 }
 
-// ==========================================
-// 2. RENDERING (UI UPDATES)
-// ==========================================
-
-// Render Add/Qty buttons on the Menu Cards
 function renderMenuButtons() {
-    document.querySelectorAll('.fp-card-action-wrapper').forEach(wrapper => {
+    document.querySelectorAll('.fp-action-wrapper').forEach(wrapper => {
         const name = wrapper.dataset.name;
         const itemInCart = cart.find(item => item.name === name);
-        const addBtn = wrapper.querySelector('.fp-card-add-btn');
-        const qtyControl = wrapper.querySelector('.fp-card-qty-control');
-        const qtyDisplay = wrapper.querySelector('.fp-card-qty-display');
+        const addBtn = wrapper.querySelector('.fp-add-btn');
+        const qtyStepper = wrapper.querySelector('.fp-qty-stepper');
+        const qtyVal = wrapper.querySelector('.fp-qty-val');
 
         if (itemInCart) {
             addBtn.style.display = 'none';
-            qtyControl.style.display = 'flex';
-            qtyDisplay.textContent = itemInCart.qty;
+            qtyStepper.style.display = 'flex';
+            qtyVal.textContent = itemInCart.qty;
         } else {
             addBtn.style.display = 'block';
-            qtyControl.style.display = 'none';
+            qtyStepper.style.display = 'none';
         }
     });
 }
 
-// Render Cart Sidebar, Floating Bar, and Checkout Summary
 function renderCart() {
     const cartContainer = document.getElementById('fp-cart-items-container');
     const checkoutList = document.getElementById('checkout-items-list');
@@ -96,14 +78,12 @@ function renderCart() {
     const checkoutTotal = document.getElementById('chk-final-total');
     const floatingBar = document.getElementById('floating-cart');
 
-    let totalQty = 0;
-    let totalPrice = 0;
-    
+    let totalQty = 0, totalPrice = 0;
     cartContainer.innerHTML = '';
     checkoutList.innerHTML = '';
 
     if (cart.length === 0) {
-        cartContainer.innerHTML = '<p style="text-align:center; color:#777; padding:20px;">Your basket is empty</p>';
+        cartContainer.innerHTML = '<p style="text-align:center; color:#777; padding:30px 0;">Your basket is empty</p>';
         floatingBar.classList.add('hidden');
     } else {
         floatingBar.classList.remove('hidden');
@@ -112,156 +92,93 @@ function renderCart() {
             let itemTotal = item.price * item.qty;
             totalPrice += itemTotal;
 
-            // Sidebar Cart Item HTML (With +/- to remove)
+            // Sidebar Cart Item HTML (নিচে + - বাটন যুক্ত করা হয়েছে)
             cartContainer.innerHTML += `
                 <div class="sidebar-item">
                     <div style="flex:1">
-                        <strong style="display:block; margin-bottom:5px;">${item.name}</strong>
-                        <div class="fp-card-qty-control" style="display:flex; width:auto;">
-                            <button class="fp-card-qty-btn minus" onclick="updateSidebarQty('${item.name}', -1)">-</button>
-                            <span class="fp-card-qty-display" style="width:30px;">${item.qty}</span>
-                            <button class="fp-card-qty-btn plus" onclick="updateSidebarQty('${item.name}', 1)">+</button>
+                        <strong style="display:block; margin-bottom:8px; font-size:14px;">${item.name}</strong>
+                        <div class="fp-qty-stepper" style="display:flex; height:30px; width:fit-content;">
+                            <button class="fp-qty-btn minus" style="width:28px; font-size:16px;" onclick="updateSidebarQty('${item.name}', -1)">−</button>
+                            <span class="fp-qty-val" style="width:28px; font-size:14px;">${item.qty}</span>
+                            <button class="fp-qty-btn plus" style="width:28px; font-size:16px;" onclick="updateSidebarQty('${item.name}', 1)">+</button>
                         </div>
                     </div>
-                    <strong style="margin-left:15px;">৳ ${itemTotal}</strong>
-                </div>
-            `;
+                    <strong style="margin-left:15px; font-size:14px; color:#222;">৳ ${itemTotal}</strong>
+                </div>`;
             
-            // Checkout Summary Item HTML
+            // Checkout Order Summary Item HTML (এখানেও + - বাটন যুক্ত করা হয়েছে)
             checkoutList.innerHTML += `
-                <div class="chk-item-row">
-                    <span>${item.qty}x ${item.name}</span>
-                    <span>৳ ${itemTotal}</span>
-                </div>
-            `;
+                <div class="chk-item-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #f0f0f0; padding-bottom:10px;">
+                    <div style="flex:1">
+                        <strong style="display:block; margin-bottom:8px; font-size:14px;">${item.name}</strong>
+                        <div class="fp-qty-stepper" style="display:flex; height:30px; width:fit-content;">
+                            <button class="fp-qty-btn minus" style="width:28px; font-size:16px;" onclick="updateSidebarQty('${item.name}', -1)">−</button>
+                            <span class="fp-qty-val" style="width:28px; font-size:14px;">${item.qty}</span>
+                            <button class="fp-qty-btn plus" style="width:28px; font-size:16px;" onclick="updateSidebarQty('${item.name}', 1)">+</button>
+                        </div>
+                    </div>
+                    <strong style="font-size:14px; color:#222;">৳ ${itemTotal}</strong>
+                </div>`;
         });
     }
-
     floatingCount.textContent = totalQty;
-    floatingPrice.textContent = `Tk ${totalPrice}`;
-    checkoutTotal.textContent = `Tk ${totalPrice}`;
+    floatingPrice.textContent = `৳ ${totalPrice}`;
+    checkoutTotal.textContent = `৳ ${totalPrice}`;
 }
 
-// ==========================================
-// 3. CART SIDEBAR & CHECKOUT TOGGLES
-// ==========================================
-
-function openFpSidebar() {
-    document.getElementById('fp-sidebar-overlay').style.display = 'block';
-    document.getElementById('fp-sidebar').style.right = '0';
-}
-
-function closeFpSidebar() {
-    document.getElementById('fp-sidebar-overlay').style.display = 'none';
-    document.getElementById('fp-sidebar').style.right = '-450px';
-}
+function openFpSidebar() { document.getElementById('fp-sidebar-overlay').style.display = 'block'; document.getElementById('fp-sidebar').style.right = '0'; }
+function closeFpSidebar() { document.getElementById('fp-sidebar-overlay').style.display = 'none'; document.getElementById('fp-sidebar').style.right = '-420px'; }
 
 function openFullCheckout() {
-    if(cart.length === 0) {
-        showToast("Your cart is empty!");
-        return;
-    }
+    if(cart.length === 0) return;
     closeFpSidebar();
     document.getElementById('full-checkout-page').style.display = 'block';
-    document.body.style.overflow = 'hidden'; // Disable background scroll
-    
-    // Ensure form view is visible and success view is hidden initially
+    document.body.style.overflow = 'hidden';
     document.getElementById('checkout-form-view').style.display = 'block';
     document.getElementById('checkout-success-view').style.display = 'none';
 }
-
-function closeFullCheckout() {
-    document.getElementById('full-checkout-page').style.display = 'none';
-    document.body.style.overflow = 'auto'; // Enable background scroll
-}
-
-// ==========================================
-// 4. ORDER SUCCESS & RESET (Image 1 Logic)
-// ==========================================
+function closeFullCheckout() { document.getElementById('full-checkout-page').style.display = 'none'; document.body.style.overflow = 'auto'; }
 
 function submitFinalOrder() {
-    const name = document.getElementById('chk-name').value.trim();
-    const phone = document.getElementById('chk-phone').value.trim();
-    const address = document.getElementById('chk-address').value.trim();
-
-    if(!name || !phone || !address) {
-        showToast("Please fill in Name, Phone, and Address.");
-        return;
+    if(!document.getElementById('chk-name').value || !document.getElementById('chk-phone').value || !document.getElementById('chk-address').value) {
+        showToast("Please fill all delivery details!"); return;
     }
-
-    // Hide form view, show success overlay
     document.getElementById('checkout-form-view').style.display = 'none';
     document.getElementById('checkout-success-view').style.display = 'flex';
 }
 
-// "Continue Exploring" / "Continue Dining" button logic
 function resetToHome() {
-    cart = []; // Empty the cart
-    renderCart(); // Update UI
-    renderMenuButtons(); // Reset menu buttons to "Add"
-    closeFullCheckout(); // Close checkout panel
-    
-    // Clear checkout form inputs
-    document.getElementById('chk-name').value = '';
-    document.getElementById('chk-phone').value = '';
-    document.getElementById('chk-address').value = '';
-    
-    // Scroll back to menu section
+    cart = [];
+    renderCart(); renderMenuButtons(); closeFullCheckout();
+    document.getElementById('chk-name').value = ''; document.getElementById('chk-phone').value = ''; document.getElementById('chk-address').value = '';
     window.location.href = '#menu';
 }
 
-// ==========================================
-// 5. MENU FILTERING
-// ==========================================
-
 function filterMenu(category) {
-    // Update active button
     document.querySelectorAll('.filter-tab-btn').forEach(btn => btn.classList.remove('active'));
     event.target.classList.add('active');
-
-    // Show/Hide cards
     document.querySelectorAll('.product-item-card').forEach(card => {
-        if (category === 'all' || card.classList.contains(category)) {
-            card.style.display = 'flex';
-        } else {
-            card.style.display = 'none';
-        }
+        card.style.display = (category === 'all' || card.classList.contains(category)) ? 'flex' : 'none';
     });
 }
 
-// ==========================================
-// 6. UTILITY FUNCTIONS
-// ==========================================
-
-// Chef Image Preview
 function previewChefImage(input) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('chef-vera-img').src = e.target.result;
-        }
+        reader.onload = (e) => document.getElementById('chef-vera-img').src = e.target.result;
         reader.readAsDataURL(input.files[0]);
     }
 }
 
-// Toast Notification
 function showToast(message) {
     const toast = document.getElementById('toast-notification');
-    toast.textContent = message;
-    toast.style.display = 'block';
-    toast.style.position = 'fixed';
-    toast.style.bottom = '100px';
-    toast.style.left = '50%';
-    toast.style.transform = 'translateX(-50%)';
-    toast.style.background = '#333';
-    toast.style.color = '#fff';
-    toast.style.padding = '10px 25px';
-    toast.style.borderRadius = '8px';
-    toast.style.zIndex = '9999';
-    toast.style.fontSize = '14px';
-    toast.style.boxShadow = '0 4px 10px rgba(0,0,0,0.2)';
-    
-    setTimeout(() => {
-        toast.style.display = 'none';
-    }, 2000);
+    toast.textContent = message; toast.style.display = 'block';
+    toast.style.cssText = `position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:10px 20px; border-radius:8px; z-index:9999; font-size:14px; display:block;`;
+    setTimeout(() => toast.style.display = 'none', 2000);
 }
+
+// Page load hole cart render kore neyar jonno
+document.addEventListener('DOMContentLoaded', () => {
+    renderMenuButtons();
+    renderCart();
+});

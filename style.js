@@ -1,19 +1,25 @@
-// Global cart array
 let cart = [];
 
-// Add Item Function (Foodpanda Style)
-function addToCart(itemName, itemPrice) {
-    let existingItem = cart.find(item => item.name === itemName);
+// Add Item Function (HTML er sathe match korano)
+function addFoodToCart(name, price) {
+    price = parseInt(price);
+    let existingItem = cart.find(item => item.name === name);
     if (existingItem) {
         existingItem.qty += 1;
     } else {
-        cart.push({ name: itemName, price: itemPrice, qty: 1 });
+        cart.push({ name: name, price: price, qty: 1 });
     }
     syncCardButtons();
     renderCartData();
+    showToast(`${name} added to cart!`);
 }
 
-// Update Qty (+/-)
+// Sidebar er Addon er jonno
+function addDirectAddon(name, price) {
+    addFoodToCart(name, price);
+}
+
+// Update Qty (+/-) from Menu Card
 function updateCardItemQty(name, factor) {
     let index = cart.findIndex(item => item.name === name);
     if (index !== -1) {
@@ -24,6 +30,29 @@ function updateCardItemQty(name, factor) {
     }
     syncCardButtons();
     renderCartData();
+}
+
+// Update Qty (+/-) from Sidebar
+function updateSidebarQty(name, factor) {
+    updateCardItemQty(name, factor);
+}
+
+// Dropdown theke price change korar jonno
+function updateDynamicPricing(selectElement) {
+    const price = selectElement.value;
+    const cardBody = selectElement.closest('.product-card-body');
+    const priceDisplay = cardBody.querySelector('.dynamic-render-price');
+    const actionWrapper = cardBody.querySelector('.fp-card-action-wrapper');
+    
+    priceDisplay.textContent = ` ৳ ${price}`;
+    actionWrapper.dataset.price = price;
+    
+    const name = actionWrapper.dataset.name;
+    const existingItem = cart.find(item => item.name === name);
+    if (existingItem) { 
+        existingItem.price = parseInt(price); 
+        renderCartData(); 
+    }
 }
 
 // UI Sync for Add Buttons vs Qty Control
@@ -47,22 +76,133 @@ function syncCardButtons() {
     });
 }
 
-// Cart Data Renderer (Sidebar-e dekhanor jonno)
+// Cart Data Renderer (Sidebar, Checkout & Floating bar er jonno)
 function renderCartData() {
-    let cartList = document.getElementById('cart-items-display-list');
-    let totalDisplay = document.getElementById('cart-total-price-tag');
-    let total = 0;
+    const cartContainer = document.getElementById('fp-cart-items-container');
+    const checkoutList = document.getElementById('checkout-items-list');
+    const floatingCount = document.getElementById('cart-item-count');
+    const floatingPrice = document.getElementById('cart-total-price');
+    const checkoutSubtotal = document.getElementById('chk-subtotal');
+    const checkoutTotal = document.getElementById('chk-final-total');
+    const sidebarStickyTotal = document.getElementById('fp-sticky-total');
+    const floatingBar = document.getElementById('floating-cart');
+
+    let totalQty = 0, totalPrice = 0;
+    cartContainer.innerHTML = '';
+    checkoutList.innerHTML = '';
+
+    if (cart.length === 0) {
+        cartContainer.innerHTML = '<p style="text-align:center; color:#777; padding:30px 0;">Your basket is empty</p>';
+        floatingBar.classList.add('hidden');
+    } else {
+        floatingBar.classList.remove('hidden');
+        cart.forEach(item => {
+            totalQty += item.qty;
+            let itemTotal = item.price * item.qty;
+            totalPrice += itemTotal;
+
+            cartContainer.innerHTML += `
+                <div class="sidebar-item">
+                    <div style="flex:1">
+                        <strong style="display:block; margin-bottom:8px; font-size:14px;">${item.name}</strong>
+                        <div class="fp-card-qty-control" style="display:flex; height:30px; width:fit-content;">
+                            <button class="fp-card-qty-btn minus" style="width:28px; font-size:16px;" onclick="updateSidebarQty('${item.name}', -1)">-</button>
+                            <span class="fp-card-qty-display" style="width:28px; font-size:14px; line-height:24px;">${item.qty}</span>
+                            <button class="fp-card-qty-btn plus" style="width:28px; font-size:16px;" onclick="updateSidebarQty('${item.name}', 1)">+</button>
+                        </div>
+                    </div>
+                    <strong style="margin-left:15px; font-size:14px; color:#222;">৳ ${itemTotal}</strong>
+                </div>`;
+            
+            checkoutList.innerHTML += `
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px;">
+                    <span>${item.qty}x ${item.name}</span>
+                    <span>৳ ${itemTotal}</span>
+                </div>`;
+        });
+    }
     
-    cartList.innerHTML = '';
-    cart.forEach(item => {
-        total += (item.price * item.qty);
-        cartList.innerHTML += `
-            <div class="cart-item">
-                <span>${item.name} (x${item.qty})</span>
-                <span>৳ ${item.price * item.qty}</span>
-                <button onclick="updateCardItemQty('${item.name}', -1)">❌</button>
-            </div>
-        `;
-    });
-    totalDisplay.innerText = "৳ " + total;
+    let finalCheckoutTotal = totalPrice + 32 + 19; 
+    
+    floatingCount.textContent = totalQty;
+    floatingPrice.textContent = `Tk ${totalPrice}`;
+    if(checkoutSubtotal) checkoutSubtotal.textContent = `Tk ${totalPrice}`;
+    checkoutTotal.textContent = `Tk ${finalCheckoutTotal}`;
+    sidebarStickyTotal.textContent = `Tk ${totalPrice}`;
 }
+
+// Sidebar Open/Close
+function openFpSidebar() { document.getElementById('fp-sidebar-overlay').style.display = 'block'; document.getElementById('fp-sidebar').style.right = '0'; }
+function closeFpSidebar() { document.getElementById('fp-sidebar-overlay').style.display = 'none'; document.getElementById('fp-sidebar').style.right = '-450px'; }
+
+// Checkout Open/Close
+function openFullCheckout() {
+    if(cart.length === 0) return;
+    closeFpSidebar();
+    document.getElementById('full-checkout-page').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    
+    const checkoutContent = document.querySelector('.checkout-content');
+    if(checkoutContent) checkoutContent.style.display = 'block';
+    const successView = document.getElementById('checkout-success-view');
+    if(successView) successView.style.display = 'none';
+}
+
+function closeFullCheckout() { 
+    document.getElementById('full-checkout-page').style.display = 'none'; 
+    document.body.style.overflow = 'auto'; 
+}
+
+// Order Submit & Success Screen
+function submitFinalOrder() {
+    const streetInput = document.getElementById('chk-street');
+    if(!streetInput || !streetInput.value.trim()) {
+        showToast("Please fill Street / House Number!"); return;
+    }
+    
+    const checkoutContent = document.querySelector('.checkout-content');
+    if(checkoutContent) checkoutContent.style.display = 'none';
+    
+    const successView = document.getElementById('checkout-success-view');
+    if(successView) successView.style.display = 'flex';
+}
+
+function resetToHome() {
+    cart = [];
+    renderCartData(); 
+    syncCardButtons(); 
+    closeFullCheckout();
+    const streetInput = document.getElementById('chk-street');
+    if(streetInput) streetInput.value = '';
+    window.location.href = '#menu';
+}
+
+// Menu Filter
+function filterMenu(category) {
+    document.querySelectorAll('.filter-tab-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    document.querySelectorAll('.product-item-card').forEach(card => {
+        card.style.display = (category === 'all' || card.classList.contains(category)) ? 'flex' : 'none';
+    });
+}
+
+// Chef Image Preview
+function previewChefImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => document.getElementById('chef-vera-img').src = e.target.result;
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Toast Notification
+function showToast(message) {
+    const toast = document.getElementById('toast-notification');
+    if(!toast) return;
+    toast.textContent = message; toast.style.display = 'block';
+    toast.style.cssText = `position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:10px 20px; border-radius:8px; z-index:9999; font-size:14px; display:block;`;
+    setTimeout(() => toast.style.display = 'none', 2000);
+}
+
+// Page load hole default render
+document.addEventListener('DOMContentLoaded', () => { syncCardButtons(); renderCartData(); });

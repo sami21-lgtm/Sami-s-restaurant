@@ -1,242 +1,352 @@
-// developed by Md. Emtiaz Hossain Sami 2026
-let cartArray = [];
-let globalSelectedPayment = 'cod';
+// =============================================
+// STATE
+// =============================================
+let cart = [];
+let deliveryFee = 32;
+let deliveryType = 'standard';
+let discountPercent = 0;
+let voucherApplied = false;
 
-// ড্রপডাউন থেকে দাম চেঞ্জ হলে কার্ডের দাম আপডেট করবে
-function updateCardPricing(dropdownNode) {
-    if (!dropdownNode) return;
-    const livePriceValue = dropdownNode.value;
-    const parentCard = dropdownNode.closest('.food-item-card');
-    if (!parentCard) return;
+const PROMOS = { 'DHAKA20': 20, 'SAMI10': 10, 'WELCOME15': 15 };
 
-    const targetPriceSpan = parentCard.querySelector('.item-live-price');
-    const targetActionWrapper = parentCard.querySelector('.fp-card-action-wrapper');
-    const selectedTextLabel = dropdownNode.options[dropdownNode.selectedIndex].text.split('-')[0].trim();
-
-    if (targetPriceSpan) targetPriceSpan.textContent = `৳ ${livePriceValue}`;
-    if (targetActionWrapper) {
-        targetActionWrapper.dataset.price = livePriceValue;
-        targetActionWrapper.dataset.activeVariant = selectedTextLabel;
-    }
-}
-
-// Add বাটনে ক্লিক করলে ফুডপান্ডার মত কার্টে যোগ হবে এবং সাইডবার ওপেন হবে
-function addItemToCart(buttonNode) {
-    const dataWrapper = buttonNode.closest('.fp-card-action-wrapper');
-    if (!dataWrapper) return;
-
-    const baseName = dataWrapper.getAttribute('data-base-name');
-    const variantExtension = dataWrapper.dataset.activeVariant || 
-                             dataWrapper.closest('.food-item-card').querySelector('.variant-select').options[0].text.split('-')[0].trim();
-    
-    const uniqueFullName = `${baseName} (${variantExtension})`;
-    const fixedCalculatedPrice = parseInt(dataWrapper.dataset.price) || 0;
-
-    let searchMatchItem = cartArray.find(element => element.fullName === uniqueFullName);
-    if (searchMatchItem) {
-        searchMatchItem.quantity += 1;
+// =============================================
+// ADD TO CART (Foodpanda: ADD → Sidebar Opens)
+// =============================================
+function fpAdd(name, price) {
+    price = parseInt(price);
+    const item = cart.find(i => i.name === name);
+    if (item) {
+        item.qty++;
+        const w = document.querySelector(`.fp-add-wrapper[data-name="${name}"]`);
+        if (w) item.price = parseInt(w.dataset.price);
     } else {
-        cartArray.push({ fullName: uniqueFullName, baseName: baseName, price: fixedCalculatedPrice, quantity: 1 });
+        cart.push({ name, price, qty: 1 });
     }
 
-    synchronizeInterfaceState();
-    recalculateMainCartSystem();
-    toggleSidebar(true);
+    syncAllCards();
+    renderAll();
+    showFloatingBar();
+    openSidebar();
+    toast(`${name} added!`);
 }
 
-// সাইডবার বা মেনুর ভেতর থেকে + / - করলে কাজ করবে
-function modifyItemQuantity(itemUniqueName, arithmeticFactor) {
-    let matchedIndex = cartArray.findIndex(element => element.fullName === itemUniqueName);
-    if (matchedIndex !== -1) {
-        cartArray[matchedIndex].quantity += arithmeticFactor;
-        if (cartArray[matchedIndex].quantity <= 0) {
-            cartArray.splice(matchedIndex, 1);
-        }
+// =============================================
+// QTY CHANGE FROM CARD
+// =============================================
+function fpQtyChange(name, delta) {
+    const idx = cart.findIndex(i => i.name === name);
+    if (idx !== -1) {
+        cart[idx].qty += delta;
+        if (cart[idx].qty <= 0) cart.splice(idx, 1);
     }
-    synchronizeInterfaceState();
-    recalculateMainCartSystem();
+    syncAllCards();
+    renderAll();
+    if (cart.length === 0) hideFloatingBar();
 }
 
-// ডিলিট আইকন দিয়ে বাস্কেট থেকে রিমুভ করা
-function removeEntireLineItem(itemUniqueName) {
-    cartArray = cartArray.filter(element => element.fullName !== itemUniqueName);
-    synchronizeInterfaceState();
-    recalculateMainCartSystem();
+// =============================================
+// QTY CHANGE FROM SIDEBAR
+// =============================================
+function fpSideQty(name, delta) {
+    fpQtyChange(name, delta);
 }
 
-function changeQty(btnNode, amount) {
-    const wrapper = btnNode.closest('.fp-card-action-wrapper');
-    if (!wrapper) return;
-    const baseName = wrapper.getAttribute('data-base-name');
-    const variantExtension = wrapper.dataset.activeVariant || 
-                             wrapper.closest('.food-item-card').querySelector('.variant-select').options[0].text.split('-')[0].trim();
-    const fullUniqueKeyName = `${baseName} (${variantExtension})`;
-    modifyItemQuantity(fullUniqueKeyName, amount);
+// =============================================
+// DELETE FROM SIDEBAR
+// =============================================
+function fpSideDel(name) {
+    cart = cart.filter(i => i.name !== name);
+    syncAllCards();
+    renderAll();
+    if (cart.length === 0) hideFloatingBar();
+    toast(`${name} removed`);
 }
 
-// UI আপডেট
-function synchronizeInterfaceState() {
-    document.querySelectorAll('.fp-card-action-wrapper').forEach(wrapper => {
-        const bName = wrapper.getAttribute('data-base-name');
-        const vExt = wrapper.dataset.activeVariant || 
-                     wrapper.closest('.food-item-card').querySelector('.variant-select').options[0].text.split('-')[0].trim();
-        const matchedKey = `${bName} (${vExt})`;
+// =============================================
+// VARIANT (Dropdown) PRICE CHANGE
+// =============================================
+function fpVariantChange(sel) {
+    const price = sel.value;
+    const body = sel.closest('.food-card-body');
+    if (!body) return;
+    const dynPrice = body.querySelector('.dyn-price');
+    const wrapper = body.closest('.food-card').querySelector('.fp-add-wrapper');
+    if (dynPrice) dynPrice.textContent = price;
+    if (wrapper) {
+        wrapper.dataset.price = price;
+        const name = wrapper.dataset.name;
+        const item = cart.find(i => i.name === name);
+        if (item) { item.price = parseInt(price); renderAll(); }
+    }
+}
 
-        const matchingCartEntry = cartArray.find(el => el.fullName === matchedKey);
-        const addButton = wrapper.querySelector('.fp-card-add-btn');
-        const stepperControlGroup = wrapper.querySelector('.fp-card-qty-control');
-        const textDisplay = wrapper.querySelector('.fp-card-qty-display');
-
-        if (matchingCartEntry) {
-            if (addButton) addButton.style.display = 'none';
-            if (stepperControlGroup) stepperControlGroup.style.display = 'flex';
-            if (textDisplay) textDisplay.textContent = matchingCartEntry.quantity;
+// =============================================
+// SYNC CARD BUTTONS (ADD ↔ QTY)
+// =============================================
+function syncAllCards() {
+    document.querySelectorAll('.fp-add-wrapper').forEach(w => {
+        const name = w.dataset.name;
+        const addBtn = w.querySelector('.fp-add-btn');
+        const qtyCtrl = w.querySelector('.fp-qty-ctrl');
+        const qtyNum = w.querySelector('.fp-qty-num');
+        const item = cart.find(i => i.name === name);
+        if (item) {
+            addBtn.style.display = 'none';
+            qtyCtrl.style.display = 'flex';
+            qtyNum.textContent = item.qty;
         } else {
-            if (addButton) addButton.style.display = 'block';
-            if (stepperControlGroup) stepperControlGroup.style.display = 'none';
+            addBtn.style.display = 'flex';
+            qtyCtrl.style.display = 'none';
         }
     });
 }
 
-// মূল বিলিং হিসাব
-function recalculateMainCartSystem() {
-    const sidebarScroller = document.getElementById('fp-cart-items-container');
-    const checkoutSummaryArea = document.getElementById('checkout-invoice-items-list');
-    const floatingMainContainer = document.getElementById('floating-cart');
+// =============================================
+// RENDER ALL (Sidebar + Checkout + Floating)
+// =============================================
+function renderAll() {
+    const cartDiv = document.getElementById('fp-cart-items');
+    const chkList = document.getElementById('chk-items-list');
+    const barCount = document.getElementById('fp-bar-count');
+    const barTotal = document.getElementById('fp-bar-total');
+    const sideSub = document.getElementById('fp-side-subtotal');
+    const sideTotal = document.getElementById('fp-side-total');
 
-    let aggregateQuantity = 0, combinedSubtotalPrice = 0;
-    
-    if (sidebarScroller) sidebarScroller.innerHTML = '';
-    if (checkoutSummaryArea) checkoutSummaryArea.innerHTML = '';
+    let totalQty = 0, subtotal = 0;
+    if (cartDiv) cartDiv.innerHTML = '';
+    if (chkList) chkList.innerHTML = '';
 
-    if (cartArray.length === 0) {
-        if (sidebarScroller) {
-            sidebarScroller.innerHTML = `
-                <div style="text-align:center; padding:50px 10px; color:#aaa;">
-                    <i class="fa-solid fa-basket-shopping" style="font-size:35px; margin-bottom:10px;"></i>
-                    <p style="font-weight:600; font-size:14px;">Your current basket layer is empty.</p>
-                </div>`;
-        }
-        if (floatingMainContainer) floatingMainContainer.classList.add('hidden');
-        toggleSidebar(false);
+    if (cart.length === 0) {
+        if (cartDiv) cartDiv.innerHTML = '<p style="text-align:center;color:#aaa;padding:30px 0;font-size:14px;">Your basket is empty</p>';
     } else {
-        if (floatingMainContainer) floatingMainContainer.classList.remove('hidden');
+        cart.forEach(item => {
+            totalQty += item.qty;
+            const lineTotal = item.price * item.qty;
+            subtotal += lineTotal;
 
-        cartArray.forEach(entry => {
-            aggregateQuantity += entry.quantity;
-            let inlineRowTotalPrice = entry.price * entry.quantity;
-            combinedSubtotalPrice += inlineRowTotalPrice;
-
-            if (sidebarScroller) {
-                sidebarScroller.innerHTML += `
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f9f9f9; padding:12px 0;">
-                        <div style="flex:1;">
-                            <span style="font-size:14px; font-weight:700; display:block; color:#222;">${entry.fullName}</span>
-                            <div class="fp-card-qty-control" style="margin-top:6px; width:fit-content; height:28px;">
-                                <button class="fp-card-qty-btn" onclick="modifyItemQuantity('${entry.fullName}', -1)">-</button>
-                                <span class="fp-card-qty-display" style="font-size:13px; line-height:26px;">${entry.quantity}</span>
-                                <button class="fp-card-qty-btn" onclick="modifyItemQuantity('${entry.fullName}', 1)">+</button>
-                            </div>
+            // Sidebar item
+            if (cartDiv) {
+                cartDiv.innerHTML += `
+                <div class="fp-sb-item">
+                    <div class="fp-sb-item-info">
+                        <h4>${item.name}</h4>
+                        <div class="fp-qty-ctrl" style="display:flex;height:26px;width:fit-content;">
+                            <button class="fp-qty-minus" onclick="fpSideQty('${item.name}',-1)" style="width:24px;font-size:14px;">−</button>
+                            <span class="fp-qty-num" style="width:24px;line-height:20px;font-size:12px;">${item.qty}</span>
+                            <button class="fp-qty-plus" onclick="fpSideQty('${item.name}',1)" style="width:24px;font-size:14px;">+</button>
                         </div>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <strong style="font-size:14px; color:#111;">৳${inlineRowTotalPrice}</strong>
-                            <button style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-size:14px;" onclick="removeEntireLineItem('${entry.fullName}')"><i class="fa-solid fa-trash-can"></i></button>
-                        </div>
-                    </div>`;
+                    </div>
+                    <div class="fp-sb-item-right">
+                        <span class="fp-sb-item-price">৳ ${lineTotal}</span>
+                        <button class="fp-sb-del" onclick="fpSideDel('${item.name}')"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                </div>`;
             }
 
-            if (checkoutSummaryArea) {
-                checkoutSummaryArea.innerHTML += `
-                    <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:14px;">
-                        <span><strong>${entry.quantity}x</strong> ${entry.fullName}</span>
-                        <strong>৳${inlineRowTotalPrice}</strong>
-                    </div>`;
+            // Checkout item
+            if (chkList) {
+                chkList.innerHTML += `
+                <div class="chk-item-row">
+                    <span class="ci-qty">${item.qty}x</span>
+                    <span class="ci-name">${item.name}</span>
+                    <span class="ci-total">৳ ${lineTotal}</span>
+                </div>`;
             }
         });
     }
 
-    let deliveryFeeCost = 32;
-    let setupVatCost = 19;
-    let aggregateFinalInvoiceTotal = combinedSubtotalPrice > 0 ? (combinedSubtotalPrice + deliveryFeeCost + setupVatCost) : 0;
+    // Calculate
+    const vat = Math.round(subtotal * 0.05);
+    const discount = voucherApplied ? Math.round(subtotal * discountPercent / 100) : 0;
+    const total = subtotal + deliveryFee + vat - discount;
 
-    document.getElementById('cart-item-count').textContent = aggregateQuantity;
-    document.getElementById('cart-total-price').textContent = `৳ ${combinedSubtotalPrice}`;
-    document.getElementById('fp-sidebar-subtotal').textContent = `৳ ${combinedSubtotalPrice}`;
-    document.getElementById('chk-subtotal').textContent = `৳ ${combinedSubtotalPrice}`;
-    document.getElementById('chk-final-total').textContent = `৳ ${aggregateFinalInvoiceTotal}`;
+    // Floating bar
+    if (barCount) barCount.textContent = totalQty;
+    if (barTotal) barTotal.textContent = `৳ ${subtotal}`;
+
+    // Sidebar footer
+    if (sideSub) sideSub.textContent = `৳ ${subtotal}`;
+    if (sideTotal) sideTotal.textContent = `৳ ${subtotal}`;
+
+    // Checkout bill
+    const bSub = document.getElementById('b-subtotal');
+    const bDel = document.getElementById('b-delivery');
+    const bVat = document.getElementById('b-vat');
+    const bDisRow = document.getElementById('b-discount-row');
+    const bDis = document.getElementById('b-discount');
+    const bTotal = document.getElementById('b-total');
+    const goBtn = document.getElementById('fp-go-checkout');
+
+    if (bSub) bSub.textContent = `৳ ${subtotal}`;
+    if (bDel) bDel.textContent = deliveryType === 'pickup' ? 'FREE' : `৳ ${deliveryFee}`;
+    if (bVat) bVat.textContent = `৳ ${vat}`;
+    if (bDisRow && bDis) {
+        if (voucherApplied && discount > 0) {
+            bDisRow.style.display = 'flex';
+            bDis.textContent = `- ৳ ${discount}`;
+        } else {
+            bDisRow.style.display = 'none';
+        }
+    }
+    if (bTotal) bTotal.textContent = `৳ ${total}`;
+    if (goBtn) goBtn.disabled = cart.length === 0;
 }
 
-// সাইডবার ওপেন ও ক্লোজ
-function toggleSidebar(shouldDisplay) {
-    const layoutOverlay = document.getElementById('fp-sidebar-overlay');
-    const targetSidebarPanel = document.getElementById('fp-sidebar');
-    if (layoutOverlay) layoutOverlay.style.display = shouldDisplay ? 'block' : 'none';
-    if (targetSidebarPanel) targetSidebarPanel.style.right = shouldDisplay ? '0px' : '-450px';
+// =============================================
+// FLOATING BAR
+// =============================================
+function showFloatingBar() {
+    const bar = document.getElementById('fp-floating-cart');
+    if (bar) bar.classList.add('show');
+}
+function hideFloatingBar() {
+    const bar = document.getElementById('fp-floating-cart');
+    if (bar) bar.classList.remove('show');
 }
 
-function openCheckoutView() {
-    if (cartArray.length === 0) return;
-    toggleSidebar(false);
-    const viewTargetPage = document.getElementById('full-checkout-page');
-    if (viewTargetPage) viewTargetPage.style.display = 'block';
+// =============================================
+// SIDEBAR OPEN / CLOSE
+// =============================================
+function openSidebar() {
+    document.getElementById('fp-overlay').classList.add('show');
+    document.getElementById('fp-sidebar').classList.add('open');
+}
+function closeSidebar() {
+    document.getElementById('fp-overlay').classList.remove('show');
+    document.getElementById('fp-sidebar').classList.remove('open');
+}
+
+// =============================================
+// CHECKOUT OPEN / CLOSE
+// =============================================
+function openCheckout() {
+    if (cart.length === 0) return;
+    closeSidebar();
+    document.getElementById('fp-checkout-page').style.display = 'block';
+    document.getElementById('chk-main').style.display = 'block';
+    document.getElementById('chk-success').style.display = 'none';
     document.body.style.overflow = 'hidden';
+    renderAll();
 }
-
-function closeCheckoutView() {
-    const viewTargetPage = document.getElementById('full-checkout-page');
-    if (viewTargetPage) viewTargetPage.style.display = 'none';
+function closeCheckout() {
+    document.getElementById('fp-checkout-page').style.display = 'none';
     document.body.style.overflow = 'auto';
 }
 
-function setPaymentMethod(cardDomElement, codeValue) {
-    document.querySelectorAll('.payment-card-option').forEach(element => element.classList.remove('active-opt'));
-    cardDomElement.classList.add('active-opt');
-    const coreRadio = cardDomElement.querySelector('input[type="radio"]');
-    if (coreRadio) coreRadio.checked = true;
-    globalSelectedPayment = codeValue;
+// =============================================
+// DELIVERY PICK
+// =============================================
+function pickDelivery(el, type) {
+    document.querySelectorAll('.del-opt').forEach(c => c.classList.remove('active-del'));
+    el.classList.add('active-del');
+    deliveryType = type;
+    deliveryFee = type === 'standard' ? 32 : type === 'express' ? 60 : 0;
+    renderAll();
 }
 
-function triggerOrderSubmission() {
-    const currentName = document.getElementById('fp-custName').value.trim();
-    const currentPhone = document.getElementById('fp-custPhone').value.trim();
-    const currentAddress = document.getElementById('fp-custAddress').value.trim();
+// =============================================
+// PAYMENT PICK
+// =============================================
+function pickPayment(el, method) {
+    document.querySelectorAll('.pay-opt').forEach(c => c.classList.remove('active-pay'));
+    el.classList.add('active-pay');
+}
 
-    if (!currentName || !currentPhone || !currentAddress) {
-        alert("⚠️ Please provide all missing delivery address fields first!");
-        return;
+// =============================================
+// PROMO CODE
+// =============================================
+function applyPromo() {
+    const input = document.getElementById('c-promo');
+    const msg = document.getElementById('promo-msg');
+    const code = input.value.trim().toUpperCase();
+
+    if (PROMOS[code]) {
+        discountPercent = PROMOS[code];
+        voucherApplied = true;
+        msg.textContent = `✅ ${discountPercent}% discount applied!`;
+        msg.style.color = '#4CAF50';
+        input.disabled = true;
+        input.style.background = '#f0fff0';
+    } else {
+        voucherApplied = false;
+        discountPercent = 0;
+        msg.textContent = '❌ Invalid promo code';
+        msg.style.color = '#f44336';
     }
-
-    document.getElementById('checkout-success-view').style.display = 'flex';
+    renderAll();
 }
 
-function wipeDataAndResetHome() {
-    cartArray = [];
-    recalculateMainCartSystem();
-    synchronizeInterfaceState();
-    closeCheckoutView();
+// =============================================
+// PLACE ORDER
+// =============================================
+function placeOrder() {
+    const name = document.getElementById('c-name').value.trim();
+    const phone = document.getElementById('c-phone').value.trim();
+    const addr = document.getElementById('c-address').value.trim();
 
-    document.getElementById('fp-custName').value = '';
-    document.getElementById('fp-custPhone').value = '';
-    document.getElementById('fp-custAddress').value = '';
-    document.getElementById('checkout-success-view').style.display = 'none';
+    if (!name || !phone || !addr) { toast('Please fill all delivery details!'); return; }
+    if (phone.length < 11) { toast('Enter valid phone number!'); return; }
+
+    const oid = 'SR-' + Math.floor(1000 + Math.random() * 9000);
+    document.getElementById('order-id').textContent = `Order #${oid}`;
+
+    document.getElementById('chk-main').style.display = 'none';
+    document.getElementById('chk-success').style.display = 'flex';
 }
 
-// ক্যাটাগরি ফিল্টার লজিক (Breakfast, Lunch, Dinner etc.)
-function filterCategory(targetCategoryString) {
-    const currentEvent = window.event;
-    document.querySelectorAll('.menu-filter-tab').forEach(tab => tab.classList.remove('active'));
-    if (currentEvent && currentEvent.target) currentEvent.target.classList.add('active');
+// =============================================
+// GO HOME (Reset Everything)
+// =============================================
+function goHome() {
+    cart = [];
+    voucherApplied = false;
+    discountPercent = 0;
+    deliveryFee = 32;
+    deliveryType = 'standard';
 
-    document.querySelectorAll('.food-item-card').forEach(cardElement => {
-        if (targetCategoryString === 'all' || cardElement.classList.contains(targetCategoryString)) {
-            cardElement.style.display = 'flex';
-        } else {
-            cardElement.style.display = 'none';
-        }
+    syncAllCards();
+    renderAll();
+    hideFloatingBar();
+    closeCheckout();
+
+    // Reset inputs
+    ['c-name','c-phone','c-address','c-note','c-promo'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.value = ''; el.disabled = false; el.style.background = ''; }
+    });
+    document.getElementById('promo-msg').textContent = '';
+    document.querySelectorAll('.del-opt').forEach((c, i) => c.classList.toggle('active-del', i === 0));
+    document.querySelectorAll('.pay-opt').forEach((c, i) => c.classList.toggle('active-pay', i === 0));
+
+    window.location.href = '#menu';
+}
+
+// =============================================
+// MENU FILTER
+// =============================================
+function filterMenu(cat, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    document.querySelectorAll('.food-card').forEach(c => {
+        c.style.display = (cat === 'all' || c.classList.contains(cat)) ? 'flex' : 'none';
     });
 }
 
+// =============================================
+// TOAST
+// =============================================
+function toast(msg) {
+    const t = document.getElementById('fp-toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// =============================================
+// INIT
+// =============================================
 document.addEventListener('DOMContentLoaded', () => {
-    synchronizeInterfaceState();
-    recalculateMainCartSystem();
+    syncAllCards();
+    renderAll();
 });

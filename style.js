@@ -122,7 +122,7 @@ function renderCart() {
     
     floatingCount.textContent = totalQty;
     floatingPrice.textContent = `Tk ${totalPrice}`;
-    checkoutSubtotal.textContent = `Tk ${totalPrice}`;
+    if(checkoutSubtotal) checkoutSubtotal.textContent = `Tk ${totalPrice}`;
     checkoutTotal.textContent = `Tk ${finalCheckoutTotal}`;
     sidebarStickyTotal.textContent = `Tk ${totalPrice}`;
 }
@@ -135,21 +135,29 @@ function openFullCheckout() {
     closeFpSidebar();
     document.getElementById('full-checkout-page').style.display = 'block';
     document.body.style.overflow = 'hidden';
+    document.querySelector('.checkout-content').style.display = 'block';
+    document.getElementById('checkout-success-view').style.display = 'none';
 }
-function closeFullCheckout() { document.getElementById('full-checkout-page').style.display = 'none'; document.body.style.overflow = 'auto'; }
+
+function closeFullCheckout() { 
+    document.getElementById('full-checkout-page').style.display = 'none'; 
+    document.body.style.overflow = 'auto'; 
+}
 
 function submitFinalOrder() {
-    if(!document.getElementById('chk-street').value) {
+    const streetInput = document.getElementById('chk-street');
+    if(!streetInput || !streetInput.value) {
         showToast("Please fill Street / House Number!"); return;
     }
     document.querySelector('.checkout-content').style.display = 'none';
-    document.querySelector('.order-success-overlay').style.display = 'flex';
+    document.getElementById('checkout-success-view').style.display = 'flex';
 }
 
 function resetToHome() {
     cart = [];
     renderCart(); renderMenuButtons(); closeFullCheckout();
-    document.getElementById('chk-street').value = '';
+    const streetInput = document.getElementById('chk-street');
+    if(streetInput) streetInput.value = '';
     window.location.href = '#menu';
 }
 
@@ -171,6 +179,7 @@ function previewChefImage(input) {
 
 function showToast(message) {
     const toast = document.getElementById('toast-notification');
+    if(!toast) return;
     toast.textContent = message; toast.style.display = 'block';
     toast.style.cssText = `position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:10px 20px; border-radius:8px; z-index:9999; font-size:14px; display:block;`;
     setTimeout(() => toast.style.display = 'none', 2000);

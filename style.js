@@ -24,12 +24,6 @@ function addFoodToCart(name, price) {
     showToast(`${name} added to cart!`);
 }
 
-// Sidebar er Addon er jonno
-function addDirectAddon(name, price) {
-    addFoodToCart(name, price);
-}
-
-// Update Qty (+/-) from Menu Card
 function updateCardItemQty(name, factor) {
     let index = cart.findIndex(item => item.name === name);
     if (index !== -1) {
@@ -42,44 +36,20 @@ function updateCardItemQty(name, factor) {
     renderCartData();
 }
 
-// Update Qty (+/-) from Sidebar
 function updateSidebarQty(name, factor) {
     updateCardItemQty(name, factor);
 }
 
-// কার্ট থেকে সরাসরি আইটেম ডিলিট করার নতুন ফাংশন
 function deleteCartItem(name) {
     let index = cart.findIndex(item => item.name === name);
     if (index !== -1) {
-        cart.splice(index, 1); // আইটেমটি কার্ট অ্যারে থেকে মুছে ফেলবে
+        cart.splice(index, 1);
     }
     syncCardButtons();
     renderCartData();
     showToast(`${name} removed from basket`);
 }
 
-// Dropdown theke price change korar jonno
-function updateDynamicPricing(selectElement) {
-    const price = selectElement.value;
-    const cardBody = selectElement.closest('.product-card-body');
-    if (!cardBody) return;
-    
-    const priceDisplay = cardBody.querySelector('.dynamic-render-price');
-    const actionWrapper = cardBody.querySelector('.fp-card-action-wrapper');
-    
-    if (priceDisplay) priceDisplay.textContent = ` ৳ ${price}`;
-    if (actionWrapper) {
-        actionWrapper.dataset.price = price;
-        const name = actionWrapper.dataset.name;
-        const existingItem = cart.find(item => item.name === name);
-        if (existingItem) { 
-            existingItem.price = parseInt(price); 
-            renderCartData(); 
-        }
-    }
-}
-
-// UI Sync for Add Buttons vs Qty Control
 function syncCardButtons() {
     document.querySelectorAll('.fp-card-action-wrapper').forEach(wrapper => {
         const itemName = wrapper.getAttribute('data-name');
@@ -100,7 +70,6 @@ function syncCardButtons() {
     });
 }
 
-// Cart Data Renderer (Sidebar, Checkout & Floating bar er jonno)
 function renderCartData() {
     const cartContainer = document.getElementById('fp-cart-items-container');
     const checkoutList = document.getElementById('checkout-items-list');
@@ -116,8 +85,9 @@ function renderCartData() {
     if (checkoutList) checkoutList.innerHTML = '';
 
     if (cart.length === 0) {
-        if (cartContainer) cartContainer.innerHTML = '<p style="text-align:center; color:#777; padding:30px 0;">Your basket is empty</p>';
+        if (cartContainer) cartContainer.innerHTML = '<div style="text-align:center; padding: 50px 20px;"><i class="fa-solid fa-basket-shopping" style="font-size:40px; color:#ddd; margin-bottom:15px;"></i><p style="color:#777; font-weight:bold;">Your basket is empty</p></div>';
         if (floatingBar) floatingBar.classList.add('hidden');
+        closeFpSidebar();
     } else {
         if (floatingBar) floatingBar.classList.remove('hidden');
         cart.forEach(item => {
@@ -125,10 +95,9 @@ function renderCartData() {
             let itemTotal = item.price * item.qty;
             totalPrice += itemTotal;
 
-            // সাইডবার আইটেম রেন্ডারার - এখানে ফুডপান্ডার মতো ডিলিট বাটন (Trash Icon) যোগ করা হয়েছে
             if (cartContainer) {
                 cartContainer.innerHTML += `
-                    <div class="sidebar-item" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:12px 0;">
+                    <div class="sidebar-item" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:15px 0;">
                         <div style="flex:1">
                             <strong style="display:block; margin-bottom:8px; font-size:14px; color:#333;">${item.name}</strong>
                             <div class="fp-card-qty-control" style="display:flex; height:30px; width:fit-content; align-items:center;">
@@ -148,15 +117,18 @@ function renderCartData() {
             
             if (checkoutList) {
                 checkoutList.innerHTML += `
-                    <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px;">
-                        <span>${item.qty}x ${item.name}</span>
-                        <span>৳ ${itemTotal}</span>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px; color:#333;">
+                        <span style="font-weight:600;">${item.qty}x <span style="font-weight:normal; margin-left:5px;">${item.name}</span></span>
+                        <span style="font-weight:600;">৳ ${itemTotal}</span>
                     </div>`;
             }
         });
     }
     
-    let finalCheckoutTotal = totalPrice + 32 + 19; 
+    // Foodpanda Style Bill Calculation
+    let deliveryFee = 32;
+    let platformFeeAndVat = 19;
+    let finalCheckoutTotal = totalPrice > 0 ? (totalPrice + deliveryFee + platformFeeAndVat) : 0; 
     
     if (floatingCount) floatingCount.textContent = totalQty;
     if (floatingPrice) floatingPrice.textContent = `Tk ${totalPrice}`;
@@ -165,8 +137,8 @@ function renderCartData() {
     if (sidebarStickyTotal) sidebarStickyTotal.textContent = `Tk ${totalPrice}`;
 }
 
-// Sidebar Open/Close
 function openFpSidebar() { 
+    if(cart.length === 0) return;
     const overlay = document.getElementById('fp-sidebar-overlay');
     const sidebar = document.getElementById('fp-sidebar');
     if (overlay) overlay.style.display = 'block'; 
@@ -180,7 +152,6 @@ function closeFpSidebar() {
     if (sidebar) sidebar.style.right = '-450px'; 
 }
 
-// Checkout Open/Close
 function openFullCheckout() {
     if (cart.length === 0) return;
     closeFpSidebar();
@@ -210,13 +181,6 @@ function submitFinalOrder() {
         return;
     }
     
-    // সাইডবার বন্ধ করা হচ্ছে
-    const overlay = document.getElementById('fp-sidebar-overlay');
-    const sidebar = document.getElementById('fp-sidebar');
-    if (overlay) overlay.style.display = 'none';
-    if (sidebar) sidebar.style.right = '-450px';
-    
-    // সাকসেস স্ক্রিন দেখানো হচ্ছে
     const successView = document.getElementById('checkout-success-view');
     if (successView) successView.style.display = 'flex';
 }
@@ -226,40 +190,24 @@ function resetToHome() {
     renderCartData(); 
     syncCardButtons(); 
     closeFullCheckout();
-    const streetInput = document.getElementById('chk-street');
-    if (streetInput) streetInput.value = '';
-    window.location.href = '#menu';
+    
+    document.getElementById('fp-custName').value = '';
+    document.getElementById('fp-custPhone').value = '';
+    document.getElementById('fp-custAddress').value = '';
+    
+    const successView = document.getElementById('checkout-success-view');
+    if (successView) successView.style.display = 'none';
 }
 
-// Menu Filter
-function filterMenu(category) {
-    document.querySelectorAll('.filter-tab-btn').forEach(btn => btn.classList.remove('active'));
-    if (event && event.target) event.target.classList.add('active');
-    document.querySelectorAll('.product-item-card').forEach(card => {
-        card.style.display = (category === 'all' || card.classList.contains(category)) ? 'flex' : 'none';
-    });
-}
-
-// Chef Image Preview
-function previewChefImage(input) {
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = (e) => document.getElementById('chef-vera-img').src = e.target.result;
-        reader.readAsDataURL(input.files[0]);
-    }
-}
-
-// Toast Notification
 function showToast(message) {
     const toast = document.getElementById('toast-notification');
     if (!toast) return;
     toast.textContent = message; 
     toast.style.display = 'block';
-    toast.style.cssText = `position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:10px 20px; border-radius:8px; z-index:9999; font-size:14px; display:block; box-shadow: 0 4px 10px rgba(0,0,0,0.3);`;
-    setTimeout(() => toast.style.display = 'none', 2000);
+    toast.style.cssText = `position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:12px 24px; border-radius:8px; z-index:9999; font-size:14px; font-weight:bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3);`;
+    setTimeout(() => toast.style.display = 'none', 2500);
 }
 
-// Page load hole default render
 document.addEventListener('DOMContentLoaded', () => { 
     syncCardButtons(); 
     renderCartData(); 

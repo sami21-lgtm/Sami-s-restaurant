@@ -781,12 +781,15 @@
         </div>
     </section>
 
-    <div id="floating-cart" class="floating-basket-bar hidden" onclick="openFpSidebar()">
-        <div class="cart-left">
-            <div class="cart-icon-wrapper">
-                <i class="fa-solid fa-basket-shopping"></i>
-                <span id="cart-item-count">0</span>
-            </div>
+    <div id="floating-cart" <div class="floating-basket-bar hidden" id="floating-cart" onclick="openFpSidebar()">
+    <div class="cart-left">
+        <div class="cart-icon-wrapper">
+            🛍️ <span id="cart-item-count">0</span>
+        </div>
+        <span class="cart-view-text">View your basket</span>
+    </div>
+    <span id="cart-total-price">৳0</span>
+</div>
             <span class="cart-view-text">View your basket</span>
         </div>
         <div class="cart-right">
@@ -794,118 +797,99 @@
         </div>
     </div>
 
-    <div id="fp-sidebar-overlay" class="fp-overlay" onclick="closeFpSidebar()"></div>
-    <div id="fp-sidebar" class="fp-sidebar">
-        <div class="fp-header" style="padding: 20px; border-bottom: 1px solid #eee;">
-            <h2 style="font-size: 20px;">Your Basket</h2>
-            <button class="fp-close-btn" onclick="closeFpSidebar()"><i class="fa-solid fa-xmark"></i></button>
+   <!-- ========================================================= -->
+<!-- NEW SIDEBAR, CHECKOUT & SUCCESS HTML (PASTE BEFORE </body>) -->
+<!-- ========================================================= -->
+
+<!-- 1. Sidebar Overlay & Sidebar -->
+<div id="fp-sidebar-overlay" onclick="closeFpSidebar()"></div>
+<div class="fp-sidebar" id="fp-sidebar">
+    <div style="padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 20px; margin: 0;">Your Basket</h2>
+        <span onclick="closeFpSidebar()" style="font-size: 24px; cursor: pointer; color: #888;">&times;</span>
+    </div>
+    
+    <div id="fp-cart-items-container" style="padding: 20px; flex-grow: 1; overflow-y: auto; background: #f9f9f9;">
+        <!-- Cart items will be injected here by JS -->
+    </div>
+    
+    <div style="padding: 20px; border-top: 1px solid #eee; background: #fff;">
+        <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; margin-bottom: 15px;">
+            <span>Total:</span>
+            <span id="fp-sticky-total">৳ 0</span>
         </div>
-        
-        <div class="fp-sidebar-scroll-area">
-            <div class="fp-delivery-toggle">
-                <div class="toggle-option active">
-                    <strong>Delivery</strong>
-                    <span>25-40 min</span>
-                </div>
-                <div class="toggle-option">
-                    <strong>Pick-Up</strong>
-                    <span>Distance: 1.2 km</span>
-                </div>
+        <button onclick="openFullCheckout()" style="width: 100%; background: #d70f64; color: white; border: none; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
+            Proceed to Checkout
+        </button>
+    </div>
+</div>
+
+<!-- 2. Fullscreen Checkout Page -->
+<div class="checkout-fullscreen-wrapper" id="full-checkout-page">
+    <div style="background: #fff; padding: 15px 20px; border-bottom: 1px solid #ddd; display: flex; align-items: center; position: sticky; top: 0; z-index: 10;">
+        <span onclick="closeFullCheckout()" style="font-size: 24px; cursor: pointer; margin-right: 15px; color: #555;">&larr;</span>
+        <h2 style="font-size: 18px; margin: 0;">Checkout</h2>
+    </div>
+    
+    <div style="padding: 20px; max-width: 600px; margin: 0 auto;">
+        <!-- Delivery Details Form -->
+        <div style="background: #fff; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #eee;">
+            <h3 style="margin-bottom: 15px; font-size: 16px;">Delivery Details</h3>
+            <div class="input-form-field">
+                <label>Full Name</label>
+                <input type="text" id="fp-custName" placeholder="e.g. John Doe">
             </div>
-
-            <div id="fp-cart-items-container">
-                </div>
+            <div class="input-form-field">
+                <label>Phone Number</label>
+                <input type="tel" id="fp-custPhone" placeholder="e.g. 017xxxxxxxx">
+            </div>
+            <div class="input-form-field">
+                <label>Delivery Address</label>
+                <textarea id="fp-custAddress" rows="3" placeholder="House, Road, Area..."></textarea>
+            </div>
         </div>
 
-        <div class="fp-sidebar-footer">
-            <div class="summary-row">
+        <!-- Order Summary -->
+        <div style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee;">
+            <h3 style="margin-bottom: 15px; font-size: 16px;">Order Summary</h3>
+            <div id="checkout-items-list-fp" style="margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+                <!-- Checkout items will be injected here -->
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px;">
                 <span>Subtotal</span>
-                <span id="fp-sticky-total"> ৳ 0</span>
+                <span id="chk-subtotal">৳ 0</span>
             </div>
-            <div class="summary-row" style="color: #777; font-size: 13px;">
-                <span>Standard Delivery</span>
-                <span> ৳ 32</span>
+            <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px;">
+                <span>Delivery Fee</span>
+                <span>৳ 32</span>
             </div>
-            <button class="fp-review-btn" onclick="openFullCheckout()">Review Payment & Address</button>
+            <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+                <span>Platform Fee</span>
+                <span>৳ 19</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 18px;">
+                <span>Total</span>
+                <span id="chk-final-total" style="color: #d70f64;">৳ 0</span>
+            </div>
+            
+            <button onclick="submitFinalOrder()" style="width: 100%; background: #27ae60; color: white; border: none; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px;">
+                Confirm Order
+            </button>
         </div>
     </div>
+</div>
 
-    <div id="full-checkout-page" class="checkout-fullscreen-wrapper">
-        <div class="checkout-header">
-            <div class="checkout-header-inner">
-                <button class="back-btn" onclick="closeFullCheckout()"><i class="fa-solid fa-arrow-left"></i></button>
-                <h2 style="font-size: 18px;">Checkout</h2>
-                <div style="width: 20px;"></div>
-            </div>
-        </div>
-
-        <div class="checkout-content">
-            <h1 class="checkout-main-title">Complete your order</h1>
-            <div class="checkout-grid">
-                
-                <div class="checkout-left-col">
-                    <div class="checkout-box">
-                        <div class="box-header">
-                            <h3 style="font-size: 16px;"><i class="fa-solid fa-location-dot" style="color: var(--fp-pink);"></i> Delivery Address</h3>
-                        </div>
-                        <input type="text" id="fp-custName" class="chk-input" placeholder="Full Name (e.g. Md. Emtiaz Hossain)" required>
-                        <input type="tel" id="fp-custPhone" class="chk-input" placeholder="Phone Number (e.g. 017XXXXXX)" required>
-                        <textarea id="fp-custAddress" class="chk-input" rows="3" placeholder="House, Road, Block, Area..." required></textarea>
-                    </div>
-
-                    <div class="checkout-box">
-                        <div class="box-header">
-                            <h3 style="font-size: 16px;"><i class="fa-regular fa-credit-card" style="color: var(--fp-pink);"></i> Payment Method</h3>
-                        </div>
-                        <label class="delivery-option-card active-opt">
-                            <input type="radio" name="payment" checked style="margin-right: 10px;"> Cash on Delivery
-                        </label>
-                        <label class="delivery-option-card">
-                            <input type="radio" name="payment" style="margin-right: 10px;"> bKash / Nagad
-                        </label>
-                    </div>
-                </div>
-
-                <div class="checkout-right-col">
-                    <div class="checkout-box">
-                        <h3 style="font-size: 16px; margin-bottom: 15px;">Order Summary</h3>
-                        
-                        <div id="checkout-items-list" class="chk-item-list" style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
-                            </div>
-
-                        <div class="summary-line">
-                            <span>Subtotal</span>
-                            <span id="chk-subtotal"> ৳ 0</span>
-                        </div>
-                        <div class="summary-line">
-                            <span>Delivery Fee</span>
-                            <span> ৳ 32</span>
-                        </div>
-                        <div class="summary-line">
-                            <span>Platform Fee & VAT</span>
-                            <span> ৳ 19</span>
-                        </div>
-                        
-                        <div class="summary-line total-line" style="font-weight: 900; color: var(--fp-pink);">
-                            <span>Total</span>
-                            <span id="chk-final-total"> ৳ 0</span>
-                        </div>
-
-                        <button class="btn-place-order" onclick="submitFinalOrder()">Place Order</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+<!-- 3. Success Overlay -->
+<div class="order-success-overlay" id="checkout-success-view">
+    <div class="success-content">
+        <div class="success-icon-circle">✓</div>
+        <h2 style="margin-bottom: 10px; color: #2c2a27;">Order Placed Successfully!</h2>
+        <p style="color: #6a6660; margin-bottom: 25px; font-size: 15px;">Your delicious food is being prepared and will be delivered soon.</p>
+        <button onclick="resetToHome()" style="background: #d36613; color: white; border: none; padding: 12px 25px; border-radius: 25px; font-weight: bold; cursor: pointer; font-size: 15px;">
+            Back to Home
+        </button>
     </div>
-
-    <div id="checkout-success-view" class="order-success-overlay">
-        <div class="success-content">
-            <div class="success-icon-circle"><i class="fa-solid fa-check"></i></div>
-            <h2 style="font-size: 24px; margin-bottom: 10px;">Order Placed Successfully!</h2>
-            <p style="color: #666; margin-bottom: 25px;">Your delicious food is being prepared.</p>
-            <button class="btn-primary" onclick="resetToHome()">Back to Home</button>
-        </div>
-    </div>
+</div>
 
     <div id="toast-notification"></div>
     <script src="script.js"></script>

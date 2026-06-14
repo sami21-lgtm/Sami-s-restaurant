@@ -1,19 +1,20 @@
 let cart = [];
 
-// Add Item Function (HTML er sathe match korano)
 function addFoodToCart(name, price) {
     price = parseInt(price);
     let existingItem = cart.find(item => item.name === name);
-    if (existingItem) {
-        existingItem.qty += 1;
-    } else {
-        cart.push({ name: name, price: price, qty: 1 });
-    }
+    if (existingItem) { existingItem.qty += 1; } 
+    else { cart.push({ name: name, price: price, qty: 1 }); }
+    
     syncCardButtons();
     renderCartData();
+    
+    // এই ২ লাইন যোগ করুন - Add তে ক্লিক করলে নিচে কার্ট বার ভেসে উঠবে এবং সাথে সাথে সাইডবার ওপেন হবে
+    document.getElementById('floating-cart').classList.remove('hidden');
+    openFpSidebar();
+    
     showToast(`${name} added to cart!`);
 }
-
 // Sidebar er Addon er jonno
 function addDirectAddon(name, price) {
     addFoodToCart(name, price);
@@ -153,18 +154,21 @@ function closeFullCheckout() {
     document.body.style.overflow = 'auto'; 
 }
 
-// Order Submit & Success Screen
 function submitFinalOrder() {
-    const streetInput = document.getElementById('chk-street');
-    if(!streetInput || !streetInput.value.trim()) {
-        showToast("Please fill Street / House Number!"); return;
+    const name = document.getElementById('fp-custName').value.trim();
+    const phone = document.getElementById('fp-custPhone').value.trim();
+    const address = document.getElementById('fp-custAddress').value.trim();
+
+    if(!name || !phone || !address) {
+        showToast("Please fill all delivery details!"); return;
     }
     
-    const checkoutContent = document.querySelector('.checkout-content');
-    if(checkoutContent) checkoutContent.style.display = 'none';
+    // সাইডবার বন্ধ করা হচ্ছে
+    document.getElementById('fp-sidebar-overlay').style.display = 'none';
+    document.getElementById('fp-sidebar').style.right = '-450px';
     
-    const successView = document.getElementById('checkout-success-view');
-    if(successView) successView.style.display = 'flex';
+    // সাকসেস স্ক্রিন দেখানো হচ্ছে
+    document.getElementById('checkout-success-view').style.display = 'flex';
 }
 
 function resetToHome() {

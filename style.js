@@ -135,8 +135,12 @@ function openFullCheckout() {
     closeFpSidebar();
     document.getElementById('full-checkout-page').style.display = 'block';
     document.body.style.overflow = 'hidden';
-    document.querySelector('.checkout-content').style.display = 'block';
-    document.getElementById('checkout-success-view').style.display = 'none';
+    
+    // Ensure form view is visible and success view is hidden
+    const checkoutContent = document.querySelector('.checkout-content');
+    if(checkoutContent) checkoutContent.style.display = 'block';
+    const successView = document.getElementById('checkout-success-view');
+    if(successView) successView.style.display = 'none';
 }
 
 function closeFullCheckout() { 
@@ -146,16 +150,23 @@ function closeFullCheckout() {
 
 function submitFinalOrder() {
     const streetInput = document.getElementById('chk-street');
-    if(!streetInput || !streetInput.value) {
+    if(!streetInput || !streetInput.value.trim()) {
         showToast("Please fill Street / House Number!"); return;
     }
-    document.querySelector('.checkout-content').style.display = 'none';
-    document.getElementById('checkout-success-view').style.display = 'flex';
+    
+    // Hide checkout form, show success overlay
+    const checkoutContent = document.querySelector('.checkout-content');
+    if(checkoutContent) checkoutContent.style.display = 'none';
+    
+    const successView = document.getElementById('checkout-success-view');
+    if(successView) successView.style.display = 'flex';
 }
 
 function resetToHome() {
     cart = [];
-    renderCart(); renderMenuButtons(); closeFullCheckout();
+    renderCart(); 
+    renderMenuButtons(); 
+    closeFullCheckout();
     const streetInput = document.getElementById('chk-street');
     if(streetInput) streetInput.value = '';
     window.location.href = '#menu';

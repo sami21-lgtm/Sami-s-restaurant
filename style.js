@@ -3,14 +3,21 @@ let cart = [];
 function addFoodToCart(name, price) {
     price = parseInt(price);
     const existingItem = cart.find(item => item.name === name);
-    if (existingItem) {
-        existingItem.qty += 1;
-    } else {
-        cart.push({ name, price, qty: 1 });
-    }
+    if (existingItem) { existingItem.qty += 1; } 
+    else { cart.push({ name, price, qty: 1 }); }
     renderMenuButtons();
     renderCart();
     showToast(`${name} added to cart!`);
+}
+
+function addDirectAddon(name, price) {
+    price = parseInt(price);
+    const existingItem = cart.find(item => item.name === name);
+    if (existingItem) { existingItem.qty += 1; } 
+    else { cart.push({ name, price, qty: 1 }); }
+    renderMenuButtons();
+    renderCart();
+    showToast(`${name} added!`);
 }
 
 function updateCardItemQty(name, delta) {
@@ -23,7 +30,6 @@ function updateCardItemQty(name, delta) {
     renderCart();
 }
 
-// সাইডবার এবং চেকআউট পেজ থেকে কাউন্টার আপডেট করার ফাংশন
 function updateSidebarQty(name, delta) {
     const existingItem = cart.find(item => item.name === name);
     if (existingItem) {
@@ -38,34 +44,31 @@ function updateDynamicPricing(selectElement) {
     const price = selectElement.value;
     const cardBody = selectElement.closest('.product-card-body');
     const priceDisplay = cardBody.querySelector('.dynamic-render-price');
-    const actionWrapper = cardBody.querySelector('.fp-action-wrapper');
+    const actionWrapper = cardBody.querySelector('.fp-card-action-wrapper');
     
-    priceDisplay.textContent = `৳ ${price}`;
+    priceDisplay.textContent = ` ৳ ${price}`;
     actionWrapper.dataset.price = price;
     
     const name = actionWrapper.dataset.name;
     const existingItem = cart.find(item => item.name === name);
-    if (existingItem) {
-        existingItem.price = parseInt(price);
-        renderCart();
-    }
+    if (existingItem) { existingItem.price = parseInt(price); renderCart(); }
 }
 
 function renderMenuButtons() {
-    document.querySelectorAll('.fp-action-wrapper').forEach(wrapper => {
+    document.querySelectorAll('.fp-card-action-wrapper').forEach(wrapper => {
         const name = wrapper.dataset.name;
         const itemInCart = cart.find(item => item.name === name);
-        const addBtn = wrapper.querySelector('.fp-add-btn');
-        const qtyStepper = wrapper.querySelector('.fp-qty-stepper');
-        const qtyVal = wrapper.querySelector('.fp-qty-val');
+        const addBtn = wrapper.querySelector('.fp-card-add-btn');
+        const qtyControl = wrapper.querySelector('.fp-card-qty-control');
+        const qtyDisplay = wrapper.querySelector('.fp-card-qty-display');
 
         if (itemInCart) {
             addBtn.style.display = 'none';
-            qtyStepper.style.display = 'flex';
-            qtyVal.textContent = itemInCart.qty;
+            qtyControl.style.display = 'flex';
+            qtyDisplay.textContent = itemInCart.qty;
         } else {
             addBtn.style.display = 'block';
-            qtyStepper.style.display = 'none';
+            qtyControl.style.display = 'none';
         }
     });
 }
@@ -75,7 +78,9 @@ function renderCart() {
     const checkoutList = document.getElementById('checkout-items-list');
     const floatingCount = document.getElementById('cart-item-count');
     const floatingPrice = document.getElementById('cart-total-price');
+    const checkoutSubtotal = document.getElementById('chk-subtotal');
     const checkoutTotal = document.getElementById('chk-final-total');
+    const sidebarStickyTotal = document.getElementById('fp-sticky-total');
     const floatingBar = document.getElementById('floating-cart');
 
     let totalQty = 0, totalPrice = 0;
@@ -92,65 +97,59 @@ function renderCart() {
             let itemTotal = item.price * item.qty;
             totalPrice += itemTotal;
 
-            // Sidebar Cart Item HTML (নিচে + - বাটন যুক্ত করা হয়েছে)
             cartContainer.innerHTML += `
                 <div class="sidebar-item">
                     <div style="flex:1">
                         <strong style="display:block; margin-bottom:8px; font-size:14px;">${item.name}</strong>
-                        <div class="fp-qty-stepper" style="display:flex; height:30px; width:fit-content;">
-                            <button class="fp-qty-btn minus" style="width:28px; font-size:16px;" onclick="updateSidebarQty('${item.name}', -1)">−</button>
-                            <span class="fp-qty-val" style="width:28px; font-size:14px;">${item.qty}</span>
-                            <button class="fp-qty-btn plus" style="width:28px; font-size:16px;" onclick="updateSidebarQty('${item.name}', 1)">+</button>
+                        <div class="fp-card-qty-control" style="display:flex; height:30px; width:fit-content;">
+                            <button class="fp-card-qty-btn minus" style="width:28px; font-size:16px;" onclick="updateSidebarQty('${item.name}', -1)">-</button>
+                            <span class="fp-card-qty-display" style="width:28px; font-size:14px; line-height:24px;">${item.qty}</span>
+                            <button class="fp-card-qty-btn plus" style="width:28px; font-size:16px;" onclick="updateSidebarQty('${item.name}', 1)">+</button>
                         </div>
                     </div>
                     <strong style="margin-left:15px; font-size:14px; color:#222;">৳ ${itemTotal}</strong>
                 </div>`;
             
-            // Checkout Order Summary Item HTML (এখানেও + - বাটন যুক্ত করা হয়েছে)
             checkoutList.innerHTML += `
-                <div class="chk-item-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #f0f0f0; padding-bottom:10px;">
-                    <div style="flex:1">
-                        <strong style="display:block; margin-bottom:8px; font-size:14px;">${item.name}</strong>
-                        <div class="fp-qty-stepper" style="display:flex; height:30px; width:fit-content;">
-                            <button class="fp-qty-btn minus" style="width:28px; font-size:16px;" onclick="updateSidebarQty('${item.name}', -1)">−</button>
-                            <span class="fp-qty-val" style="width:28px; font-size:14px;">${item.qty}</span>
-                            <button class="fp-qty-btn plus" style="width:28px; font-size:16px;" onclick="updateSidebarQty('${item.name}', 1)">+</button>
-                        </div>
-                    </div>
-                    <strong style="font-size:14px; color:#222;">৳ ${itemTotal}</strong>
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px;">
+                    <span>${item.qty}x ${item.name}</span>
+                    <span>৳ ${itemTotal}</span>
                 </div>`;
         });
     }
+    
+    let finalCheckoutTotal = totalPrice + 32 + 19; // delivery + fee
+    
     floatingCount.textContent = totalQty;
-    floatingPrice.textContent = `৳ ${totalPrice}`;
-    checkoutTotal.textContent = `৳ ${totalPrice}`;
+    floatingPrice.textContent = `Tk ${totalPrice}`;
+    checkoutSubtotal.textContent = `Tk ${totalPrice}`;
+    checkoutTotal.textContent = `Tk ${finalCheckoutTotal}`;
+    sidebarStickyTotal.textContent = `Tk ${totalPrice}`;
 }
 
 function openFpSidebar() { document.getElementById('fp-sidebar-overlay').style.display = 'block'; document.getElementById('fp-sidebar').style.right = '0'; }
-function closeFpSidebar() { document.getElementById('fp-sidebar-overlay').style.display = 'none'; document.getElementById('fp-sidebar').style.right = '-420px'; }
+function closeFpSidebar() { document.getElementById('fp-sidebar-overlay').style.display = 'none'; document.getElementById('fp-sidebar').style.right = '-450px'; }
 
 function openFullCheckout() {
     if(cart.length === 0) return;
     closeFpSidebar();
     document.getElementById('full-checkout-page').style.display = 'block';
     document.body.style.overflow = 'hidden';
-    document.getElementById('checkout-form-view').style.display = 'block';
-    document.getElementById('checkout-success-view').style.display = 'none';
 }
 function closeFullCheckout() { document.getElementById('full-checkout-page').style.display = 'none'; document.body.style.overflow = 'auto'; }
 
 function submitFinalOrder() {
-    if(!document.getElementById('chk-name').value || !document.getElementById('chk-phone').value || !document.getElementById('chk-address').value) {
-        showToast("Please fill all delivery details!"); return;
+    if(!document.getElementById('chk-street').value) {
+        showToast("Please fill Street / House Number!"); return;
     }
-    document.getElementById('checkout-form-view').style.display = 'none';
-    document.getElementById('checkout-success-view').style.display = 'flex';
+    document.querySelector('.checkout-content').style.display = 'none';
+    document.querySelector('.order-success-overlay').style.display = 'flex';
 }
 
 function resetToHome() {
     cart = [];
     renderCart(); renderMenuButtons(); closeFullCheckout();
-    document.getElementById('chk-name').value = ''; document.getElementById('chk-phone').value = ''; document.getElementById('chk-address').value = '';
+    document.getElementById('chk-street').value = '';
     window.location.href = '#menu';
 }
 
@@ -177,8 +176,4 @@ function showToast(message) {
     setTimeout(() => toast.style.display = 'none', 2000);
 }
 
-// Page load hole cart render kore neyar jonno
-document.addEventListener('DOMContentLoaded', () => {
-    renderMenuButtons();
-    renderCart();
-});
+document.addEventListener('DOMContentLoaded', () => { renderMenuButtons(); renderCart(); });

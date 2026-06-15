@@ -641,7 +641,61 @@ h2 {
         padding: 25px;
     }
 }
-/* ================= DIRECT FULLSCREEN CHECKOUT VIEW CUSTOM CODE ================= */
+/* ================= NEW FOODPANDA STYLE INTERFACE ADDITIONS ================= */
+
+/* Food Card Inline Dynamic Counter (The Green Add Box) */
+.fp-card-inline-selector {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #1ebd60;
+    border-radius: 8px;
+    padding: 6px 12px;
+    width: 100%;
+    max-width: 130px;
+    margin-left: auto;
+    box-shadow: 0 4px 10px rgba(30, 189, 96, 0.2);
+    animation: popScale 0.2s ease-out;
+}
+
+.fp-inline-action-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.fp-inline-action-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.fp-inline-qty-text {
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    text-align: center;
+    min-width: 20px;
+}
+
+/* Overriding original cart-action-group for proper alignment */
+.cart-action-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: flex-end;
+    width: 100%;
+}
+
+/* Checkout Fullscreen Layout */
 #direct-checkout-overlay {
     position: fixed;
     top: 0;
@@ -654,11 +708,22 @@ h2 {
 }
 
 .checkout-fullscreen-wrapper {
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100vh;
+    background: #f7f7f7; 
+    z-index: 10000; 
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.4s ease;
     display: flex;
     flex-direction: column;
-    height: 100%;
-    width: 100%;
-    background-color: #fcfbfa;
+}
+
+.checkout-fullscreen-wrapper.active {
+    transform: translateY(0);
 }
 
 .checkout-header-bar {
@@ -666,7 +731,7 @@ h2 {
     display: flex;
     flex-direction: column;
     text-align: left;
-    background: #fcfbfa;
+    background: #fff;
     border-bottom: 1px solid #eee;
 }
 
@@ -680,7 +745,7 @@ h2 {
 }
 
 .checkout-title-text {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: bold;
     color: #111;
 }
@@ -689,18 +754,128 @@ h2 {
     padding: 20px;
     flex: 1;
     overflow-y: auto;
+    background: #f7f7f7;
 }
 
-.checkout-summary-pill {
-    background-color: #fff9f3;
-    border: 1px dashed #d36613;
-    padding: 12px;
-    border-radius: 6px;
-    margin-bottom: 20px;
+/* Inside Basket UI */
+.foodpanda-cart-container {
+    background: #ffffff;
+    border: 1px solid #e1dbd6;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.basket-heading {
+    font-size: 16px;
+    color: #d36613;
+    font-weight: 600;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #f3ece6;
+    padding-bottom: 8px;
+}
+
+.empty-basket-text {
+    text-align: center;
+    color: #888;
     font-size: 14px;
-    color: #2c2a27;
+    padding: 20px 0;
 }
 
+.fp-cart-item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px dashed #eee;
+    gap: 10px;
+}
+
+.fp-item-info {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+}
+
+.fp-item-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+.fp-item-unit-price {
+    font-size: 12px;
+    color: #888;
+    margin-top: 4px;
+}
+
+/* Inline Controller in Checkout */
+.fp-qty-actions-box {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+    overflow: hidden;
+}
+
+.fp-qty-inline-btn {
+    background: #f8f9fa;
+    border: none;
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #444;
+    transition: background 0.2s;
+}
+
+.fp-qty-inline-btn:hover { background: #e9ecef; }
+
+.fp-qty-inline-value {
+    width: 28px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    color: #111;
+}
+
+.fp-item-total-price {
+    flex: 1;
+    text-align: right;
+    font-size: 14px;
+    font-weight: bold;
+    color: #111;
+}
+
+.fp-item-delete-btn {
+    background: none;
+    border: none;
+    color: #dc3545;
+    font-size: 15px;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.fp-item-delete-btn:hover { color: #bd2130; }
+
+.basket-grand-total-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 16px;
+    font-weight: bold;
+    color: #111;
+    margin-top: 15px;
+    padding-top: 12px;
+    border-top: 2px solid #f3ece6;
+}
+
+#basket-grand-total-val {
+    color: #1ebd60;
+}
+
+/* Inputs and Forms */
 .input-flat-group {
     margin-bottom: 18px;
     display: flex;
@@ -721,24 +896,13 @@ h2 {
     background: #fff;
     outline: none;
     font-size: 14px;
-    border-radius: 4px;
+    border-radius: 6px;
 }
 
-.input-flat-group input:focus {
-    border-color: #1ebd60;
-}
+.input-flat-group input:focus { border-color: #1ebd60; }
 
-.payment-method-flat-group {
-    margin-top: 25px;
-}
-
-.payment-section-title {
-    font-size: 13px;
-    color: #333;
-    font-weight: 500;
-    display: block;
-    margin-bottom: 12px;
-}
+.payment-method-flat-group { margin-top: 20px; }
+.payment-section-title { font-size: 13px; color: #333; font-weight: 500; display: block; margin-bottom: 12px; }
 
 .radio-flat-option {
     display: flex;
@@ -746,16 +910,14 @@ h2 {
     gap: 10px;
     margin-bottom: 12px;
     font-size: 14px;
+    background: white;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 6px;
 }
 
-.radio-flat-option input {
-    cursor: pointer;
-    width: 16px;
-    height: 16px;
-    accent-color: #1ebd60;
-}
+.radio-flat-option input { cursor: pointer; accent-color: #1ebd60; }
 
-/* Big Full width Green Button at the bottom */
 .btn-green-place-order {
     width: 100%;
     background-color: #1ebd60;
@@ -766,62 +928,34 @@ h2 {
     font-weight: bold;
     cursor: pointer;
     text-align: center;
-    border-radius: 0;
 }
 
-.btn-green-place-order:hover {
-    background-color: #1aa654;
-}
+.btn-green-place-order:hover { background-color: #1aa654; }
 
-/* ================= OTP & SUCCESS MODALS ================= */
+/* OTP & Success Modals */
 .otp-modal-overlay, .success-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    z-index: 100000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6); z-index: 100000;
+    display: flex; align-items: center; justify-content: center;
 }
 
 .otp-modal-content, .success-modal-content {
-    background: #fff;
-    padding: 30px;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 400px;
-    text-align: center;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    background: #fff; padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center;
 }
 
 #direct-otp-input {
-    width: 60%;
-    padding: 10px;
-    text-align: center;
-    font-size: 22px;
-    letter-spacing: 4px;
-    border: 2px solid #ddd;
-    border-radius: 6px;
-    margin-bottom: 20px;
-    outline: none;
+    width: 60%; padding: 10px; text-align: center; font-size: 22px; letter-spacing: 4px;
+    border: 2px solid #ddd; border-radius: 6px; margin-bottom: 20px; outline: none;
 }
 
 .btn-verify-otp, .btn-success-close {
-    width: 100%;
-    background: #1ebd60;
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 15px;
+    width: 100%; background: #1ebd60; color: white; border: none;
+    padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px;
 }
 
-.btn-success-close {
-    background: #333;
-    margin-top: 10px;
+.btn-success-close { background: #333; margin-top: 10px; }
+
+@keyframes popScale {
+    0% { transform: scale(0.9); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
 }

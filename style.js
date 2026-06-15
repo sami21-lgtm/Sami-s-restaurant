@@ -1,4 +1,3 @@
-// ----- PRODUCT LIST (FULL 24 ITEMS) -----
 const products = [
   { name: "Soft Ruti / Paratha", cats: "breakfast", img: "images (12).jpg", fallback: "https://images.unsplash.com/photo-1505253758473-96b7015fcd40?w=400", variants: [{ label:"1 Piece (৳20)", val:20 },{ label:"2 Pieces (৳40)", val:40 }] },
   { name: "Special Bhuna Daal", cats: "breakfast", img: "images (13).jpg", fallback: "https://images.unsplash.com/photo-1548943487-a2e4f43bb288?w=400", variants: [{ label:"1 Bowl (৳40)", val:40 }], badge: "Morning Special" },
@@ -28,9 +27,9 @@ const products = [
 
 let cart = [];
 
-// Render Menu Dynamically
 function renderMenu() {
   const container = document.getElementById('menuContainer');
+  if (!container) return;
   container.innerHTML = '';
   products.forEach(p => {
     const catsClass = p.cats;
@@ -85,7 +84,7 @@ function addToCart(btn, name) {
   showToast(`${name} added!`);
   renderAllInlineCounters();
   updateCartUI();
-  // 🔥 AFTER ADD, OPEN CHECKOUT (FOODPANDA STYLE)
+  // 🔥 সবচেয়ে গুরুত্বপূর্ণ লাইন: Add করার পর চেকআউট ওপেন হবে
   openFpSidebar();
 }
 
@@ -132,7 +131,8 @@ function updateCartUI() {
 function openFpSidebar() {
   if (cart.length === 0) { showToast("Basket empty!"); return; }
   renderBasketItems();
-  document.getElementById('direct-checkout-overlay').classList.add('active');
+  const overlay = document.getElementById('direct-checkout-overlay');
+  overlay.classList.add('active');
   document.body.style.overflow = 'hidden';
 }
 

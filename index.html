@@ -424,6 +424,32 @@
                     </div>
                 </div>
             </div>
+            <div class="product-item-card lunch dinner">
+                <span class="badge-popular">Staple</span>
+                <img src="plain_rice.jpg" alt="Plain Rice" onerror="this.src='https://images.unsplash.com/photo-1586201375761-83865001e8ac?w=400'">
+                <div class="product-card-body">
+                    <h3>Plain Steamed Rice</h3>
+                    <p>Fluffy, steamed white rice – goes with any curry.</p>
+                    <div class="product-dropdown-control">
+                        <label>Portion:</label>
+                        <select class="variant-select" onchange="updateDynamicPricing(this)">
+                            <option value="60">Small (৳60)</option>
+                            <option value="110">Large (৳110)</option>
+                        </select>
+                    </div>
+                    <div class="product-price-action">
+                        <span class="product-base-price dynamic-render-price" data-base-price="60">৳60</span>
+                        <div class="cart-action-group">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="updateQty(this, -1)">-</button>
+                                <input type="text" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                            </div>
+                            <button class="btn-cart" onclick="addToCart(this, 'Plain Steamed Rice')">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div class="product-item-card desserts">
                 <img src="efbacffe-7036-4fd0-beb4-43eafe0c7e00.png" alt="Vanilla Cake" onerror="this.src='https://images.unsplash.com/photo-1557308536-ee471ef2c390?w=400'">

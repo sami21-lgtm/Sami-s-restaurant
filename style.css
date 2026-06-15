@@ -641,9 +641,7 @@ h2 {
         padding: 25px;
     }
 }
-/* ================= NEW FOODPANDA STYLE INTERFACE ADDITIONS ================= */
-
-/* Food Card Inline Dynamic Counter (The Green Add Box) */
+/* ================= NEW: Inline Counter (Green [- 1 +] Box) ================= */
 .fp-card-inline-selector {
     display: flex;
     align-items: center;
@@ -652,18 +650,16 @@ h2 {
     border-radius: 8px;
     padding: 6px 12px;
     width: 100%;
-    max-width: 130px;
-    margin-left: auto;
+    max-width: 110px;
     box-shadow: 0 4px 10px rgba(30, 189, 96, 0.2);
     animation: popScale 0.2s ease-out;
 }
-
 .fp-inline-action-btn {
     background: transparent;
     border: none;
     color: white;
-    width: 26px;
-    height: 26px;
+    width: 24px;
+    height: 24px;
     border-radius: 4px;
     font-size: 18px;
     font-weight: bold;
@@ -673,289 +669,62 @@ h2 {
     justify-content: center;
     transition: background 0.2s;
 }
+.fp-inline-action-btn:hover { background: rgba(255, 255, 255, 0.2); }
+.fp-inline-qty-text { color: white; font-weight: bold; font-size: 15px; text-align: center; min-width: 20px; }
+@keyframes popScale { 0% { transform: scale(0.9); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
 
-.fp-inline-action-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.fp-inline-qty-text {
-    color: white;
-    font-weight: bold;
-    font-size: 16px;
-    text-align: center;
-    min-width: 20px;
-}
-
-/* Overriding original cart-action-group for proper alignment */
-.cart-action-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    justify-content: flex-end;
-    width: 100%;
-}
-
-/* Checkout Fullscreen Layout */
+/* ================= NEW: Checkout Overlay & Modals ================= */
 #direct-checkout-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 99999;
-    background-color: #fcfbfa;
-    display: none;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: transparent; z-index: 10000;
+    display: none; flex-direction: column; overflow: hidden;
 }
-
+#direct-checkout-overlay.active { display: flex; }
 .checkout-fullscreen-wrapper {
-    position: fixed; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 100vh;
-    background: #f7f7f7; 
-    z-index: 10000; 
-    overflow-y: auto;
-    transform: translateY(100%);
-    transition: transform 0.4s ease;
-    display: flex;
-    flex-direction: column;
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: #f7f7f7; display: flex; flex-direction: column;
 }
 
-.checkout-fullscreen-wrapper.active {
-    transform: translateY(0);
-}
+.checkout-header-bar { padding: 15px 20px; background: #fff; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px;}
+.close-checkout-x { font-size: 32px; color: #333; cursor: pointer; line-height: 20px; margin-bottom: 5px; }
+.checkout-title-text { font-size: 20px; font-weight: bold; color: #111; }
+.checkout-body-form { padding: 20px; flex: 1; overflow-y: auto; background: #f7f7f7; }
 
-.checkout-header-bar {
-    padding: 15px 20px;
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-    background: #fff;
-    border-bottom: 1px solid #eee;
-}
+.foodpanda-cart-container { background: #ffffff; border: 1px solid #e1dbd6; border-radius: 8px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.basket-heading { font-size: 16px; color: #d36613; font-weight: 600; margin-bottom: 15px; border-bottom: 1px solid #f3ece6; padding-bottom: 8px; }
+.empty-basket-text { text-align: center; color: #888; font-size: 14px; padding: 20px 0; }
 
-.close-checkout-x {
-    font-size: 32px;
-    color: #333;
-    cursor: pointer;
-    width: 30px;
-    line-height: 20px;
-    margin-bottom: 5px;
-}
+.fp-cart-item-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #eee; gap: 10px; }
+.fp-item-info { flex: 2; display: flex; flex-direction: column; }
+.fp-item-name { font-size: 14px; font-weight: 600; color: #333; }
+.fp-item-unit-price { font-size: 12px; color: #888; margin-top: 4px; }
 
-.checkout-title-text {
-    font-size: 22px;
-    font-weight: bold;
-    color: #111;
-}
-
-.checkout-body-form {
-    padding: 20px;
-    flex: 1;
-    overflow-y: auto;
-    background: #f7f7f7;
-}
-
-/* Inside Basket UI */
-.foodpanda-cart-container {
-    background: #ffffff;
-    border: 1px solid #e1dbd6;
-    border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-}
-
-.basket-heading {
-    font-size: 16px;
-    color: #d36613;
-    font-weight: 600;
-    margin-bottom: 15px;
-    border-bottom: 1px solid #f3ece6;
-    padding-bottom: 8px;
-}
-
-.empty-basket-text {
-    text-align: center;
-    color: #888;
-    font-size: 14px;
-    padding: 20px 0;
-}
-
-.fp-cart-item-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 0;
-    border-bottom: 1px dashed #eee;
-    gap: 10px;
-}
-
-.fp-item-info {
-    flex: 2;
-    display: flex;
-    flex-direction: column;
-}
-
-.fp-item-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: #333;
-}
-
-.fp-item-unit-price {
-    font-size: 12px;
-    color: #888;
-    margin-top: 4px;
-}
-
-/* Inline Controller in Checkout */
-.fp-qty-actions-box {
-    display: flex;
-    align-items: center;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background: #fff;
-    overflow: hidden;
-}
-
-.fp-qty-inline-btn {
-    background: #f8f9fa;
-    border: none;
-    width: 28px;
-    height: 28px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    color: #444;
-    transition: background 0.2s;
-}
-
+.fp-qty-actions-box { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 4px; background: #fff; overflow: hidden; }
+.fp-qty-inline-btn { background: #f8f9fa; border: none; width: 28px; height: 28px; font-size: 16px; font-weight: bold; cursor: pointer; color: #444; }
 .fp-qty-inline-btn:hover { background: #e9ecef; }
+.fp-qty-inline-value { width: 28px; text-align: center; font-size: 14px; font-weight: bold; color: #111; }
 
-.fp-qty-inline-value {
-    width: 28px;
-    text-align: center;
-    font-size: 14px;
-    font-weight: bold;
-    color: #111;
-}
+.fp-item-total-price { flex: 1; text-align: right; font-size: 14px; font-weight: bold; color: #111; }
+.fp-item-delete-btn { background: none; border: none; color: #dc3545; font-size: 15px; cursor: pointer; padding: 5px; }
 
-.fp-item-total-price {
-    flex: 1;
-    text-align: right;
-    font-size: 14px;
-    font-weight: bold;
-    color: #111;
-}
+.basket-grand-total-row { display: flex; justify-content: space-between; font-size: 16px; font-weight: bold; color: #111; margin-top: 15px; padding-top: 12px; border-top: 2px solid #f3ece6; }
+#basket-grand-total-val { color: #1ebd60; }
 
-.fp-item-delete-btn {
-    background: none;
-    border: none;
-    color: #dc3545;
-    font-size: 15px;
-    cursor: pointer;
-    padding: 5px;
-}
-
-.fp-item-delete-btn:hover { color: #bd2130; }
-
-.basket-grand-total-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 16px;
-    font-weight: bold;
-    color: #111;
-    margin-top: 15px;
-    padding-top: 12px;
-    border-top: 2px solid #f3ece6;
-}
-
-#basket-grand-total-val {
-    color: #1ebd60;
-}
-
-/* Inputs and Forms */
-.input-flat-group {
-    margin-bottom: 18px;
-    display: flex;
-    flex-direction: column;
-}
-
-.input-flat-group label {
-    font-size: 13px;
-    color: #333;
-    margin-bottom: 6px;
-    font-weight: 500;
-}
-
-.input-flat-group input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    background: #fff;
-    outline: none;
-    font-size: 14px;
-    border-radius: 6px;
-}
-
+.input-flat-group { margin-bottom: 18px; display: flex; flex-direction: column; }
+.input-flat-group label { font-size: 13px; color: #333; margin-bottom: 6px; font-weight: 500; }
+.input-flat-group input { width: 100%; padding: 12px; border: 1px solid #ccc; background: #fff; outline: none; font-size: 14px; border-radius: 6px; }
 .input-flat-group input:focus { border-color: #1ebd60; }
 
 .payment-method-flat-group { margin-top: 20px; }
 .payment-section-title { font-size: 13px; color: #333; font-weight: 500; display: block; margin-bottom: 12px; }
-
-.radio-flat-option {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 12px;
-    font-size: 14px;
-    background: white;
-    padding: 10px;
-    border: 1px solid #eee;
-    border-radius: 6px;
-}
-
+.radio-flat-option { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 14px; background: white; padding: 10px; border: 1px solid #eee; border-radius: 6px; }
 .radio-flat-option input { cursor: pointer; accent-color: #1ebd60; }
 
-.btn-green-place-order {
-    width: 100%;
-    background-color: #1ebd60;
-    color: white;
-    border: none;
-    padding: 18px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    text-align: center;
-}
-
+.btn-green-place-order { width: 100%; background-color: #1ebd60; color: white; border: none; padding: 18px; font-size: 16px; font-weight: bold; cursor: pointer; text-align: center; margin-top: auto;}
 .btn-green-place-order:hover { background-color: #1aa654; }
 
-/* OTP & Success Modals */
-.otp-modal-overlay, .success-modal-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.6); z-index: 100000;
-    display: flex; align-items: center; justify-content: center;
-}
-
-.otp-modal-content, .success-modal-content {
-    background: #fff; padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center;
-}
-
-#direct-otp-input {
-    width: 60%; padding: 10px; text-align: center; font-size: 22px; letter-spacing: 4px;
-    border: 2px solid #ddd; border-radius: 6px; margin-bottom: 20px; outline: none;
-}
-
-.btn-verify-otp, .btn-success-close {
-    width: 100%; background: #1ebd60; color: white; border: none;
-    padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px;
-}
-
+.otp-modal-overlay, .success-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 100000; display: flex; align-items: center; justify-content: center; }
+.otp-modal-content, .success-modal-content { background: #fff; padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; }
+#direct-otp-input { width: 60%; padding: 10px; text-align: center; font-size: 22px; letter-spacing: 4px; border: 2px solid #ddd; border-radius: 6px; margin-bottom: 20px; outline: none; }
+.btn-verify-otp, .btn-success-close { width: 100%; background: #1ebd60; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px; }
 .btn-success-close { background: #333; margin-top: 10px; }
-
-@keyframes popScale {
-    0% { transform: scale(0.9); opacity: 0.7; }
-    100% { transform: scale(1); opacity: 1; }
-}

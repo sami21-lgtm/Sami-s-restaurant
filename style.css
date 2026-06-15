@@ -641,3 +641,187 @@ h2 {
         padding: 25px;
     }
 }
+/* ================= DIRECT FULLSCREEN CHECKOUT VIEW CUSTOM CODE ================= */
+#direct-checkout-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 99999;
+    background-color: #fcfbfa;
+    display: none;
+}
+
+.checkout-fullscreen-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    background-color: #fcfbfa;
+}
+
+.checkout-header-bar {
+    padding: 15px 20px;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    background: #fcfbfa;
+    border-bottom: 1px solid #eee;
+}
+
+.close-checkout-x {
+    font-size: 32px;
+    color: #333;
+    cursor: pointer;
+    width: 30px;
+    line-height: 20px;
+    margin-bottom: 5px;
+}
+
+.checkout-title-text {
+    font-size: 24px;
+    font-weight: bold;
+    color: #111;
+}
+
+.checkout-body-form {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.checkout-summary-pill {
+    background-color: #fff9f3;
+    border: 1px dashed #d36613;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #2c2a27;
+}
+
+.input-flat-group {
+    margin-bottom: 18px;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-flat-group label {
+    font-size: 13px;
+    color: #333;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.input-flat-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    background: #fff;
+    outline: none;
+    font-size: 14px;
+    border-radius: 4px;
+}
+
+.input-flat-group input:focus {
+    border-color: #1ebd60;
+}
+
+.payment-method-flat-group {
+    margin-top: 25px;
+}
+
+.payment-section-title {
+    font-size: 13px;
+    color: #333;
+    font-weight: 500;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.radio-flat-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.radio-flat-option input {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    accent-color: #1ebd60;
+}
+
+/* Big Full width Green Button at the bottom */
+.btn-green-place-order {
+    width: 100%;
+    background-color: #1ebd60;
+    color: white;
+    border: none;
+    padding: 18px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 0;
+}
+
+.btn-green-place-order:hover {
+    background-color: #1aa654;
+}
+
+/* ================= OTP & SUCCESS MODALS ================= */
+.otp-modal-overlay, .success-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.otp-modal-content, .success-modal-content {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+#direct-otp-input {
+    width: 60%;
+    padding: 10px;
+    text-align: center;
+    font-size: 22px;
+    letter-spacing: 4px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    outline: none;
+}
+
+.btn-verify-otp, .btn-success-close {
+    width: 100%;
+    background: #1ebd60;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.btn-success-close {
+    background: #333;
+    margin-top: 10px;
+}

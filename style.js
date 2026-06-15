@@ -84,7 +84,7 @@ function addToCart(btn, name) {
   showToast(`${name} added!`);
   renderAllInlineCounters();
   updateCartUI();
-  // 🔥 সবচেয়ে গুরুত্বপূর্ণ লাইন: Add করার পর চেকআউট ওপেন হবে
+  // ***** এই লাইনটি Checkout খুলবে *****
   openFpSidebar();
 }
 

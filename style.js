@@ -1,233 +1,174 @@
-let cart = [];
-let isOtpVerified = false;
+// Global cart item state
+let currentOrder = null;
 
-// 2. Filter Menu Function
+// Menu category filter
 function filterMenu(category) {
-    const items = document.querySelectorAll('.product-item-card');
-    const buttons = document.querySelectorAll('.filter-tab-btn');
+    const cards = document.querySelectorAll('.product-item-card');
+    const tabs = document.querySelectorAll('.filter-tab-btn');
     
-    buttons.forEach(btn => btn.classList.remove('active'));
-    if(event && event.target) event.target.classList.add('active');
+    tabs.forEach(tab => tab.classList.remove('active'));
+    if(event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+    }
 
-    items.forEach(item => {
-        if (category === 'all' || item.classList.contains(category)) {
-            item.style.display = 'block';
+    cards.forEach(card => {
+        if (category === 'all' || card.classList.contains(category)) {
+            card.style.display = 'block';
         } else {
-            item.style.display = 'none';
+            card.style.display = 'none';
         }
     });
 }
 
-// 3. Update Dynamic Pricing (When user changes portion)
+// Portion price selection update
 function updateDynamicPricing(selectElement) {
-    const card = selectElement.closest('.product-card-body');
-    const priceSpan = card.querySelector('.dynamic-render-price');
-    const selectedValue = selectElement.value;
-    
-    if (priceSpan) {
-        priceSpan.innerText = '৳ ' + selectedValue;
-        priceSpan.setAttribute('data-base-price', selectedValue);
+    const selectedPrice = selectElement.value;
+    const cardBody = selectElement.closest('.product-card-body');
+    if(cardBody) {
+        const priceDisplay = cardBody.querySelector('.dynamic-render-price');
+        if (priceDisplay) {
+            priceDisplay.innerText = ' ৳ ' + selectedPrice;
+            priceDisplay.setAttribute('data-base-price', selectedPrice);
+        }
     }
 }
 
-// 4. Update Quantity (+/- Buttons)
+// Quantity Counter adjustment (+ / -)
 function updateQty(btn, change) {
     const input = btn.parentElement.querySelector('.qty-input');
-    let currentVal = parseInt(input.value);
-    let newVal = currentVal + change;
-    
-    if (newVal >= 1) {
-        input.value = newVal;
-    }
+    let newValue = parseInt(input.value) + change;
+    if (newValue < 1) newValue = 1;
+    input.value = newValue;
 }
 
-// 5. Add to Cart
+// "Add" বাটনে ক্লিক করলে এই ফাংশনটি সরাসরি রান হবে এবং চেকআউট ওপেন করবে
 function addToCart(btn, itemName) {
-    const card = btn.closest('.product-card-body');
-    const priceSpan = card.querySelector('.dynamic-render-price');
+    const cardBody = btn.closest('.product-card-body');
+    let priceText = "0";
     
-    if (!priceSpan) return;
-    
-    const price = parseFloat(priceSpan.getAttribute('data-base-price'));
-    const qtyInput = card.querySelector('.qty-input');
-    const qty = parseInt(qtyInput.value);
-    const imgElement = card.closest('.product-item-card').querySelector('img');
-    const imgSrc = imgElement ? imgElement.src : 'https://via.placeholder.com/100';
-
-    const existingItem = cart.find(item => item.name === itemName);
-
-    if (existingItem) {
-        existingItem.qty += qty;
-    } else {
-        cart.push({ name: itemName, price: price, qty: qty, img: imgSrc });
+    const priceEl = cardBody.querySelector('.dynamic-render-price');
+    if (priceEl) {
+        priceText = priceEl.getAttribute('data-base-price') || priceEl.innerText.replace(/[^0-9]/g, '');
     }
+    
+    const itemPrice = parseFloat(priceText);
+    const itemQty = parseInt(cardBody.querySelector('.qty-input').value || 1);
+    const itemTotal = itemPrice * itemQty;
 
-    // Reset input to 1
-    qtyInput.value = 1;
+    // সরাসরি চেকআউট প্যানেল তৈরি ও ওপেন করা হচ্ছে
+    openDirectCheckoutPanel(itemName, itemQty, itemTotal);
     
-    // Update UI
-    updateCartUI();
-    
-    // Visual Feedback
-    const originalText = btn.innerText;
-    btn.innerText = "Added!";
-    btn.style.backgroundColor = "#22c55e"; // Green
-    setTimeout(() => {
-        btn.innerText = originalText;
-        btn.style.backgroundColor = ""; // Revert
-    }, 1000);
+    // কাউন্টার আবার ১ করে দেওয়া হচ্ছে
+    if (cardBody.querySelector('.qty-input')) {
+        cardBody.querySelector('.qty-input').value = "1";
+    }
 }
 
-// 6. Update Cart Sidebar UI (Calculate Total & Render Items)
-function updateCartUI() {
-    const container = document.getElementById('fp-cart-items-container');
-    const countSpan = document.getElementById('cart-item-count');
+// চেকআউট প্যানেল জেনারেটর (image_f46d4e.png ইন্টারফেস অনুযায়ী)
+function openDirectCheckoutPanel(itemName, qty, total) {
+    let checkoutPanel = document.getElementById('direct-checkout-overlay');
     
-    if (!container || !countSpan) return;
-
-    const totalQty = cart.reduce((acc, item) => acc + item.qty, 0);
-    countSpan.innerText = totalQty;
-    
-    // Show/Hide Floating Cart
-    const floatingCart = document.getElementById('floating-cart');
-    if (floatingCart) {
-        if (totalQty > 0) {
-            floatingCart.classList.remove('hidden');
-        } else {
-            floatingCart.classList.add('hidden');
-            closeFpSidebar();
-        }
+    if (!checkoutPanel) {
+        checkoutPanel = document.createElement('div');
+        checkoutPanel.id = 'direct-checkout-overlay';
+        document.body.appendChild(checkoutPanel);
     }
 
-    // Render Items in Sidebar
-    container.innerHTML = '';
-    let subtotal = 0;
-
-    cart.forEach((item, index) => {
-        const itemTotal = item.price * item.qty;
-        subtotal += itemTotal;
-
-        const itemHtml = `
-            <div class="fp-cart-item" style="display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-                <img src="${item.img}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
-                <div style="flex: 1;">
-                    <h4 style="font-size: 14px; margin: 0;">${item.name}</h4>
-                    <p style="font-size: 12px; color: #666;">${item.qty} x ৳${item.price}</p>
+    checkoutPanel.innerHTML = `
+        <div class="checkout-fullscreen-wrapper">
+            <div class="checkout-header-bar">
+                <span class="close-checkout-x" onclick="closeFullCheckout()">×</span>
+                <h2 class="checkout-title-text">Checkout</h2>
+            </div>
+            
+            <div class="checkout-body-form">
+                <div class="checkout-summary-pill">
+                    <strong>Selected Item:</strong> ${qty}x ${itemName} — <span style="color:#1ebd60; font-weight:bold;">Total: ৳${total}</span>
                 </div>
-                <div style="display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end;">
-                    <span style="font-weight: bold;">৳${itemTotal}</span>
-                    <button onclick="removeFromCart(${index})" style="background: none; border: none; color: red; font-size: 12px; cursor: pointer;">Remove</button>
+                
+                <div class="input-flat-group">
+                    <label>Full Name</label>
+                    <input type="text" id="custName" placeholder="Enter your name" required>
+                </div>
+                
+                <div class="input-flat-group">
+                    <label>Delivery Address</label>
+                    <input type="text" id="custAddress" placeholder="House, Road, Area" required>
+                </div>
+                
+                <div class="input-flat-group">
+                    <label>Phone Number (for OTP)</label>
+                    <input type="tel" id="custPhone" placeholder="017xxxxxxxx" required>
+                </div>
+                
+                <div class="payment-method-flat-group">
+                    <label class="payment-section-title">Payment Method</label>
+                    <div class="radio-flat-option">
+                        <input type="radio" id="cod" name="payment" value="Cash on Delivery" checked>
+                        <label for="cod">Cash on Delivery</label>
+                    </div>
+                    <div class="radio-flat-option">
+                        <input type="radio" id="nagad" name="payment" value="Nagad">
+                        <label for="nagad">Nagad</label>
+                    </div>
                 </div>
             </div>
-        `;
-        container.innerHTML += itemHtml;
-    });
+            
+            <button class="btn-green-place-order" onclick="submitDirectOrder()">Place Order</button>
+        </div>
 
-    // Calculate Totals
-    const deliveryFee = subtotal > 0 ? 60 : 0; // 60 TK Delivery Fee
-    const grandTotal = subtotal + deliveryFee;
-
-    // Update Sidebar Footer (Total + Checkout Button)
-    const footer = document.querySelector('.fp-sidebar-footer');
-    if (footer) {
-        footer.innerHTML = `
-            <div class="summary-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <span>Subtotal</span>
-                <span>৳ ${subtotal}</span>
+        <div id="otp-verification-panel" class="otp-modal-overlay" style="display: none;">
+            <div class="otp-modal-content">
+                <h2>OTP Verification</h2>
+                <p>Enter the 4-digit verification code sent to your number:</p>
+                <input type="text" id="direct-otp-input" placeholder="0 0 0 0" maxlength="4">
+                <button class="btn-verify-otp" onclick="confirmDirectOtp()">Verify & Complete Order</button>
             </div>
-            <div class="summary-row" style="display: flex; justify-content: space-between; margin-bottom: 10px; color: #666;">
-                <span>Delivery</span>
-                <span>৳ ${deliveryFee}</span>
+        </div>
+
+        <div id="order-success-panel" class="success-modal-overlay" style="display: none;">
+            <div class="success-modal-content">
+                <h2 style="color: #1ebd60; margin-bottom: 10px;">Order Placed Successfully!</h2>
+                <p>Your order has been received and is being prepared.</p>
+                <button class="btn-success-close" onclick="resetToMenu()">Back to Menu</button>
             </div>
-            <div class="summary-row" style="display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; font-size: 18px;">
-                <span>Total</span>
-                <span>৳ ${grandTotal}</span>
-            </div>
-            <button onclick="openCheckoutModal()" class="btn-primary" style="width: 100%; padding: 15px; background: #f97316; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;">Proceed to Checkout</button>
-        `;
-    }
+        </div>
+    `;
+
+    checkoutPanel.style.display = 'block';
+    document.body.style.overflow = 'hidden'; 
 }
 
-// 7. Remove Item from Cart
-function removeFromCart(index) {
-    cart.splice(index, 1);
-    updateCartUI();
+function closeFullCheckout() {
+    const panel = document.getElementById('direct-checkout-overlay');
+    if (panel) panel.style.display = 'none';
+    document.body.style.overflow = 'auto';
 }
 
-// 8. Open/Close Sidebar
-function openFpSidebar() {
-    document.getElementById('fp-sidebar').classList.add('active');
-    document.getElementById('fp-sidebar-overlay').classList.add('active');
-}
+function submitDirectOrder() {
+    const name = document.getElementById('custName').value.trim();
+    const address = document.getElementById('custAddress').value.trim();
+    const phone = document.getElementById('custPhone').value.trim();
 
-function closeFpSidebar() {
-    document.getElementById('fp-sidebar').classList.remove('active');
-    document.getElementById('fp-sidebar-overlay').classList.remove('active');
-}
-
-// 9. Checkout Modal Functions
-function openCheckoutModal() {
-    closeFpSidebar();
-    const modal = document.getElementById('checkout-modal');
-    if (modal) {
-        modal.classList.add('active');
-        document.getElementById('order-form').reset();
-        const otpSection = document.getElementById('otp-section');
-        if(otpSection) otpSection.style.display = 'none';
-        isOtpVerified = false;
-    }
-}
-
-function closeCheckoutModal() {
-    const modal = document.getElementById('checkout-modal');
-    if (modal) modal.classList.remove('active');
-}
-
-// 10. OTP Verification Logic
-function verifyOTP() {
-    const otpInput = document.getElementById('otp-input');
-    const msg = document.getElementById('otp-msg');
-    
-    if (!otpInput || !msg) return;
-
-    // Simulation: OTP must be 1234
-    if (otpInput.value === '1234') { 
-        msg.style.color = 'green';
-        msg.innerText = 'OTP Verified Successfully!';
-        isOtpVerified = true;
-    } else {
-        msg.style.color = 'red';
-        msg.innerText = 'Invalid OTP. Try 1234';
-        isOtpVerified = false;
-    }
-}
-
-// 11. Final Order Submission
-function verifyOTPAndOrder() {
-    const phone = document.getElementById('cust-phone');
-    const name = document.getElementById('cust-name');
-    const address = document.getElementById('cust-address');
-    
-    if (!phone || !name || !address) return;
-
-    // Check if OTP is verified first
-    if (!isOtpVerified) {
-        const otpSection = document.getElementById('otp-section');
-        if (otpSection) otpSection.style.display = 'block';
-        alert('Please verify your phone number first with the OTP.');
+    if (!name || !address || !phone) {
+        alert("Please fill up all the fields before placing order!");
         return;
     }
+    document.getElementById('otp-verification-panel').style.display = 'flex';
+}
 
-    if (isOtpVerified) {
-        const paymentMethod = document.querySelector('input[name="payment"]:checked');
-        const paymentValue = paymentMethod ? paymentMethod.value : 'cod';
-        
-        // Success Message
-        alert(`Order Placed Successfully!\n\nName: ${name.value}\nAddress: ${address.value}\nPayment: ${paymentValue.toUpperCase()}\n\nThank you for eating at Sami's Restaurant!`);
-        
-        // Clear Cart and Reset
-        cart = [];
-        updateCartUI();
-        closeCheckoutModal();
+function confirmDirectOtp() {
+    const otpInput = document.getElementById('direct-otp-input').value.trim();
+    if (otpInput.length !== 4) {
+        alert("Please enter a valid 4-digit OTP code!");
+        return;
     }
+    document.getElementById('otp-verification-panel').style.display = 'none';
+    document.getElementById('order-success-panel').style.display = 'flex';
+}
+
+function resetToMenu() {
+    const panel = document.getElementById('direct-checkout-overlay');
+    if (panel) panel.style.display = 'none';
+    document.body.style.overflow = 'auto';
 }

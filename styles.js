@@ -1,7 +1,5 @@
-// ======================== সম্পূর্ণ ওয়ার্কিং script.js (Add করলেই চেকআউট) ========================
 let cart = [];
 
-// ফ্লোটিং কার্ট আপডেট
 function updateCartUI() {
     let totalItems = 0, totalPrice = 0;
     cart.forEach(item => {
@@ -15,7 +13,6 @@ function updateCartUI() {
     else floatingCart.classList.add('hidden');
 }
 
-// চেকআউটে আইটেম রেন্ডার
 function renderBasketItems() {
     const container = document.getElementById('checkout-dynamic-items-list');
     if (!container) return;
@@ -50,7 +47,6 @@ function renderBasketItems() {
     document.getElementById('basket-grand-total-val').innerText = '৳ ' + grand;
 }
 
-// চেকআউট ওপেন
 function openFpSidebar() {
     if (cart.length === 0) {
         showToast("Basket empty!");
@@ -66,7 +62,6 @@ function closeFullCheckout() {
     document.body.style.overflow = 'auto';
 }
 
-// কার্টে আইটেম যোগ করা (Add বাটন)
 function addToCart(btn, itemName) {
     const cardBody = btn.closest('.product-card-body');
     const priceSpan = cardBody.querySelector('.dynamic-render-price');
@@ -80,16 +75,11 @@ function addToCart(btn, itemName) {
     
     if (qtyInput) qtyInput.value = 1;
     showToast(`${itemName} added!`);
-    
-    // ইনলাইন কাউন্টার রিফ্রেশ
     renderAllInlineCounters();
     updateCartUI();
-    
-    // 🔥 সবচেয়ে গুরুত্বপূর্ণ: Add ক্লিক করলেই চেকআউট আসবে
     openFpSidebar();
 }
 
-// + / - ফুড কার্ডে গ্রীন ইনলাইন কাউন্টার দেখানো
 function renderAllInlineCounters() {
     document.querySelectorAll('.product-card-body').forEach(card => {
         const nameElem = card.querySelector('h3');
@@ -120,7 +110,6 @@ function renderAllInlineCounters() {
     });
 }
 
-// চেকআউটের ভিতর ও ফুড কার্ডে +/- আপডেট
 function updateCartItemQty(name, price, delta) {
     const idx = cart.findIndex(i => i.name === name && i.price === price);
     if (idx !== -1) {
@@ -141,7 +130,6 @@ function removeBasketItem(index) {
     renderBasketItems();
 }
 
-// ভেরিয়েন্ট চেঞ্জে দাম আপডেট
 function updateDynamicPricing(select) {
     const newPrice = select.value;
     const priceSpan = select.closest('.product-card-body').querySelector('.dynamic-render-price');
@@ -159,7 +147,6 @@ function updateQty(btn, delta) {
     }
 }
 
-// মেনু ফিল্টার
 function filterMenu(category) {
     const btns = document.querySelectorAll('.filter-tab-btn');
     btns.forEach(btn => btn.classList.remove('active'));
@@ -173,7 +160,6 @@ function filterMenu(category) {
     });
 }
 
-// অর্ডার সাবমিট
 function submitDirectOrder() {
     if (cart.length === 0) return;
     const name = document.getElementById('custName').value.trim();
@@ -235,7 +221,6 @@ function escapeHtml(str) {
     });
 }
 
-// গ্লোবাল ফাংশন এক্সপোজ
 window.filterMenu = filterMenu;
 window.updateDynamicPricing = updateDynamicPricing;
 window.updateQty = updateQty;
@@ -251,7 +236,6 @@ window.removeBasketItem = removeBasketItem;
 window.renderAllInlineCounters = renderAllInlineCounters;
 window.updateCartUI = updateCartUI;
 
-// পেজ লোড হলে ইনলাইন কাউন্টার রেডি রাখা
 document.addEventListener('DOMContentLoaded', () => {
     renderAllInlineCounters();
     updateCartUI();

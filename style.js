@@ -1,119 +1,134 @@
-// Global cart array to hold products
 let cart = [];
 
-// Category filtering mechanism
+// Menu Filtering Logic
 function filterMenu(category) {
-    const cards = document.querySelectorAll('.product-item-card');
-    const tabs = document.querySelectorAll('.filter-tab-btn');
-    
-    tabs.forEach(tab => tab.classList.remove('active'));
-    if(typeof event !== 'undefined' && event && event.currentTarget) {
+    const buttons = document.querySelectorAll('.filter-tab-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    if (typeof event !== 'undefined' && event.currentTarget) {
         event.currentTarget.classList.add('active');
     }
 
-    cards.forEach(card => {
-        if (category === 'all' || card.classList.contains(category)) {
-            card.style.display = 'block';
+    const items = document.querySelectorAll('.product-item-card');
+    items.forEach(item => {
+        if (category === 'all' || item.classList.contains(category)) {
+            item.style.display = 'block';
         } else {
-            card.style.display = 'none';
+            item.style.display = 'none';
         }
     });
 }
 
-// Portion or option based price update
+// Dynamic Pricing Update
 function updateDynamicPricing(selectElement) {
     const selectedPrice = selectElement.value;
-    const container = selectElement.closest('.product-card-body') || selectElement.closest('.fp-action-wrapper');
-    if(container) {
-        const priceDisplay = container.querySelector('.dynamic-render-price');
-        if (priceDisplay) {
-            priceDisplay.innerText = ' ৳ ' + selectedPrice;
-            priceDisplay.setAttribute('data-base-price', selectedPrice);
-        }
+    const cardBody = selectElement.closest('.product-card-body');
+    if (cardBody) {
+        const priceDisplay = cardBody.querySelector('.dynamic-render-price');
+        priceDisplay.innerText = '৳ ' + selectedPrice;
+        priceDisplay.setAttribute('data-base-price', selectedPrice);
+    }
+    // Update inline buttons if variant changes
+    renderAllInlineCounters();
+}
+
+// Old qty button handler (for the initial Add button)
+function updateQty(btn, change) {
+    const input = btn.parentElement.querySelector('.qty-input');
+    if (input) {
+        let val = parseInt(input.value) + change;
+        if (val < 1) val = 1;
+        input.value = val;
     }
 }
 
-// Main Add to Cart engine (Foodpanda style button transformation)
+// Add Item To Cart
 function addToCart(btn, itemName) {
-    const container = btn.closest('.product-card-body') || btn.closest('.fp-action-wrapper');
-    if (!container) return;
-
-    let priceText = "0";
-    const priceEl = container.querySelector('.dynamic-render-price');
-    if (priceEl) {
-        priceText = priceEl.getAttribute('data-base-price') || priceEl.innerText.replace(/[^0-9]/g, '');
-    }
-    
+    const cardBody = btn.closest('.product-card-body');
+    const priceText = cardBody.querySelector('.dynamic-render-price').getAttribute('data-base-price');
     const itemPrice = parseFloat(priceText);
-
-    // Check if item already exists in cart
+    
+    const input = cardBody.querySelector('.qty-input');
+    const addedQty = input ? parseInt(input.value) : 1;
+    
     const existingItem = cart.find(item => item.name === itemName && item.price === itemPrice);
     
-    if (!existingItem) {
+    if (existingItem) {
+        existingItem.qty += addedQty;
+    } else {
         cart.push({
             name: itemName,
             price: itemPrice,
-            qty: 1
+            qty: addedQty
         });
     }
 
-    // Transform the Add button into an inline counter selector layout
-    transformToInlineCounter(container, itemName, itemPrice);
+    if (input) input.value = 1; // Reset input field
+
+    showToast(`${itemName} added to your basket!`);
     
-    // Global Cart UI Layout synchronization
+    renderAllInlineCounters();
     updateCartUI();
 }
 
-// Transforms the main card button into a foodpanda style dynamic toggler
-function transformToInlineCounter(container, itemName, itemPrice) {
-    const targetBox = container.querySelector('.product-item-action-box') || container;
-    if (!targetBox) return;
+// Magic Function: Converts Add button to Foodpanda Inline Counter
+function renderAllInlineCounters() {
+    const allCards = document.querySelectorAll('.product-card-body');
+    
+    allCards.forEach(cardBody => {
+        const itemNameObj = cardBody.querySelector('h3');
+        const priceObj = cardBody.querySelector('.dynamic-render-price');
+        if (!itemNameObj || !priceObj) return;
 
-    const currentItem = cart.find(item => item.name === itemName && item.price === itemPrice);
-    const currentQty = currentItem ? currentItem.qty : 0;
-
-    // Safely store the original layout inside a data attribute for resetting later
-    if (!targetBox.getAttribute('data-original-html')) {
-        targetBox.setAttribute('data-original-html', targetBox.innerHTML);
-    }
-
-    if (currentQty > 0) {
-        targetBox.innerHTML = `
-            <div class="fp-card-inline-selector">
-                <button class="fp-inline-action-btn minus" onclick="updateMenuCardQty(this, '${itemName}', ${itemPrice}, -1)">-</button>
-                <span class="fp-inline-qty-text">${currentQty}</span>
-                <button class="fp-inline-action-btn plus" onclick="updateMenuCardQty(this, '${itemName}', ${itemPrice}, 1)">+</button>
-            </div>
-        `;
-    } else {
-        // Reset back to original Add Button if count drops to zero
-        const originalHTML = targetBox.getAttribute('data-original-html');
-        if (originalHTML) {
-            targetBox.innerHTML = originalHTML;
-            targetBox.removeAttribute('data-original-html');
-        }
-    }
-}
-
-// Handles calculations when + or - is clicked on the food card itself
-function updateMenuCardQty(element, itemName, itemPrice, change) {
-    const container = element.closest('.product-card-body') || element.closest('.fp-action-wrapper');
-    const itemIndex = cart.findIndex(item => item.name === itemName && item.price === itemPrice);
-
-    if (itemIndex > -1) {
-        cart[itemIndex].qty += change;
+        const itemName = itemNameObj.innerText.trim();
+        const itemPrice = parseFloat(priceObj.getAttribute('data-base-price'));
         
-        if (cart[itemIndex].qty < 1) {
-            cart.splice(itemIndex, 1); // Remove item if count is less than 1
-        }
-    }
+        const existing = cart.find(i => i.name === itemName && i.price === itemPrice);
+        const actionGroup = cardBody.querySelector('.cart-action-group');
+        
+        if (actionGroup) {
+            // Save the original HTML structure (Input + Add button)
+            if (!actionGroup.hasAttribute('data-original-html')) {
+                actionGroup.setAttribute('data-original-html', actionGroup.innerHTML);
+            }
 
-    // Refresh UI states
-    transformToInlineCounter(container, itemName, itemPrice);
-    updateCartUI();
+            if (existing && existing.qty > 0) {
+                // Change to Foodpanda Inline + / - Style
+                actionGroup.innerHTML = `
+                    <div class="fp-card-inline-selector">
+                        <button class="fp-inline-action-btn" onclick="updateCartItemQty('${itemName}', ${itemPrice}, -1)">-</button>
+                        <span class="fp-inline-qty-text">${existing.qty}</span>
+                        <button class="fp-inline-action-btn" onclick="updateCartItemQty('${itemName}', ${itemPrice}, 1)">+</button>
+                    </div>
+                `;
+            } else {
+                // Restore original if quantity becomes 0
+                actionGroup.innerHTML = actionGroup.getAttribute('data-original-html');
+            }
+        }
+    });
 }
 
-// Synchronizes the bottom bar or basket panel layout
+// Handles +/- clicks directly from the food card
+function updateCartItemQty(name, price, change) {
+    const index = cart.findIndex(i => i.name === name && i.price === price);
+    if (index > -1) {
+        cart[index].qty += change;
+        if (cart[index].qty <= 0) {
+            cart.splice(index, 1);
+        }
+    }
+    
+    renderAllInlineCounters();
+    updateCartUI();
+    
+    // Refresh checkout screen if it's currently open
+    const checkoutPanel = document.getElementById('direct-checkout-overlay');
+    if (checkoutPanel && checkoutPanel.style.display === 'block') {
+        renderBasketItems();
+    }
+}
+
+// Update Global UI Elements (Floating Cart)
 function updateCartUI() {
     let totalItems = 0;
     let totalPrice = 0;
@@ -123,166 +138,211 @@ function updateCartUI() {
         totalPrice += (item.price * item.qty);
     });
 
-    // Update global variables if elements exist
     const countEl = document.getElementById('cart-item-count');
     const priceEl = document.getElementById('cart-total-price');
-    const floatingCart = document.getElementById('floating-cart');
-
     if (countEl) countEl.innerText = totalItems;
     if (priceEl) priceEl.innerText = '৳' + totalPrice;
 
+    const floatingCart = document.getElementById('floating-cart');
     if (floatingCart) {
         if (totalItems > 0) {
             floatingCart.classList.remove('hidden');
         } else {
             floatingCart.classList.add('hidden');
-        }
-    }
-
-    // Automatically re-render items inside the active checkout layout
-    renderCheckoutItems();
-}
-
-// Modal open/close controller engine
-function toggleCheckoutModal(show) {
-    const modal = document.getElementById('checkoutModal');
-    if(modal) {
-        modal.style.display = show ? 'flex' : 'none';
-        if (show) {
-            renderCheckoutItems();
+            closeFullCheckout();
         }
     }
 }
 
-// Renders foodpanda structural layout inside checkout basket list
-function renderCheckoutItems() {
-    const listContainer = document.getElementById('checkout-items-list');
+// Floating bar click opens checkout layout
+function openFpSidebar() {
+    if (cart.length === 0) {
+        showToast("Your basket is empty!");
+        return;
+    }
+    openFoodpandaCheckout();
+}
+
+// Checkout Engine
+function openFoodpandaCheckout() {
+    let checkoutPanel = document.getElementById('direct-checkout-overlay');
+    
+    if (!checkoutPanel) {
+        checkoutPanel = document.createElement('div');
+        checkoutPanel.id = 'direct-checkout-overlay';
+        document.body.appendChild(checkoutPanel);
+    }
+
+    checkoutPanel.innerHTML = `
+        <div class="checkout-fullscreen-wrapper active">
+            <div class="checkout-header-bar">
+                <span class="close-checkout-x" onclick="closeFullCheckout()">×</span>
+                <h2 class="checkout-title-text">Checkout</h2>
+            </div>
+            
+            <div class="checkout-body-form">
+                <div class="foodpanda-cart-container">
+                    <h3 class="basket-heading"><i class="fa-solid fa-basket-shopping"></i> Your Basket</h3>
+                    <div id="checkout-dynamic-items-list"></div>
+                    <div class="basket-grand-total-row">
+                        <span>Grand Total:</span>
+                        <span id="basket-grand-total-val">৳0</span>
+                    </div>
+                </div>
+                
+                <div class="input-flat-group" style="margin-top: 25px;">
+                    <label>Full Name</label>
+                    <input type="text" id="custName" placeholder="Enter your name" required>
+                </div>
+                <div class="input-flat-group">
+                    <label>Delivery Address</label>
+                    <input type="text" id="custAddress" placeholder="House, Road, Area" required>
+                </div>
+                <div class="input-flat-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="custPhone" placeholder="017xxxxxxxx" required>
+                </div>
+                
+                <div class="payment-method-flat-group">
+                    <label class="payment-section-title">Payment Method</label>
+                    <div class="radio-flat-option">
+                        <input type="radio" id="cod" name="payment" value="Cash on Delivery" checked>
+                        <label for="cod">Cash on Delivery</label>
+                    </div>
+                    <div class="radio-flat-option">
+                        <input type="radio" id="nagad" name="payment" value="Nagad">
+                        <label for="nagad">Nagad</label>
+                    </div>
+                </div>
+            </div>
+            <button class="btn-green-place-order" onclick="submitDirectOrder()">Place Order</button>
+        </div>
+
+        <div id="otp-verification-panel" class="otp-modal-overlay" style="display: none;">
+            <div class="otp-modal-content">
+                <h2>OTP Verification</h2>
+                <p>Enter the 4-digit verification code:</p>
+                <input type="text" id="direct-otp-input" placeholder="0 0 0 0" maxlength="4">
+                <button class="btn-verify-otp" onclick="confirmDirectOtp()">Verify & Complete</button>
+            </div>
+        </div>
+
+        <div id="order-success-panel" class="success-modal-overlay" style="display: none;">
+            <div class="success-modal-content">
+                <h2 style="color: #1ebd60; margin-bottom: 10px;">Order Placed Successfully!</h2>
+                <p>Your food will arrive soon.</p>
+                <button class="btn-success-close" onclick="resetToMenu()">Back to Menu</button>
+            </div>
+        </div>
+    `;
+
+    renderBasketItems();
+    checkoutPanel.style.display = 'block';
+    document.body.style.overflow = 'hidden'; 
+}
+
+function renderBasketItems() {
+    const listContainer = document.getElementById('checkout-dynamic-items-list');
     if (!listContainer) return;
-
+    
     listContainer.innerHTML = '';
     let grandTotal = 0;
 
     if (cart.length === 0) {
-        listContainer.innerHTML = '<p style="text-align:center; color:#888; padding: 20px 0;">Your basket is empty.</p>';
-        const totalValEl = document.getElementById('summary-total-val');
-        if (totalValEl) totalValEl.innerText = '৳0';
+        listContainer.innerHTML = '<p class="empty-basket-text">Your basket is empty.</p>';
+        document.getElementById('basket-grand-total-val').innerText = '৳0';
+        closeFullCheckout();
         return;
     }
 
     cart.forEach((item, index) => {
         const itemTotal = item.price * item.qty;
         grandTotal += itemTotal;
-        
+
         listContainer.innerHTML += `
-            <div class="fp-checkout-basket-row">
-                <div class="fp-basket-info">
-                    <span class="fp-basket-name">${item.name}</span>
-                    <span class="fp-basket-price">৳${item.price}</span>
+            <div class="fp-cart-item-row">
+                <div class="fp-item-info">
+                    <span class="fp-item-name">${item.name}</span>
+                    <span class="fp-item-unit-price">৳${item.price} each</span>
                 </div>
                 
-                <!-- Foodpanda +/- Controls inside checkout box -->
-                <div class="fp-basket-counter-controls">
-                    <button type="button" class="fp-basket-ctrl-btn" onclick="modifyBasketItemQty(${index}, -1)">-</button>
-                    <span class="fp-basket-ctrl-qty">${item.qty}</span>
-                    <button type="button" class="fp-basket-ctrl-btn" onclick="modifyBasketItemQty(${index}, 1)">+</button>
+                <div class="fp-qty-actions-box">
+                    <button class="fp-qty-inline-btn" onclick="updateCartItemQty('${item.name}', ${item.price}, -1)">-</button>
+                    <span class="fp-qty-inline-value">${item.qty}</span>
+                    <button class="fp-qty-inline-btn" onclick="updateCartItemQty('${item.name}', ${item.price}, 1)">+</button>
                 </div>
 
-                <span class="fp-basket-item-total">৳${itemTotal}</span>
+                <span class="fp-item-total-price">৳${itemTotal}</span>
                 
-                <!-- Trash/Delete Action -->
-                <button type="button" class="fp-basket-delete-icon" onclick="deleteBasketItem(${index})">
+                <button class="fp-item-delete-btn" onclick="removeBasketItem(${index})">
                     <i class="fa-solid fa-trash-can"></i>
                 </button>
             </div>
         `;
     });
 
-    const totalValEl = document.getElementById('summary-total-val');
-    if (totalValEl) totalValEl.innerText = '৳' + grandTotal;
+    document.getElementById('basket-grand-total-val').innerText = '৳' + grandTotal;
 }
 
-// Basket modifications handler
-function modifyBasketItemQty(index, change) {
-    cart[index].qty += change;
-    
-    if (cart[index].qty < 1) {
-        deleteBasketItem(index);
-    } else {
-        syncAllCardsUI();
-        updateCartUI();
-    }
-}
-
-// Basket single row delete handler
-function deleteBasketItem(index) {
+function removeBasketItem(index) {
     cart.splice(index, 1);
-    syncAllCardsUI();
+    renderAllInlineCounters();
     updateCartUI();
+    renderBasketItems();
 }
 
-// Synchronizes menu-card button components if items are removed from checkout list directly
-function syncAllCardsUI() {
-    const activeCards = document.querySelectorAll('.product-card-body, .fp-action-wrapper');
-    activeCards.forEach(container => {
-        const actionBox = container.querySelector('.product-item-action-box') || container;
-        if (actionBox && actionBox.getAttribute('data-original-html')) {
-            // Find matched elements
-            const btnEl = actionBox.querySelector('button[onclick*="addToCart"]');
-            if (btnEl) {
-                // Extract item details
-                const onclickAttr = btnEl.getAttribute('onclick');
-                const match = onclickAttr.match(/'([^']+)'/);
-                if (match) {
-                    const itemName = match[1];
-                    let priceText = "0";
-                    const priceEl = container.querySelector('.dynamic-render-price');
-                    if (priceEl) {
-                        priceText = priceEl.getAttribute('data-base-price') || priceEl.innerText.replace(/[^0-9]/g, '');
-                    }
-                    const itemPrice = parseFloat(priceText);
-                    
-                    // Trigger custom view transformation updates
-                    transformToInlineCounter(container, itemName, itemPrice);
-                }
-            }
-        }
-    });
+function closeFullCheckout() {
+    const panel = document.getElementById('direct-checkout-overlay');
+    if (panel) panel.style.display = 'none';
+    document.body.style.overflow = 'auto';
 }
 
-// Order submission handler
-function handleOrderSubmission(event) {
-    event.preventDefault();
+function submitDirectOrder() {
+    if (cart.length === 0) return;
     
-    if(cart.length === 0) {
-        showToast("Please add items to your cart first!");
+    const name = document.getElementById('custName').value.trim();
+    const address = document.getElementById('custAddress').value.trim();
+    const phone = document.getElementById('custPhone').value.trim();
+
+    if (!name || !address || !phone) {
+        showToast("Please fill up all delivery information!");
         return;
     }
-
-    showToast("Order Placed Successfully! We will contact you soon.");
-    
-    // Full system state reset
-    cart = [];
-    syncAllCardsUI();
-    updateCartUI();
-    toggleCheckoutModal(false);
-    event.target.reset();
+    document.getElementById('otp-verification-panel').style.display = 'flex';
 }
 
-// Table reservation handler
+function confirmDirectOtp() {
+    const otpInput = document.getElementById('direct-otp-input').value.trim();
+    if (otpInput.length !== 4) {
+        showToast("Enter a 4-digit OTP!");
+        return;
+    }
+    document.getElementById('otp-verification-panel').style.display = 'none';
+    document.getElementById('order-success-panel').style.display = 'flex';
+}
+
+function resetToMenu() {
+    cart = [];
+    renderAllInlineCounters();
+    updateCartUI();
+    closeFullCheckout();
+}
+
+// Generic Handlers
 function handleReservation(event) {
     event.preventDefault();
     showToast("Table Reservation Confirmed! See you soon.");
     event.target.reset();
 }
 
-// Alert notifications manager
 function showToast(message) {
-    const toast = document.getElementById("toast-notification");
-    if(toast) {
-        toast.innerText = message;
-        toast.className = "show-alert";
-        setTimeout(() => {
-            toast.className = toast.className.replace("show-alert", "");
-        }, 3000);
+    let toast = document.getElementById("toast-notification");
+    if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "toast-notification";
+        document.body.appendChild(toast);
     }
+    toast.innerText = message;
+    toast.className = "show-alert";
+    setTimeout(() => { toast.className = toast.className.replace("show-alert", ""); }, 3000);
 }

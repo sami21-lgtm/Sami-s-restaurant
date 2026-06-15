@@ -64,7 +64,15 @@ function closeFullCheckout() {
 
 function addToCart(btn, itemName) {
     const cardBody = btn.closest('.product-card-body');
+    if (!cardBody) {
+        showToast("Error: Product card not found");
+        return;
+    }
     const priceSpan = cardBody.querySelector('.dynamic-render-price');
+    if (!priceSpan) {
+        showToast("Price info missing");
+        return;
+    }
     const price = parseFloat(priceSpan.getAttribute('data-base-price'));
     const qtyInput = cardBody.querySelector('.qty-input');
     let qty = qtyInput ? parseInt(qtyInput.value) : 1;
@@ -132,9 +140,14 @@ function removeBasketItem(index) {
 
 function updateDynamicPricing(select) {
     const newPrice = select.value;
-    const priceSpan = select.closest('.product-card-body').querySelector('.dynamic-render-price');
-    priceSpan.innerText = '৳ ' + newPrice;
-    priceSpan.setAttribute('data-base-price', newPrice);
+    const cardBody = select.closest('.product-card-body');
+    if (cardBody) {
+        const priceSpan = cardBody.querySelector('.dynamic-render-price');
+        if (priceSpan) {
+            priceSpan.innerText = '৳ ' + newPrice;
+            priceSpan.setAttribute('data-base-price', newPrice);
+        }
+    }
     renderAllInlineCounters();
 }
 

@@ -781,173 +781,68 @@
         </div>
     </section>
 
-    <div class="fp-sidebar-footer">
-    <!-- JS will render cart total and checkout button here -->
-</div>
-</div> <!-- End of Sidebar -->
-</div> <!-- End of Overlay -->
-
-<!-- ================= CHECKOUT MODAL START ================= -->
-<div id="checkout-modal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn" onclick="closeCheckoutModal()">&times;</span>
-        <h2 style="margin-bottom: 20px; color: #333;">Checkout</h2>
-        
-        <form id="order-form" onsubmit="event.preventDefault(); verifyOTPAndOrder();">
-            <!-- Personal Info -->
-            <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" id="cust-name" required placeholder="Enter your name" style="width:100%; padding:10px; margin-top:5px;">
-            </div>
-            <div class="form-group">
-                <label>Delivery Address</label>
-                <input type="text" id="cust-address" required placeholder="House, Road, Area" style="width:100%; padding:10px; margin-top:5px;">
-            </div>
-            <div class="form-group">
-                <label>Phone Number (for OTP)</label>
-                <input type="tel" id="cust-phone" required placeholder="017xxxxxxxx" style="width:100%; padding:10px; margin-top:5px;">
-            </div>
-
-            <!-- Payment Method -->
-            <div class="form-group" style="margin-top:15px;">
-                <label>Payment Method</label>
-                <div style="margin-top:5px;">
-                    <label style="display: block; margin: 5px 0;">
-                        <input type="radio" name="payment" value="cod" checked> Cash on Delivery
-                    </label>
-                    <label style="display: block; margin: 5px 0;">
-                        <input type="radio" name="payment" value="nagad"> Nagad
-                    </label>
-                </div>
-            </div>
-
-            <!-- OTP Section -->
-            <div id="otp-section" style="display: none; margin-top: 20px; padding: 15px; background: #f0fdf4; border: 1px solid #22c55e; border-radius: 5px;">
-                <p style="font-size: 14px; margin: 0 0 10px 0;">OTP sent to your phone. <strong>Demo Code: 1234</strong></p>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="otp-input" placeholder="Enter OTP" maxlength="4" style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
-                    <button type="button" onclick="verifyOTP()" style="padding: 10px 15px; background: #f97316; color: white; border: none; border-radius: 5px; cursor: pointer;">Verify</button>
-                </div>
-                <p id="otp-msg" style="font-size: 12px; margin-top: 5px;"></p>
-            </div>
-
-            <button type="submit" id="btn-place-order" style="width: 100%; margin-top: 20px; padding: 15px; background: #22c55e; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer;">Place Order</button>
-        </form>
-    </div>
-</div>
-!-- Floating Basket Button -->
-    <div id="floating-cart" class="floating-basket-bar hidden" onclick="openFpSidebar()">
-        <div class="cart-left">
-            <div class="cart-icon-wrapper">
-                <i class="fa-solid fa-basket-shopping"></i>
-                <span id="cart-item-count">0</span>
-            </div>
-            <span class="cart-view-text">View your basket</span>
-        </div>
-        <div class="cart-right">
-            <span id="cart-total-price"> ৳ 0</span>
-        </div>
-    </div>
-    
-    <!-- Foodpanda Style Basket Sidebar Overlay -->
-    <div id="fp-sidebar-overlay" class="fp-overlay" onclick="closeFpSidebar()"></div>
-    
-    <!-- Foodpanda Style Basket Sidebar Panel -->
-    <div id="fp-sidebar" class="fp-sidebar">
-        <div class="fp-header" style="padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="font-size: 20px;">Your Basket</h2>
-            <button class="fp-close-btn" onclick="closeFpSidebar()"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        
-        <div class="fp-sidebar-scroll-area" style="flex: 1; overflow-y: auto; padding: 20px;">
-            <div class="fp-delivery-toggle" style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <div class="toggle-option active" style="flex: 1; padding: 10px; border: 1px solid var(--fp-pink); border-radius: 8px; text-align: center; background: #fff0f5; color: var(--fp-pink);">
-                    <strong>Delivery</strong><br><span style="font-size: 12px;">25-40 min</span>
-                </div>
-                <div class="toggle-option" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; text-align: center; color: #666;">
-                    <strong>Pick-Up</strong><br><span style="font-size: 12px;">Distance: 1.2 km</span>
-                </div>
-            </div>
-            <div id="fp-cart-items-container"></div>
-        </div>
-        
-        <div class="fp-sidebar-footer" style="padding: 20px; border-top: 1px solid #eee; background: #fff;">
-            <div class="summary-row" style="display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold;">
-                <span>Subtotal</span>
-                <span id="fp-sticky-total"> ৳ 0</span>
-            </div>
-            <div class="summary-row" style="display: flex; justify-content: space-between; color: #777; font-size: 13px; margin-bottom: 15px;">
-                <span>Standard Delivery</span>
-                <span> ৳ 32</span>
-            </div>
-            <button class="fp-review-btn" onclick="openFullCheckout()" style="width: 100%; background: var(--fp-pink); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer;">Review Payment & Address</button>
-        </div>
-    </div>
-    
-    <!-- Full Screen Checkout View Panel (Matches image_f46d4e.png Exactly) -->
-    <div id="full-checkout-page" class="checkout-fullscreen-wrapper">
-        <div class="checkout-header-bar">
-            <span class="close-checkout-x" onclick="closeFullCheckout()">×</span>
-            <h2 class="checkout-title-text">Checkout</h2>
-        </div>
-        
-        <div class="checkout-body-form">
-            <div class="input-flat-group">
-                <label>Full Name</label>
-                <input type="text" id="fp-custName" placeholder="Enter your name" required>
+   <div id="direct-checkout-overlay">
+        <div class="checkout-fullscreen-wrapper">
+            <div class="checkout-header-bar">
+                <span class="close-checkout-x" onclick="closeFullCheckout()">×</span>
+                <h2 class="checkout-title-text">Checkout</h2>
             </div>
             
-            <div class="input-flat-group">
-                <label>Delivery Address</label>
-                <input type="text" id="fp-custAddress" placeholder="House, Road, Area" required>
-            </div>
-            
-            <div class="input-flat-group">
-                <label>Phone Number (for OTP)</label>
-                <input type="tel" id="fp-custPhone" placeholder="017xxxxxxxx" required>
-            </div>
-            
-            <div class="payment-method-flat-group">
-                <label class="payment-section-title">Payment Method</label>
-                <div class="radio-flat-option">
-                    <input type="radio" id="cod" name="payment" value="Cash on Delivery" checked>
-                    <label for="cod">Cash on Delivery</label>
+            <div class="checkout-body-form">
+                <div class="foodpanda-cart-container">
+                    <h3 class="basket-heading"><i class="fa-solid fa-basket-shopping"></i> Your Basket</h3>
+                    <div id="checkout-dynamic-items-list"></div>
+                    <div class="basket-grand-total-row">
+                        <span>Grand Total:</span>
+                        <span id="basket-grand-total-val">৳0</span>
+                    </div>
                 </div>
-                <div class="radio-flat-option">
-                    <input type="radio" id="nagad" name="payment" value="Nagad">
-                    <label for="nagad">Nagad</label>
+                
+                <div class="input-flat-group" style="margin-top: 25px;">
+                    <label>Full Name</label>
+                    <input type="text" id="custName" placeholder="Enter your name" required>
+                </div>
+                <div class="input-flat-group">
+                    <label>Delivery Address</label>
+                    <input type="text" id="custAddress" placeholder="House, Road, Area" required>
+                </div>
+                <div class="input-flat-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="custPhone" placeholder="017xxxxxxxx" required>
+                </div>
+                
+                <div class="payment-method-flat-group">
+                    <label class="payment-section-title">Payment Method</label>
+                    <div class="radio-flat-option">
+                        <input type="radio" id="cod" name="payment" value="Cash on Delivery" checked>
+                        <label for="cod">Cash on Delivery</label>
+                    </div>
+                    <div class="radio-flat-option">
+                        <input type="radio" id="nagad" name="payment" value="Nagad">
+                        <label for="nagad">Nagad</label>
+                    </div>
                 </div>
             </div>
-            
-            <!-- Dynamic Order Summary inside Checkout View -->
-            <div id="checkout-order-summary-box" style="margin-top: 20px; padding: 15px; background: #fdfdfd; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
-                <!-- Selected items info will be generated here -->
-            </div>
-        </div>
-        
-        <!-- Full-width green button at the bottom -->
-        <button class="btn-green-place-order" onclick="submitFinalOrder()">Place Order</button>
-    </div>
-    
-    <!-- OTP Verification Modal Panel -->
-    <div id="otp-modal-view" class="order-success-overlay" style="display: none; z-index: 11000; background: rgba(0,0,0,0.7); position: fixed; top: 0; left: 0; width: 100%; height: 100%; align-items: center; justify-content: center;">
-        <div class="success-content" style="background: white; padding: 35px; border-radius: 12px; max-width: 400px; width: 90%; text-align: center;">
-            <h2 style="font-size: 20px; margin-bottom: 10px; font-weight: bold;">OTP Verification</h2>
-            <p style="color: #666; margin-bottom: 20px; font-size: 14px;">Enter the 4-digit verification code:</p>
-            <input type="text" id="otp-input-field" placeholder="0 0 0 0" maxlength="4" style="width: 60%; padding: 10px; text-align: center; font-size: 20px; border: 2px solid #ddd; border-radius: 6px; margin-bottom: 20px; outline: none;">
-            <button onclick="verifyOtpCode()" style="width: 100%; background: #1ebd60; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">Verify & Complete Order</button>
+            <button class="btn-green-place-order" onclick="submitDirectOrder()">Place Order</button>
         </div>
     </div>
 
-    <!-- Order Success View Overlay -->
-    <div id="checkout-success-view" class="order-success-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 12000; align-items: center; justify-content: center;">
-        <div class="success-content" style="background: white; padding: 40px; border-radius: 12px; text-align: center; max-width: 450px; width: 90%;">
-            <h2 style="font-size: 24px; color: #1ebd60; margin-bottom: 10px; font-weight: bold;">Order Placed Successfully!</h2>
-            <p style="color: #666; margin-bottom: 25px;">Your order has been received and is being prepared.</p>
-            <button onclick="resetToHome()" style="background: #333; color: white; padding: 10px 30px; border: none; border-radius: 6px; cursor: pointer;">Back to Menu</button>
+    <div id="otp-verification-panel" class="otp-modal-overlay" style="display: none;">
+        <div class="otp-modal-content">
+            <h2>OTP Verification</h2>
+            <p>Enter the 4-digit verification code:</p>
+            <input type="text" id="direct-otp-input" placeholder="0 0 0 0" maxlength="4">
+            <button class="btn-verify-otp" onclick="confirmDirectOtp()">Verify & Complete</button>
         </div>
     </div>
-    
+
+    <div id="order-success-panel" class="success-modal-overlay" style="display: none;">
+        <div class="success-modal-content">
+            <h2 style="color: #1ebd60; margin-bottom: 10px;">Order Placed Successfully!</h2>
+            <p>Your food will arrive soon.</p>
+            <button class="btn-success-close" onclick="resetToMenu()">Back to Menu</button>
+        </div>
+    </div>
     <div id="toast-notification"></div>
     <script src="script.js"></script>
 </body>

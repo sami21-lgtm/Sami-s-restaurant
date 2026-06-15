@@ -207,12 +207,6 @@ function resetToMenu() {
     document.getElementById('custPhone').value = '';
 }
 
-function handleReservation(e) {
-    e.preventDefault();
-    alert('Reservation confirmed!');
-    e.target.reset();
-}
-
 function showToast(msg) {
     let toast = document.getElementById('toast-notification');
     if (!toast) {
@@ -244,7 +238,6 @@ window.closeFullCheckout = closeFullCheckout;
 window.submitDirectOrder = submitDirectOrder;
 window.confirmDirectOtp = confirmDirectOtp;
 window.resetToMenu = resetToMenu;
-window.handleReservation = handleReservation;
 window.removeBasketItem = removeBasketItem;
 window.renderAllInlineCounters = renderAllInlineCounters;
 window.updateCartUI = updateCartUI;
